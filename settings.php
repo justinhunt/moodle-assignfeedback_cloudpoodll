@@ -89,6 +89,9 @@ $settings->add(new admin_setting_configselect(constants::M_COMPONENT .'/fallback
 //show current submission on submission form
 $yesno_options = array( 0 => get_string("no", constants::M_COMPONENT),
         1 => get_string("yes", constants::M_COMPONENT));
+$settings->add(new admin_setting_configselect(constants::M_COMPONENT .'/showcurrentsubmission',
+        new lang_string('showcurrentsubmission', constants::M_COMPONENT),
+        new lang_string('showcurrentsubmissiondetails', constants::M_COMPONENT), 1, $yesno_options));
 
 //Settings for audio recordings
 $settings->add(new admin_setting_heading(constants::M_COMPONENT .'/audio_heading',

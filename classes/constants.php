@@ -32,7 +32,7 @@ class constants
 
 
 const M_COMPONENT='assignfeedback_cloudpoodll';
-const M_TABLE='assignfeedback_cpoodll';
+const M_TABLE='assignfeedback_cloudpoodll';
 const M_FILEAREA = 'feedbacks_cloudpoodll';
 const M_SUBPLUGIN='cloudpoodll';
 

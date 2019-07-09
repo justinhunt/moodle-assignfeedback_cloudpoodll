@@ -41,7 +41,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
      * @return string
      */
     public function get_name() {
-        return get_string('pluginname', 'assignfeedback_cloudpoodll');
+        return get_string('pluginname', constants::M_COMPONENT);
     }
 
     /**
@@ -53,7 +53,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
      */
     public function get_feedback_cloudpoodll($gradeid) {
         global $DB;
-        return $DB->get_record('assignfeedback_cloudpoodll', array('grade'=>$gradeid));
+        return $DB->get_record(constants::M_TABLE, array('grade'=>$gradeid));
     }
 
 
@@ -97,7 +97,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
      * @return array An array of field names and descriptions. (name=>description, ...)
      */
     public function get_editor_fields() {
-        return array('cloudpoodll' => get_string('pluginname', 'assignfeedback_cloudpoodll'));
+        return array('cloudpoodll' => get_string('pluginname', constants::M_COMPONENT));
     }
 
 
@@ -119,14 +119,14 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         }
         if ($feedbackcomment) {
             $feedbackcomment->commenttext = $quickgradecloudpoodll;
-            return $DB->update_record('assignfeedback_cloudpoodll', $feedbackcomment);
+            return $DB->update_record(constants::M_TABLE, $feedbackcomment);
         } else {
             $feedbackcomment = new stdClass();
             $feedbackcomment->commenttext = $quickgradecloudpoodll;
             $feedbackcomment->commentformat = FORMAT_HTML;
             $feedbackcomment->grade = $grade->id;
             $feedbackcomment->assignment = $this->assignment->get_instance()->id;
-            return $DB->insert_record('assignfeedback_cloudpoodll', $feedbackcomment) > 0;
+            return $DB->insert_record(constants::M_TABLE, $feedbackcomment) > 0;
         }
     }
     */
@@ -289,12 +289,14 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         $renderer = $PAGE->get_renderer(constants::M_COMPONENT);
 
 
-        if ($feedbackcloudpoodll && !empty($feedbackcloudpoodll->mediaurl)) {
+        if ($feedbackcloudpoodll && !empty($feedbackcloudpoodll->filename)) {
 
             $deletefeedback = $renderer->fetch_delete_feedback();
 
             //show current submission
-            $currentfeedback = $renderer->prepare_current_feedback($feedbackcloudpoodll,$deletefeedback);
+            //show the previous response in a player or whatever and a delete button
+            $feedbackplayer =  $this->fetch_feedback_player($feedbackcloudpoodll);
+            $currentfeedback = $renderer->prepare_current_feedback($feedbackplayer,$deletefeedback);
 
             $mform->addElement('static', 'currentfeedback',
                     get_string('currentfeedback', constants::M_COMPONENT) ,
@@ -339,18 +341,68 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
      */
     public function save(stdClass $grade, stdClass $data) {
         global $DB;
+
+
+        //if filename is false, or empty, no update. possibly used changed something else on page
+        //possibly they did not record ... that will be caught elsewhere
+        $filename = $data->filename;
+        if($filename === false || empty($filename)){return true;}
+
+        //get expiretime of this record
+        $expiredays = $this->get_config("expiredays");
+        if($expiredays < 9999) {
+            $fileexpiry = time() + DAYSECS * $expiredays;
+        }else{
+            $fileexpiry = 0;
+        }
+
         $thefeedback = $this->get_feedback_cloudpoodll($grade->id);
+        $savedok=false;
         if ($thefeedback) {
-            $thefeedback->{constants::NAME_UPDATE_CONTROL} = $data->{constants::NAME_UPDATE_CONTROL};
-            return $DB->update_record('assignfeedback_cloudpoodll', $thefeedback);
+            if($filename=='-1'){
+                //this is a flag to delete the feedback
+                $thefeedback->filename = '';
+                $thefeedback->fileexpiry = 0;
+                $thefeedback->vttdata = '';
+                $thefeedback->transcript = '';
+                $savedok = $DB->update_record(constants::M_TABLE,$thefeedback);
+                return $savedok;
+            }else {
+                $thefeedback->{constants::NAME_UPDATE_CONTROL} = $data->{constants::NAME_UPDATE_CONTROL};
+                $thefeedback->fileexpiry = $fileexpiry;
+                $savedok = $DB->update_record(constants::M_TABLE, $thefeedback);
+            }
         } else {
             $thefeedback = new stdClass();
             $thefeedback->{constants::NAME_UPDATE_CONTROL} = $data->{constants::NAME_UPDATE_CONTROL};
+            $thefeedback->fileexpiry = $fileexpiry;
             $thefeedback->grade = $grade->id;
             $thefeedback->assignment = $this->assignment->get_instance()->id;
-            return $DB->insert_record('assignfeedback_cloudpoodll', $thefeedback) > 0;
+            $feedbackid = $DB->insert_record(constants::M_TABLE, $thefeedback);
+            if($feedbackid > 0){
+                $thefeedback->id = $feedbackid;
+                $savedok=true;
+            }
         }
+        if($savedok){$this->register_fetch_transcript_task($thefeedback);}
+        return $savedok;
     }
+
+    //register an adhoc task to pick up transcripts
+    public function register_fetch_transcript_task($cloudpoodllfeedback){
+        $fetch_task = new \assignfeedback_cloudpoodll\task\cloudpoodll_s3_adhoc();
+        $fetch_task->set_component(constants::M_COMPONENT);
+
+        $customdata = new \stdClass();
+        $customdata->feedback = $cloudpoodllfeedback;
+        $customdata->taskcreationtime = time();
+
+        $fetch_task->set_custom_data($customdata);
+        // queue it
+        \core\task\manager::queue_adhoc_task($fetch_task);
+        return true;
+    }
+
 
     /**
      * Display the comment in the feedback table.
@@ -362,20 +414,29 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
     public function view_summary(stdClass $grade, & $showviewlink) {
         $feedbackcloudpoodll = $this->get_feedback_cloudpoodll($grade->id);
         if ($feedbackcloudpoodll) {
-            return $this->view($grade);
+            return  $this->fetch_feedback_player($feedbackcloudpoodll);
         }
         return '';
     }
 
     /**
-     * Display the comment in the feedback table.
+     * Display the recording in the feedback table.
      *
      * @param stdClass $grade
      * @return string
      */
     public function view(stdClass $grade) {
-        $playerstring = "";
+
         $feedbackcloudpoodll = $this->get_feedback_cloudpoodll($grade->id);
+        $playerstring = $this->fetch_feedback_player($feedbackcloudpoodll);
+
+        return $playerstring;
+    }
+
+    public function fetch_feedback_player($feedbackcloudpoodll){
+        global $PAGE;
+
+        $playerstring = "";
         if($feedbackcloudpoodll){
             //The path to any media file we should play
             $filename= $feedbackcloudpoodll->filename;
@@ -544,8 +605,8 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
 
             }//end of switch
         }//end of if (checkfordata ...)
-
         return $playerstring;
+
     }
 
     public function	fetch_player_size($recordertype){
@@ -635,7 +696,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
     public function delete_instance() {
         global $DB;
         // Will throw exception on failure.
-        $DB->delete_records('assignfeedback_cloudpoodll',
+        $DB->delete_records(constants::M_TABLE,
                             array('assignment'=>$this->assignment->get_instance()->id));
         return true;
     }

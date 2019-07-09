@@ -38,7 +38,7 @@ define(['jquery','core/log','assignfeedback_cloudpoodll/cloudpoodllloader',"core
                         break;
                 }
             };
-
+            this.uploadstate=false;
             cloudpoodll.init(this.component + '_therecorder',recorder_callback);
         },
 

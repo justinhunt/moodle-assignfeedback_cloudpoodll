@@ -24,11 +24,11 @@ class renderer extends \plugin_renderer_base {
         return $ds;
     }
 
-    public function prepare_current_feedback($responses, $deletefeedback){
+    public function prepare_current_feedback($feedbackplayer, $deletefeedback){
         $toggletext = \html_writer::tag('span',get_string('clicktoshow',constants::M_COMPONENT),array('class'=>'toggletext'));
         $togglebutton = \html_writer::tag('span','',array('class'=>'fa fa-2x fa-toggle-off togglebutton','aria-hidden'=>'true'));
         $toggle =\html_writer::div($togglebutton . $toggletext, constants::M_COMPONENT . '_togglecontainer');
-        $cs = \html_writer::div($responses . $deletefeedback, constants::M_COMPONENT . '_currentfeedback',array('style'=>'display: none;'));
+        $cs = \html_writer::div($feedbackplayer . $deletefeedback, constants::M_COMPONENT . '_currentfeedback',array('style'=>'display: none;'));
         return $toggle . $cs;
     }
 
