@@ -37,6 +37,7 @@ class backup_assignfeedback_cloudpoodll_subplugin extends backup_subplugin {
 
     /**
      * Returns the subplugin information to attach to submission element.
+     *
      * @return backup_subplugin_element
      */
     protected function define_grade_subplugin_structure() {
@@ -45,8 +46,8 @@ class backup_assignfeedback_cloudpoodll_subplugin extends backup_subplugin {
         $subplugin = $this->get_subplugin_element();
         $subpluginwrapper = new backup_nested_element($this->get_recommended_name());
         $subpluginelement = new backup_nested_element('feedback_cloudpoodll',
-                                                      null,
-                                                      array('commenttext', 'commentformat', 'grade'));
+                null,
+                array('commenttext', 'commentformat', 'grade'));
 
         // Connect XML elements into the tree.
         $subplugin->add_child($subpluginwrapper);
@@ -54,7 +55,7 @@ class backup_assignfeedback_cloudpoodll_subplugin extends backup_subplugin {
 
         // Set source to populate the data.
         $subpluginelement->set_source_table('assignfeedback_cloudpoodll',
-                                            array('grade' => backup::VAR_PARENTID));
+                array('grade' => backup::VAR_PARENTID));
 
         return $subplugin;
     }

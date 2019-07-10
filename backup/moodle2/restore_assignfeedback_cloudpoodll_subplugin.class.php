@@ -41,6 +41,7 @@ class restore_assignfeedback_cloudpoodll_subplugin extends restore_subplugin {
 
     /**
      * Returns the paths to be handled by the subplugin at workshop level
+     *
      * @return array
      */
     protected function define_grade_subplugin_structure() {
@@ -58,12 +59,13 @@ class restore_assignfeedback_cloudpoodll_subplugin extends restore_subplugin {
 
     /**
      * Processes one feedback_cloudpoodll element.
+     *
      * @param mixed $data
      */
     public function process_assignfeedback_cloudpoodll_grade($data) {
         global $DB;
 
-        $data = (object)$data;
+        $data = (object) $data;
         $data->assignment = $this->get_new_parentid('assign');
         $oldgradeid = $data->grade;
         // The mapping is set in the restore for the core assign activity

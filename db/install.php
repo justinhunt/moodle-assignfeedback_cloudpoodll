@@ -26,6 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 /**
  * Set the initial order for the feedback cloudpoodll plugin (top)
+ *
  * @return bool
  */
 function xmldb_assignfeedback_cloudpoodll_install() {

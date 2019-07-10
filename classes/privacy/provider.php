@@ -53,9 +53,9 @@ class provider implements metadataprovider, assignfeedback_provider {
      */
     public static function get_metadata(collection $collection) {
         $data = [
-            'assignment' => 'privacy:metadata:assignmentid',
-            'grade' => 'privacy:metadata:gradepurpose',
-            'commenttext' => 'privacy:metadata:commentpurpose'
+                'assignment' => 'privacy:metadata:assignmentid',
+                'grade' => 'privacy:metadata:gradepurpose',
+                'commenttext' => 'privacy:metadata:commentpurpose'
         ];
         $collection->add_database_table('assignfeedback_cloudpoodll', $data, 'privacy:metadata:tablesummary');
         return $collection;
@@ -93,7 +93,7 @@ class provider implements metadataprovider, assignfeedback_provider {
         $plugin = $assign->get_plugin_by_type('assignfeedback', 'cloudpoodll');
         $cloudpoodll = $plugin->get_feedback_cloudpoodll($exportdata->get_pluginobject()->id);
         if ($cloudpoodll && !empty($cloudpoodll->commenttext)) {
-            $data = (object)['commenttext' => format_text($cloudpoodll->commenttext, $cloudpoodll->commentformat,
+            $data = (object) ['commenttext' => format_text($cloudpoodll->commenttext, $cloudpoodll->commentformat,
                     ['context' => $exportdata->get_context()])];
             writer::with_context($exportdata->get_context())
                     ->export_data(array_merge($exportdata->get_subcontext(),

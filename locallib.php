@@ -38,6 +38,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
 
     /**
      * Get the name of the online comment feedback plugin.
+     *
      * @return string
      */
     public function get_name() {
@@ -53,10 +54,8 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
      */
     public function get_feedback_cloudpoodll($gradeid) {
         global $DB;
-        return $DB->get_record(constants::M_TABLE, array('grade'=>$gradeid));
+        return $DB->get_record(constants::M_TABLE, array('grade' => $gradeid));
     }
-
-
 
     /**
      * Has the comment feedback been modified?
@@ -80,7 +79,6 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
             return true;
         }
     }
-
 
     /**
      * Override to indicate a plugin supports quickgrading.
@@ -138,30 +136,30 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
      * @return bool
      */
     public function save_settings(stdClass $data) {
-        //recorder type
+        // recorder type.
         $this->set_config('recordertype', $data->{constants::M_COMPONENT . '_recordertype'});
-        //recorder skin
+        // recorder skin.
         $this->set_config('recorderskin', $data->{constants::M_COMPONENT . '_recorderskin'});
 
-        //if we have a time limit, set it
-        if(isset($data->{constants::M_COMPONENT . '_timelimit'})){
+        // if we have a time limit, set it.
+        if (isset($data->{constants::M_COMPONENT . '_timelimit'})) {
             $this->set_config('timelimit', $data->{constants::M_COMPONENT . '_timelimit'});
-        }else{
+        } else {
             $this->set_config('timelimit', 0);
         }
-        //expiredays
+        // expiredays.
         $this->set_config('expiredays', $data->{constants::M_COMPONENT . '_expiredays'});
 
-        //language
+        // language.
         $this->set_config('language', $data->{constants::M_COMPONENT . '_language'});
-        //trancribe
+        // trancribe.
         $this->set_config('enabletranscription', $data->{constants::M_COMPONENT . '_enabletranscription'});
-        //transcode
+        // transcode.
         $this->set_config('enabletranscode', $data->{constants::M_COMPONENT . '_enabletranscode'});
-        //playertype
+        // playertype.
         $this->set_config('playertype', $data->{constants::M_COMPONENT . '_playertype'});
 
-        //playertype student
+        // playertype student.
         $this->set_config('playertypestudent', $data->{constants::M_COMPONENT . '_playertypestudent'});
 
         return true;
@@ -175,83 +173,89 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
      */
     public function get_settings(MoodleQuickForm $mform) {
 
-            global $CFG, $COURSE;
+        global $CFG, $COURSE;
 
-            $adminconfig = get_config(constants::M_COMPONENT);
-            $recordertype = $this->get_config('recordertype') ? $this->get_config('recordertype') :  $adminconfig->defaultrecorder;
-            $recorderskin = $this->get_config('recorderskin') ? $this->get_config('recorderskin') : constants::SKIN_BMR;
-            $timelimit = $this->get_config('timelimit') ? $this->get_config('timelimit') :  0;
-            $expiredays = $this->get_config('expiredays') ? $this->get_config('expiredays') : $adminconfig->expiredays;
-            $language = $this->get_config('language') ? $this->get_config('language') : $adminconfig->language;
-            $playertype = $this->get_config('playertype') ? $this->get_config('playertype') : $adminconfig->defaultplayertype;
-            $playertypestudent = $this->get_config('playertypestudent') ? $this->get_config('playertypestudent') : $adminconfig->defaultplayertypestudent;
-            $enabletranscription = $this->get_config('enabletranscription') ? $this->get_config('enabletranscription') : $adminconfig->enabletranscription;
-            $enabletranscode = $this->get_config('enabletranscode') ? $this->get_config('enabletranscode') : $adminconfig->enabletranscode;
+        $adminconfig = get_config(constants::M_COMPONENT);
+        $recordertype = $this->get_config('recordertype') ? $this->get_config('recordertype') : $adminconfig->defaultrecorder;
+        $recorderskin = $this->get_config('recorderskin') ? $this->get_config('recorderskin') : constants::SKIN_BMR;
+        $timelimit = $this->get_config('timelimit') ? $this->get_config('timelimit') : 0;
+        $expiredays = $this->get_config('expiredays') ? $this->get_config('expiredays') : $adminconfig->expiredays;
+        $language = $this->get_config('language') ? $this->get_config('language') : $adminconfig->language;
+        $playertype = $this->get_config('playertype') ? $this->get_config('playertype') : $adminconfig->defaultplayertype;
+        $playertypestudent = $this->get_config('playertypestudent') ? $this->get_config('playertypestudent') :
+                $adminconfig->defaultplayertypestudent;
+        $enabletranscription = $this->get_config('enabletranscription') ? $this->get_config('enabletranscription') :
+                $adminconfig->enabletranscription;
+        $enabletranscode =
+                $this->get_config('enabletranscode') ? $this->get_config('enabletranscode') : $adminconfig->enabletranscode;
 
-            $rec_options = utils::fetch_options_recorders();
-            $mform->addElement('select', constants::M_COMPONENT . '_recordertype', get_string("recordertype", constants::M_COMPONENT), $rec_options);
-            $mform->setDefault(constants::M_COMPONENT . '_recordertype',$recordertype);
-            $mform->disabledIf(constants::M_COMPONENT . '_recordertype', constants::M_COMPONENT . '_enabled', 'notchecked');
+        $rec_options = utils::fetch_options_recorders();
+        $mform->addElement('select', constants::M_COMPONENT . '_recordertype', get_string("recordertype", constants::M_COMPONENT),
+                $rec_options);
+        $mform->setDefault(constants::M_COMPONENT . '_recordertype', $recordertype);
+        $mform->disabledIf(constants::M_COMPONENT . '_recordertype', constants::M_COMPONENT . '_enabled', 'notchecked');
 
+        $skin_options = utils::fetch_options_skins();
+        $mform->addElement('select', constants::M_COMPONENT . '_recorderskin', get_string("recorderskin", constants::M_COMPONENT),
+                $skin_options);
+        $mform->setDefault(constants::M_COMPONENT . '_recorderskin', $recorderskin);
+        $mform->disabledIf(constants::M_COMPONENT . '_recorderskin', constants::M_COMPONENT . '_enabled', 'notchecked');
 
-            $skin_options = utils::fetch_options_skins();
-            $mform->addElement('select', constants::M_COMPONENT . '_recorderskin', get_string("recorderskin", constants::M_COMPONENT), $skin_options);
-            $mform->setDefault(constants::M_COMPONENT . '_recorderskin', $recorderskin);
-            $mform->disabledIf(constants::M_COMPONENT . '_recorderskin', constants::M_COMPONENT . '_enabled', 'notchecked');
+        // Add a place to set a maximum recording time.
+        $mform->addElement('duration', constants::M_COMPONENT . '_timelimit', get_string('timelimit', constants::M_COMPONENT));
+        $mform->setDefault(constants::M_COMPONENT . '_timelimit', $timelimit);
+        $mform->disabledIf(constants::M_COMPONENT . '_timelimit', constants::M_COMPONENT . '_enabled', 'notchecked');
 
+        // Add expire days.
+        $expire_options = utils::get_expiredays_options();
+        $mform->addElement('select', constants::M_COMPONENT . '_expiredays', get_string("expiredays", constants::M_COMPONENT),
+                $expire_options);
+        $mform->setDefault(constants::M_COMPONENT . '_expiredays', $expiredays);
+        $mform->disabledIf(constants::M_COMPONENT . '_expiredays', constants::M_COMPONENT . '_enabled', 'notchecked');
 
-            //Add a place to set a maximum recording time.
-            $mform->addElement('duration', constants::M_COMPONENT . '_timelimit', get_string('timelimit', constants::M_COMPONENT));
-            $mform->setDefault(constants::M_COMPONENT . '_timelimit', $timelimit);
-            $mform->disabledIf(constants::M_COMPONENT . '_timelimit', constants::M_COMPONENT . '_enabled', 'notchecked');
+        // transcode settings.
+        $mform->addElement('advcheckbox', constants::M_COMPONENT . '_enabletranscode',
+                get_string("enabletranscode", constants::M_COMPONENT));
+        $mform->setDefault(constants::M_COMPONENT . '_enabletranscode', $enabletranscode);
+        $mform->disabledIf(constants::M_COMPONENT . '_enabletranscode', constants::M_COMPONENT . '_enabled', 'notchecked');
 
-            //Add expire days
-            $expire_options = utils::get_expiredays_options();
-            $mform->addElement('select', constants::M_COMPONENT . '_expiredays', get_string("expiredays", constants::M_COMPONENT), $expire_options);
-            $mform->setDefault(constants::M_COMPONENT . '_expiredays', $expiredays);
-            $mform->disabledIf(constants::M_COMPONENT . '_expiredays', constants::M_COMPONENT . '_enabled', 'notchecked');
+        // transcription settings.
+        // here add googlecloudspeech or amazontranscrobe options.
+        $transcriber_options = utils::get_transcriber_options();
+        $mform->addElement('select', constants::M_COMPONENT . '_enabletranscription',
+                get_string("enabletranscription", constants::M_COMPONENT), $transcriber_options);
+        $mform->setDefault(constants::M_COMPONENT . '_enabletranscription', $enabletranscription);
+        $mform->disabledIf(constants::M_COMPONENT . '_enabletranscription', constants::M_COMPONENT . '_enabled', 'notchecked');
 
-            //transcode settings
-            $mform->addElement('advcheckbox', constants::M_COMPONENT . '_enabletranscode', get_string("enabletranscode", constants::M_COMPONENT));
-            $mform->setDefault(constants::M_COMPONENT . '_enabletranscode', $enabletranscode);
-            $mform->disabledIf(constants::M_COMPONENT . '_enabletranscode', constants::M_COMPONENT . '_enabled', 'notchecked');
+        // lang options.
+        $lang_options = utils::get_lang_options();
+        $mform->addElement('select', constants::M_COMPONENT . '_language', get_string("language", constants::M_COMPONENT),
+                $lang_options);
+        $mform->setDefault(constants::M_COMPONENT . '_language', $language);
+        $mform->disabledIf(constants::M_COMPONENT . '_language', constants::M_COMPONENT . '_enabled', 'notchecked');
+        $mform->disabledIf(constants::M_COMPONENT . '_language', constants::M_COMPONENT . '_enabletranscription', 'eq', 0);
+        $mform->disabledIf(constants::M_COMPONENT . '_language', constants::M_COMPONENT . '_enabletranscode', 'notchecked');
 
-            //transcription settings
-            //here add googlecloudspeech or amazontranscrobe options
-            $transcriber_options = utils::get_transcriber_options();
-            $mform->addElement('select', constants::M_COMPONENT . '_enabletranscription', get_string("enabletranscription", constants::M_COMPONENT), $transcriber_options);
-            $mform->setDefault(constants::M_COMPONENT . '_enabletranscription', $enabletranscription);
-            $mform->disabledIf(constants::M_COMPONENT . '_enabletranscription', constants::M_COMPONENT . '_enabled', 'notchecked');
+        // playertype : teacher.
+        $playertype_options = utils::fetch_options_interactivetranscript();
+        $mform->addElement('select', constants::M_COMPONENT . '_playertype', get_string("playertype", constants::M_COMPONENT),
+                $playertype_options);
+        $mform->setDefault(constants::M_COMPONENT . '_playertype', $playertype);
+        $mform->disabledIf(constants::M_COMPONENT . '_playertype', constants::M_COMPONENT . '_enabled', 'notchecked');
+        $mform->disabledIf(constants::M_COMPONENT . '_playertype', constants::M_COMPONENT . '_enabletranscription', 'eq', 0);
+        $mform->disabledIf(constants::M_COMPONENT . '_playertype', constants::M_COMPONENT . '_enabletranscode', 'notchecked');
 
-            //lang options
-            $lang_options = utils::get_lang_options();
-            $mform->addElement('select', constants::M_COMPONENT . '_language', get_string("language", constants::M_COMPONENT), $lang_options);
-            $mform->setDefault(constants::M_COMPONENT . '_language', $language);
-            $mform->disabledIf(constants::M_COMPONENT . '_language', constants::M_COMPONENT . '_enabled', 'notchecked');
-            $mform->disabledIf(constants::M_COMPONENT . '_language', constants::M_COMPONENT . '_enabletranscription', 'eq',0);
-            $mform->disabledIf(constants::M_COMPONENT . '_language', constants::M_COMPONENT . '_enabletranscode', 'notchecked');
+        // playertype: student.
+        $playertype_options = utils::fetch_options_interactivetranscript();
+        $mform->addElement('select', constants::M_COMPONENT . '_playertypestudent',
+                get_string("playertypestudent", constants::M_COMPONENT), $playertype_options);
+        $mform->setDefault(constants::M_COMPONENT . '_playertypestudent', $playertypestudent);
+        $mform->disabledIf(constants::M_COMPONENT . '_playertypestudent', constants::M_COMPONENT . '_enabled', 'notchecked');
+        $mform->disabledIf(constants::M_COMPONENT . '_playertypestudent', constants::M_COMPONENT . '_enabletranscription', 'eq', 0);
+        $mform->disabledIf(constants::M_COMPONENT . '_playertypestudent', constants::M_COMPONENT . '_enabletranscode',
+                'notchecked');
 
-
-            //playertype : teacher
-            $playertype_options = utils::fetch_options_interactivetranscript();
-            $mform->addElement('select', constants::M_COMPONENT . '_playertype', get_string("playertype", constants::M_COMPONENT), $playertype_options);
-            $mform->setDefault(constants::M_COMPONENT . '_playertype', $playertype);
-            $mform->disabledIf(constants::M_COMPONENT . '_playertype', constants::M_COMPONENT . '_enabled', 'notchecked');
-            $mform->disabledIf(constants::M_COMPONENT . '_playertype', constants::M_COMPONENT . '_enabletranscription', 'eq',0);
-            $mform->disabledIf(constants::M_COMPONENT . '_playertype', constants::M_COMPONENT . '_enabletranscode', 'notchecked');
-
-
-            //playertype: student
-            $playertype_options = utils::fetch_options_interactivetranscript();
-            $mform->addElement('select', constants::M_COMPONENT . '_playertypestudent', get_string("playertypestudent", constants::M_COMPONENT), $playertype_options);
-            $mform->setDefault(constants::M_COMPONENT . '_playertypestudent', $playertypestudent);
-            $mform->disabledIf(constants::M_COMPONENT . '_playertypestudent', constants::M_COMPONENT . '_enabled', 'notchecked');
-            $mform->disabledIf(constants::M_COMPONENT . '_playertypestudent', constants::M_COMPONENT . '_enabletranscription', 'eq',0);
-            $mform->disabledIf(constants::M_COMPONENT . '_playertypestudent', constants::M_COMPONENT . '_enabletranscode', 'notchecked');
-
-
-        }
-
+    }
 
     /**
      * Get form elements for the grading page
@@ -270,64 +274,63 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
             $feedbackcloudpoodll = $this->get_feedback_cloudpoodll($grade->id);
         }
 
-        $this->fetch_cloudpoodll_feedback_form($mform,$feedbackcloudpoodll);
+        $this->fetch_cloudpoodll_feedback_form($mform, $feedbackcloudpoodll);
 
         return true;
     }
 
-    public function fetch_cloudpoodll_feedback_form(MoodleQuickForm $mform, $feedbackcloudpoodll=false){
+    public function fetch_cloudpoodll_feedback_form(MoodleQuickForm $mform, $feedbackcloudpoodll = false) {
         global $CFG, $USER, $PAGE;
 
-        //prepare the AMD javascript for deletesubmission and showing the recorder
+        // prepare the AMD javascript for deletesubmission and showing the recorder.
         $opts = array(
-                "component"=> constants::M_COMPONENT
+                "component" => constants::M_COMPONENT
         );
         $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/feedbackhelper", 'init', array($opts));
-        $PAGE->requires->strings_for_js(array('reallydeletefeedback','clicktohide','clicktoshow'),constants::M_COMPONENT);
+        $PAGE->requires->strings_for_js(array('reallydeletefeedback', 'clicktohide', 'clicktoshow'), constants::M_COMPONENT);
 
-        //Get our renderers
+        // Get our renderers.
         $renderer = $PAGE->get_renderer(constants::M_COMPONENT);
-
 
         if ($feedbackcloudpoodll && !empty($feedbackcloudpoodll->filename)) {
 
             $deletefeedback = $renderer->fetch_delete_feedback();
 
-            //show current submission
-            //show the previous response in a player or whatever and a delete button
-            $feedbackplayer =  $this->fetch_feedback_player($feedbackcloudpoodll);
-            $currentfeedback = $renderer->prepare_current_feedback($feedbackplayer,$deletefeedback);
+            // show current submission.
+            // show the previous response in a player or whatever and a delete button.
+            $feedbackplayer = $this->fetch_feedback_player($feedbackcloudpoodll);
+            $currentfeedback = $renderer->prepare_current_feedback($feedbackplayer, $deletefeedback);
 
             $mform->addElement('static', 'currentfeedback',
-                    get_string('currentfeedback', constants::M_COMPONENT) ,
+                    get_string('currentfeedback', constants::M_COMPONENT),
                     $currentfeedback);
 
         }
 
-        //output our hidden field which has the filename
-        $mform->addElement('hidden', constants::NAME_UPDATE_CONTROL, '',array('id' => constants::ID_UPDATE_CONTROL));
-        $mform->setType(constants::NAME_UPDATE_CONTROL,PARAM_TEXT);
+        // output our hidden field which has the filename.
+        $mform->addElement('hidden', constants::NAME_UPDATE_CONTROL, '', array('id' => constants::ID_UPDATE_CONTROL));
+        $mform->setType(constants::NAME_UPDATE_CONTROL, PARAM_TEXT);
 
-        //recorder data
+        // recorder data.
         $r_options = new stdClass();
-        $r_options->recordertype=$this->get_config('recordertype');
-        $r_options->recorderskin=$this->get_config('recorderskin');
-        $r_options->timelimit=$this->get_config('timelimit');
-        $r_options->expiredays=$this->get_config('expiredays');
-        $r_options->transcode=$this->get_config('enabletranscode');
-        $r_options->transcribe=$this->get_config('enabletranscription');
-        $r_options->language=$this->get_config('language');
-        $r_options->awsregion= get_config(constants::M_COMPONENT, 'awsregion');
-        $r_options->fallback= get_config(constants::M_COMPONENT, 'fallback');
+        $r_options->recordertype = $this->get_config('recordertype');
+        $r_options->recorderskin = $this->get_config('recorderskin');
+        $r_options->timelimit = $this->get_config('timelimit');
+        $r_options->expiredays = $this->get_config('expiredays');
+        $r_options->transcode = $this->get_config('enabletranscode');
+        $r_options->transcribe = $this->get_config('enabletranscription');
+        $r_options->language = $this->get_config('language');
+        $r_options->awsregion = get_config(constants::M_COMPONENT, 'awsregion');
+        $r_options->fallback = get_config(constants::M_COMPONENT, 'fallback');
 
-        //fetch API token
-        $api_user = get_config(constants::M_COMPONENT,'apiuser');
-        $api_secret = get_config(constants::M_COMPONENT,'apisecret');
-        $token = utils::fetch_token($api_user,$api_secret);
+        // fetch API token.
+        $api_user = get_config(constants::M_COMPONENT, 'apiuser');
+        $api_secret = get_config(constants::M_COMPONENT, 'apisecret');
+        $token = utils::fetch_token($api_user, $api_secret);
 
-        //fetch recorder html
-        $recorderhtml = $renderer->fetch_recorder($r_options,$token);
-        $mform->addElement('static', 'description', '',$recorderhtml);
+        // fetch recorder html.
+        $recorderhtml = $renderer->fetch_recorder($r_options, $token);
+        $mform->addElement('static', 'description', '', $recorderhtml);
 
         return true;
     }
@@ -342,32 +345,33 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
     public function save(stdClass $grade, stdClass $data) {
         global $DB;
 
-
-        //if filename is false, or empty, no update. possibly used changed something else on page
-        //possibly they did not record ... that will be caught elsewhere
+        // if filename is false, or empty, no update. possibly used changed something else on page.
+        // possibly they did not record ... that will be caught elsewhere.
         $filename = $data->filename;
-        if($filename === false || empty($filename)){return true;}
+        if ($filename === false || empty($filename)) {
+            return true;
+        }
 
-        //get expiretime of this record
+        // get expiretime of this record.
         $expiredays = $this->get_config("expiredays");
-        if($expiredays < 9999) {
+        if ($expiredays < 9999) {
             $fileexpiry = time() + DAYSECS * $expiredays;
-        }else{
+        } else {
             $fileexpiry = 0;
         }
 
         $thefeedback = $this->get_feedback_cloudpoodll($grade->id);
-        $savedok=false;
+        $savedok = false;
         if ($thefeedback) {
-            if($filename=='-1'){
-                //this is a flag to delete the feedback
+            if ($filename == '-1') {
+                // this is a flag to delete the feedback.
                 $thefeedback->filename = '';
                 $thefeedback->fileexpiry = 0;
                 $thefeedback->vttdata = '';
                 $thefeedback->transcript = '';
-                $savedok = $DB->update_record(constants::M_TABLE,$thefeedback);
+                $savedok = $DB->update_record(constants::M_TABLE, $thefeedback);
                 return $savedok;
-            }else {
+            } else {
                 $thefeedback->{constants::NAME_UPDATE_CONTROL} = $data->{constants::NAME_UPDATE_CONTROL};
                 $thefeedback->fileexpiry = $fileexpiry;
                 $savedok = $DB->update_record(constants::M_TABLE, $thefeedback);
@@ -379,17 +383,19 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
             $thefeedback->grade = $grade->id;
             $thefeedback->assignment = $this->assignment->get_instance()->id;
             $feedbackid = $DB->insert_record(constants::M_TABLE, $thefeedback);
-            if($feedbackid > 0){
+            if ($feedbackid > 0) {
                 $thefeedback->id = $feedbackid;
-                $savedok=true;
+                $savedok = true;
             }
         }
-        if($savedok){$this->register_fetch_transcript_task($thefeedback);}
+        if ($savedok) {
+            $this->register_fetch_transcript_task($thefeedback);
+        }
         return $savedok;
     }
 
-    //register an adhoc task to pick up transcripts
-    public function register_fetch_transcript_task($cloudpoodllfeedback){
+    // register an adhoc task to pick up transcripts.
+    public function register_fetch_transcript_task($cloudpoodllfeedback) {
         $fetch_task = new \assignfeedback_cloudpoodll\task\cloudpoodll_s3_adhoc();
         $fetch_task->set_component(constants::M_COMPONENT);
 
@@ -398,11 +404,10 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         $customdata->taskcreationtime = time();
 
         $fetch_task->set_custom_data($customdata);
-        // queue it
+        // queue it.
         \core\task\manager::queue_adhoc_task($fetch_task);
         return true;
     }
-
 
     /**
      * Display the comment in the feedback table.
@@ -414,7 +419,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
     public function view_summary(stdClass $grade, & $showviewlink) {
         $feedbackcloudpoodll = $this->get_feedback_cloudpoodll($grade->id);
         if ($feedbackcloudpoodll) {
-            return  $this->fetch_feedback_player($feedbackcloudpoodll);
+            return $this->fetch_feedback_player($feedbackcloudpoodll);
         }
         return '';
     }
@@ -433,40 +438,40 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         return $playerstring;
     }
 
-    public function fetch_feedback_player($feedbackcloudpoodll){
+    public function fetch_feedback_player($feedbackcloudpoodll) {
         global $PAGE;
 
         $playerstring = "";
-        if($feedbackcloudpoodll){
-            //The path to any media file we should play
-            $filename= $feedbackcloudpoodll->filename;
-            $rawmediapath =$feedbackcloudpoodll->filename;
+        if ($feedbackcloudpoodll) {
+            // The path to any media file we should play.
+            $filename = $feedbackcloudpoodll->filename;
+            $rawmediapath = $feedbackcloudpoodll->filename;
             $mediapath = urlencode($rawmediapath);
-            if(empty($feedbackcloudpoodll->vttdata)){
+            if (empty($feedbackcloudpoodll->vttdata)) {
                 $vttdata = false;
-            }else{
+            } else {
                 $vttdata = $feedbackcloudpoodll->vttdata;
             }
 
-            //are we a person who can grade?
-            $isgrader=false;
-            if(has_capability('mod/assign:grade',$this->assignment->get_context())){
-                $isgrader=true;
+            // are we a person who can grade?
+            $isgrader = false;
+            if (has_capability('mod/assign:grade', $this->assignment->get_context())) {
+                $isgrader = true;
             }
-            //is this a list page
-            $islist = optional_param('action','',PARAM_TEXT)=='grading';
+            // is this a list page?
+            $islist = optional_param('action', '', PARAM_TEXT) == 'grading';
         } else {
             return '';
         }
 
-        //size params for our response players/images
-        //audio is a simple 1 or 0 for display or not
+        // size params for our response players/images.
+        // audio is a simple 1 or 0 for display or not.
         $size = $this->fetch_player_size($this->get_config('recordertype'));
 
-        //player type
+        // player type.
         $playertype = constants::PLAYERTYPE_DEFAULT;
-        if($vttdata && !$islist) {
-            switch($isgrader) {
+        if ($vttdata && !$islist) {
+            switch ($isgrader) {
                 case true:
                     $playertype = $this->get_config('playertype');
                     break;
@@ -476,77 +481,81 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
             }
         }
 
-
-        //if this is a playback area, for teacher, show a string if no file
-        if ( (empty($filename) || strlen($filename)<3)){
+        // if this is a playback area, for teacher, show a string if no file.
+        if ((empty($filename) || strlen($filename) < 3)) {
             $playerstring .= "";
 
-        }else{
+        } else {
 
-            //prepare our response string, which will parsed and replaced with the necessary player
-            switch($this->get_config('recordertype')){
+            // prepare our response string, which will parsed and replaced with the necessary player.
+            switch ($this->get_config('recordertype')) {
 
                 case constants::REC_AUDIO:
-                    //get player
-                    $playerid= html_writer::random_id(constants::M_COMPONENT . '_');
-                    $containerid= html_writer::random_id(constants::M_COMPONENT . '_');
-                    $container = html_writer::div('',constants::M_COMPONENT . '_transcriptcontainer',array('id'=>$containerid));
+                    // get player.
+                    $playerid = html_writer::random_id(constants::M_COMPONENT . '_');
+                    $containerid = html_writer::random_id(constants::M_COMPONENT . '_');
+                    $container = html_writer::div('', constants::M_COMPONENT . '_transcriptcontainer', array('id' => $containerid));
 
-                    //player template
+                    // player template.
                     $randomid = html_writer::random_id('cloudpoodll_');
                     $audioplayer = "<audio id='@PLAYERID@' crossorigin='anonymous' controls='true'>";
                     $audioplayer .= "<source src='@MEDIAURL@'>";
                     $audioplayer .= "<track src='@VTTURL@' kind='captions' srclang='@LANG@' label='@LANG@' default='true'>";
                     $audioplayer .= "</audio>";
-                    //template -> player
-                    $audioplayer =str_replace('@PLAYERID@',$playerid,$audioplayer);
-                    $audioplayer =str_replace('@MEDIAURL@',$rawmediapath . '?cachekiller=' . $randomid,$audioplayer);
-                    $audioplayer =str_replace('@LANG@',$this->get_config('language'),$audioplayer);
-                    $audioplayer =str_replace('@VTTURL@',$rawmediapath . '.vtt',$audioplayer);
+                    // template -> player.
+                    $audioplayer = str_replace('@PLAYERID@', $playerid, $audioplayer);
+                    $audioplayer = str_replace('@MEDIAURL@', $rawmediapath . '?cachekiller=' . $randomid, $audioplayer);
+                    $audioplayer = str_replace('@LANG@', $this->get_config('language'), $audioplayer);
+                    $audioplayer = str_replace('@VTTURL@', $rawmediapath . '.vtt', $audioplayer);
 
-
-                    if($size) {
-                        switch($playertype) {
+                    if ($size) {
+                        switch ($playertype) {
                             case constants::PLAYERTYPE_DEFAULT:
-                                //$playerstring .= format_text("<a href='$rawmediapath'>$filename</a>", FORMAT_HTML);
-                                //just use the raw audio tags response string
+                                // $playerstring .= format_text("<a href='$rawmediapath'>$filename</a>", FORMAT_HTML);
+                                // just use the raw audio tags response string.
                                 $playerstring .= $audioplayer;
                                 break;
                             case constants::PLAYERTYPE_INTERACTIVETRANSCRIPT:
 
                                 $playerstring .= $audioplayer . $container;
 
-                                //prepare AMD javascript for displaying submission
-                                $transcriptopts=array( 'component'=>constants::M_COMPONENT,'playerid'=>$playerid,'containerid'=>$containerid,
-                                        'cssprefix'=>constants::M_COMPONENT .'_transcript');
-                                $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/interactivetranscript", 'init', array($transcriptopts));
-                                $PAGE->requires->strings_for_js(array('transcripttitle'),constants::M_COMPONENT);
+                                // prepare AMD javascript for displaying feedback.
+                                $transcriptopts = array('component' => constants::M_COMPONENT, 'playerid' => $playerid,
+                                        'containerid' => $containerid,
+                                        'cssprefix' => constants::M_COMPONENT . '_transcript');
+                                $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/interactivetranscript", 'init',
+                                        array($transcriptopts));
+                                $PAGE->requires->strings_for_js(array('transcripttitle'), constants::M_COMPONENT);
                                 break;
 
                             case constants::PLAYERTYPE_STANDARDTRANSCRIPT:
 
                                 $playerstring .= $audioplayer . $container;
-                                //prepare AMD javascript for displaying submission
-                                $transcriptopts=array( 'component'=>constants::M_COMPONENT,'playerid'=>$playerid,'containerid'=>$containerid,
-                                        'cssprefix'=>constants::M_COMPONENT .'_transcript', 'transcripturl'=>$rawmediapath . '.txt');
-                                $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/standardtranscript", 'init', array($transcriptopts));
-                                $PAGE->requires->strings_for_js(array('transcripttitle'),constants::M_COMPONENT);
+                                // prepare AMD javascript for displaying feedback.
+                                $transcriptopts = array('component' => constants::M_COMPONENT, 'playerid' => $playerid,
+                                        'containerid' => $containerid,
+                                        'cssprefix' => constants::M_COMPONENT . '_transcript',
+                                        'transcripturl' => $rawmediapath . '.txt');
+                                $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/standardtranscript", 'init',
+                                        array($transcriptopts));
+                                $PAGE->requires->strings_for_js(array('transcripttitle'), constants::M_COMPONENT);
                                 break;
                         }
-                    }else{
-                        $playerstring=get_string('audioplaceholder',constants::M_COMPONENT);
+                    } else {
+                        $playerstring = get_string('audioplaceholder', constants::M_COMPONENT);
                     }
                     break;
 
                 case constants::REC_VIDEO:
-                    if($size) {
+                    if ($size) {
 
 
-                        $playerid= html_writer::random_id(constants::M_COMPONENT . '_');
-                        $containerid= html_writer::random_id(constants::M_COMPONENT . '_');
-                        $container = html_writer::div('',constants::M_COMPONENT . '_transcriptcontainer',array('id'=>$containerid));
+                        $playerid = html_writer::random_id(constants::M_COMPONENT . '_');
+                        $containerid = html_writer::random_id(constants::M_COMPONENT . '_');
+                        $container =
+                                html_writer::div('', constants::M_COMPONENT . '_transcriptcontainer', array('id' => $containerid));
 
-                        //player template
+                        // player template.
                         $randomid = html_writer::random_id('cloudpoodll_');
 
                         switch ($playertype) {
@@ -556,21 +565,24 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                                     break;
                                 }
 
-                                $videoplayer = "<video id='@PLAYERID@' class='nomediaplugin' crossorigin='anonymous' controls='true' width='$size->width' height='$size->height'>";
+                                $videoplayer =
+                                        "<video id='@PLAYERID@' class='nomediaplugin' crossorigin='anonymous' controls='true' width='$size->width' height='$size->height'>";
                                 $videoplayer .= "<source src='@MEDIAURL@'>";
                                 $videoplayer .= "<track src='@VTTURL@' kind='captions' srclang='@LANG@' label='@LANG@' default='true'>";
                                 $videoplayer .= "</video>";
-                                //template -> player
-                                $videoplayer =str_replace('@PLAYERID@',$playerid,$videoplayer);
-                                $videoplayer =str_replace('@MEDIAURL@',$rawmediapath . '?cachekiller=' . $randomid,$videoplayer);
-                                $videoplayer =str_replace('@LANG@',$this->get_config('language'),$videoplayer);
-                                $videoplayer =str_replace('@VTTURL@',$rawmediapath . '.vtt',$videoplayer);
+                                // template -> player.
+                                $videoplayer = str_replace('@PLAYERID@', $playerid, $videoplayer);
+                                $videoplayer = str_replace('@MEDIAURL@', $rawmediapath . '?cachekiller=' . $randomid, $videoplayer);
+                                $videoplayer = str_replace('@LANG@', $this->get_config('language'), $videoplayer);
+                                $videoplayer = str_replace('@VTTURL@', $rawmediapath . '.vtt', $videoplayer);
                                 $playerstring .= $videoplayer . $container;
 
-                                //prepare AMD javascript for displaying submission
-                                $transcriptopts=array( 'component'=>constants::M_COMPONENT,'playerid'=>$playerid,'containerid'=>$containerid, 'cssprefix'=>constants::M_COMPONENT .'_transcript');
-                                $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/interactivetranscript", 'init', array($transcriptopts));
-                                $PAGE->requires->strings_for_js(array('transcripttitle'),constants::M_COMPONENT);
+                                // prepare AMD javascript for displaying feedback.
+                                $transcriptopts = array('component' => constants::M_COMPONENT, 'playerid' => $playerid,
+                                        'containerid' => $containerid, 'cssprefix' => constants::M_COMPONENT . '_transcript');
+                                $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/interactivetranscript", 'init',
+                                        array($transcriptopts));
+                                $PAGE->requires->strings_for_js(array('transcripttitle'), constants::M_COMPONENT);
                                 break;
 
                             case constants::PLAYERTYPE_DEFAULT:
@@ -580,22 +592,23 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                                     break;
                                 }
 
-                                //$playerstring .= format_text("<a href='$rawmediapath?d=$size->width" . 'x' . "$size->height'>$filename</a>", FORMAT_HTML);
-                                $videoplayer = "<video id='@PLAYERID@' crossorigin='anonymous' controls='true' width='$size->width' height='$size->height'>";
+                                // $playerstring .= format_text("<a href='$rawmediapath?d=$size->width" . 'x' . "$size->height'>$filename</a>", FORMAT_HTML);
+                                $videoplayer =
+                                        "<video id='@PLAYERID@' crossorigin='anonymous' controls='true' width='$size->width' height='$size->height'>";
                                 $videoplayer .= "<source src='@MEDIAURL@'>";
-                                if($vttdata) {
+                                if ($vttdata) {
                                     $videoplayer .= "<track src='@VTTURL@' kind='captions' srclang='@LANG@' label='@LANG@' default='true'>";
                                 }
                                 $videoplayer .= "</video>";
-                                //template -> player
-                                $videoplayer =str_replace('@PLAYERID@',$playerid,$videoplayer);
-                                $videoplayer =str_replace('@MEDIAURL@',$rawmediapath . '?cachekiller=' . $randomid,$videoplayer);
-                                $videoplayer =str_replace('@LANG@',$this->get_config('language'),$videoplayer);
-                                $videoplayer =str_replace('@VTTURL@',$rawmediapath . '.vtt',$videoplayer);
+                                // template -> player.
+                                $videoplayer = str_replace('@PLAYERID@', $playerid, $videoplayer);
+                                $videoplayer = str_replace('@MEDIAURL@', $rawmediapath . '?cachekiller=' . $randomid, $videoplayer);
+                                $videoplayer = str_replace('@LANG@', $this->get_config('language'), $videoplayer);
+                                $videoplayer = str_replace('@VTTURL@', $rawmediapath . '.vtt', $videoplayer);
                                 $playerstring .= $videoplayer;
                         }
-                    }else{
-                        $playerstring=get_string('videoplaceholder',constants::M_COMPONENT);
+                    } else {
+                        $playerstring = get_string('videoplaceholder', constants::M_COMPONENT);
                     }
                     break;
 
@@ -603,42 +616,56 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     $playerstring .= format_text("<a href='$rawmediapath'>$filename</a>", FORMAT_HTML);
                     break;
 
-            }//end of switch
-        }//end of if (checkfordata ...)
+            }// end of switch.
+        }// end of if (checkfordata ...).
         return $playerstring;
 
     }
 
-    public function	fetch_player_size($recordertype){
+    public function fetch_player_size($recordertype) {
 
-        //is this a list view
-        $islist = optional_param('action','',PARAM_TEXT)=='grading';
+        // is this a list view?
+        $islist = optional_param('action', '', PARAM_TEXT) == 'grading';
 
-        //build our sizes array
-        $sizes=array();
-        $sizes['0']=new stdClass();$sizes['0']->width=0;$sizes['0']->height=0;
-        $sizes['160']=new stdClass();$sizes['160']->width=160;$sizes['160']->height=120;
-        $sizes['320']=new stdClass();$sizes['320']->width=320;$sizes['320']->height=240;
-        $sizes['480']=new stdClass();$sizes['480']->width=480;$sizes['480']->height=360;
-        $sizes['640']=new stdClass();$sizes['640']->width=640;$sizes['640']->height=480;
-        $sizes['800']=new stdClass();$sizes['800']->width=800;$sizes['800']->height=600;
-        $sizes['1024']=new stdClass();$sizes['1024']->width=1024;$sizes['1024']->height=768;
+        // build our sizes array.
+        $sizes = array();
+        $sizes['0'] = new stdClass();
+        $sizes['0']->width = 0;
+        $sizes['0']->height = 0;
+        $sizes['160'] = new stdClass();
+        $sizes['160']->width = 160;
+        $sizes['160']->height = 120;
+        $sizes['320'] = new stdClass();
+        $sizes['320']->width = 320;
+        $sizes['320']->height = 240;
+        $sizes['480'] = new stdClass();
+        $sizes['480']->width = 480;
+        $sizes['480']->height = 360;
+        $sizes['640'] = new stdClass();
+        $sizes['640']->width = 640;
+        $sizes['640']->height = 480;
+        $sizes['800'] = new stdClass();
+        $sizes['800']->width = 800;
+        $sizes['800']->height = 600;
+        $sizes['1024'] = new stdClass();
+        $sizes['1024']->width = 1024;
+        $sizes['1024']->height = 768;
 
-        $size=$sizes[0];
-        $config=get_config(constants::M_COMPONENT);
+        $size = $sizes[0];
+        $config = get_config(constants::M_COMPONENT);
 
-        //prepare our response string, which will parsed and replaced with the necessary player
-        switch($recordertype){
+        // prepare our response string, which will parsed and replaced with the necessary player.
+        switch ($recordertype) {
             case constants::REC_VIDEO:
-                $size=$islist ? $sizes[$config->displaysize_list] : $sizes[$config->displaysize_single] ;
+                $size = $islist ? $sizes[$config->displaysize_list] : $sizes[$config->displaysize_single];
                 break;
             case constants::REC_AUDIO:
-                $size=$islist ? $config->displayaudioplayer_list : $config->displayaudioplayer_single ;
+                $size = $islist ? $config->displayaudioplayer_list : $config->displayaudioplayer_single;
                 break;
             default:
                 break;
 
-        }//end of switch
+        }// end of switch.
         return $size;
 
     }
@@ -680,10 +707,10 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
      * @return bool true or false - false will trigger a rollback
      */
     public function upgrade(context $oldcontext,
-                            stdClass $oldassignment,
-                            stdClass $oldsubmission,
-                            stdClass $grade,
-                            & $log) {
+            stdClass $oldassignment,
+            stdClass $oldsubmission,
+            stdClass $grade,
+            & $log) {
 
         return true;
     }
@@ -697,7 +724,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         global $DB;
         // Will throw exception on failure.
         $DB->delete_records(constants::M_TABLE,
-                            array('assignment'=>$this->assignment->get_instance()->id));
+                array('assignment' => $this->assignment->get_instance()->id));
         return true;
     }
 
@@ -727,7 +754,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
     }
     */
 
-    /**
+    /*
      * Return the plugin configs for external functions.
      *
      * @return array the list of settings

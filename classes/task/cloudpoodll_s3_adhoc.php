@@ -29,7 +29,6 @@ defined('MOODLE_INTERNAL') || die();
 use \assignfeedback_cloudpoodll\constants;
 use \assignfeedback_cloudpoodll\utils;
 
-
 /**
  * Assignfeedback_cloudpoodll adhoc task to fetch back transcriptions from Amazon S3
  *
@@ -39,63 +38,67 @@ use \assignfeedback_cloudpoodll\utils;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class cloudpoodll_s3_adhoc extends \core\task\adhoc_task {
-                                                                     
-   	 /**
+
+    /**
      *  Run the tasks
      */
-	 public function execute(){
-	     global $DB;
-		$trace = new \text_progress_trace();
+    public function execute() {
+        global $DB;
+        $trace = new \text_progress_trace();
 
-		//CD should contain activityid / attemptid and modulecontextid
-		$cd =  $this->get_custom_data();
-		$feedback = $cd->feedback;
-		//$trace->output($cd->somedata)
+        // CD should contain activityid / attemptid and modulecontextid.
+        $cd = $this->get_custom_data();
+        $feedback = $cd->feedback;
+        // $trace->output($cd->somedata).
 
-         $transcript = utils::fetch_transcriptdata($feedback->filename . '.txt');
-         $fulltranscript = false;
-         $vttdata = false;
-         if($transcript) {
-             $fulltranscript = utils::fetch_transcriptdata($feedback->filename . '.json');
-             $vttdata = utils::fetch_transcriptdata($feedback->filename . '.vtt');
-         }
-         if($transcript===false){
-             if($cd->taskcreationtime + (HOURSECS * 24) < time()){
-                 $this->do_forever_fail('No transcript could be found',$trace);
-                 return;
-             }else{
-                 $this->do_retry_soon('Transcript appears to not be ready yet',$trace,$cd);
-                 return;
-             }
-         } else {
-             //yay we have transcript data, let us save that shall we ...
-             $feedback->transcript = $transcript;
-             if($fulltranscript){$feedback->fulltranscript = $fulltranscript;}
-             if($vttdata){$feedback->vttdata = $vttdata;}
-             $DB->update_record(constants::M_TABLE, $feedback);
-             return;
-         }
-     }
+        $transcript = utils::fetch_transcriptdata($feedback->filename . '.txt');
+        $fulltranscript = false;
+        $vttdata = false;
+        if ($transcript) {
+            $fulltranscript = utils::fetch_transcriptdata($feedback->filename . '.json');
+            $vttdata = utils::fetch_transcriptdata($feedback->filename . '.vtt');
+        }
+        if ($transcript === false) {
+            if ($cd->taskcreationtime + (HOURSECS * 24) < time()) {
+                $this->do_forever_fail('No transcript could be found', $trace);
+                return;
+            } else {
+                $this->do_retry_soon('Transcript appears to not be ready yet', $trace, $cd);
+                return;
+            }
+        } else {
+            // yay we have transcript data, let us save that shall we .
+            $feedback->transcript = $transcript;
+            if ($fulltranscript) {
+                $feedback->fulltranscript = $fulltranscript;
+            }
+            if ($vttdata) {
+                $feedback->vttdata = $vttdata;
+            }
+            $DB->update_record(constants::M_TABLE, $feedback);
+            return;
+        }
+    }
 
-    protected function do_retry_soon($reason,$trace,$customdata){
-        if($customdata->taskcreationtime + (MINSECS * 15) < time()){
-            $this->do_retry_delayed($reason,$trace);
-        }else {
+    protected function do_retry_soon($reason, $trace, $customdata) {
+        if ($customdata->taskcreationtime + (MINSECS * 15) < time()) {
+            $this->do_retry_delayed($reason, $trace);
+        } else {
             $trace->output($reason . ": will try again next cron ");
             $fetch_task = new \assignfeedback_cloudpoodll\task\cloudpoodll_s3_adhoc();
             $fetch_task->set_component(constants::M_COMPONENT);
             $fetch_task->set_custom_data($customdata);
-            // queue it
+            // queue it.
             \core\task\manager::queue_adhoc_task($fetch_task);
         }
     }
 
-    protected function do_retry_delayed($reason,$trace){
+    protected function do_retry_delayed($reason, $trace) {
         $trace->output($reason . ": will retry after a delay ");
         throw new \file_exception('retrievefileproblem', 'could not fetch transcript.');
     }
 
-    protected function do_forever_fail($reason,$trace){
+    protected function do_forever_fail($reason, $trace) {
         $trace->output($reason . ": will not retry ");
     }
 

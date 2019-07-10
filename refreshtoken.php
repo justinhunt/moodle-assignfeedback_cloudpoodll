@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -24,8 +23,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
-require_once(dirname(dirname(dirname(dirname(dirname(__FILE__))))).'/config.php');
+require_once(dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/config.php');
 
 use \assignfeedback_cloudpoodll\utils;
 use \assignfeedback_cloudpoodll\constants;
@@ -33,11 +31,11 @@ use \assignfeedback_cloudpoodll\constants;
 require_login(0, false);
 $systemcontext = context_system::instance();
 
-if(has_capability('moodle/site:config',$systemcontext)){
-    $apiuser = get_config(constants::M_COMPONENT,'apiuser');
-    $apisecret=get_config(constants::M_COMPONENT,'apisecret');
-    $force=true;
-    if($apiuser && $apisecret) {
+if (has_capability('moodle/site:config', $systemcontext)) {
+    $apiuser = get_config(constants::M_COMPONENT, 'apiuser');
+    $apisecret = get_config(constants::M_COMPONENT, 'apisecret');
+    $force = true;
+    if ($apiuser && $apisecret) {
         utils::fetch_token($apiuser, $apisecret, $force);
     }
 }
