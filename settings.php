@@ -97,6 +97,12 @@ $settings->add(new admin_setting_configselect(constants::M_COMPONENT . '/showcur
         new lang_string('showcurrentsubmissiondetails', constants::M_COMPONENT), 1, $yesno_options));
 */
 
+//allow user to set a custom name for the plugin as displayed to users
+$settings->add(new admin_setting_configtext(constants::M_COMPONENT . '/customname',
+        new lang_string('customname', constants::M_COMPONENT),
+        new lang_string('customnamedetails', constants::M_COMPONENT),
+        '', PARAM_TEXT));
+
 // Settings for audio recordings.
 $settings->add(new admin_setting_heading(constants::M_COMPONENT . '/audio_heading',
         get_string('setting_audio_heading', constants::M_COMPONENT),

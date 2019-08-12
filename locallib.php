@@ -42,7 +42,11 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
      * @return string
      */
     public function get_name() {
-        return get_string('pluginname', constants::M_COMPONENT);
+        if(get_config(constants::M_COMPONENT,'customname')){
+            return get_config(constants::M_COMPONENT,'customname');
+        }else {
+            return get_string('pluginname', constants::M_COMPONENT);
+        }
     }
 
     /**
@@ -189,6 +193,9 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         $enabletranscode =
                 $this->get_config('enabletranscode') ? $this->get_config('enabletranscode') : $adminconfig->enabletranscode;
 
+        //add a settings divider. Cloud Poodll has so many we should do this:
+        $mform->addElement('static',constants::M_COMPONENT . '_dividerend', '',get_string('divider',constants::M_COMPONENT,$this->get_name()));
+
         $rec_options = utils::fetch_options_recorders();
         $mform->addElement('select', constants::M_COMPONENT . '_recordertype', get_string("recordertype", constants::M_COMPONENT),
                 $rec_options);
@@ -254,6 +261,9 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         $mform->disabledIf(constants::M_COMPONENT . '_playertypestudent', constants::M_COMPONENT . '_enabletranscription', 'eq', 0);
         $mform->disabledIf(constants::M_COMPONENT . '_playertypestudent', constants::M_COMPONENT . '_enabletranscode',
                 'notchecked');
+
+        //Close our settings divider.
+        $mform->addElement('static',constants::M_COMPONENT . '_dividerend', '',get_string('divider',constants::M_COMPONENT,''));
 
     }
 

@@ -26,8 +26,8 @@ $string['default'] = 'Enabled by default';
 $string['default_help'] = 'If set, this feedback method will be enabled by default for all new assignments.';
 $string['enabled'] = 'Cloud Poodll feedback';
 $string['enabled_help'] = 'If enabled, the marker can leave feedback cloudpoodll for each submission. ';
-$string['pluginname'] = 'Cloud Poodll feedback';
-$string['privacy:commentpath'] = 'Cloud Poodll feedback';
+$string['pluginname'] = 'Cloud Poodll Feedback';
+$string['privacy:commentpath'] = 'Cloud Poodll Feedback';
 $string['privacy:metadata:assignmentid'] = 'Assignment identifier';
 $string['privacy:metadata:commentpurpose'] = 'The comment text.';
 $string['privacy:metadata:gradepurpose'] = 'The grade ID associated with the comment.';
@@ -49,7 +49,7 @@ $string['enabletranscription'] = 'Enable Transcription';
 $string['enabletranscription_details'] = 'Cloud Poodll can transcribe the student speaking if required';
 $string['enabletranscode'] = 'Enable Transcode';
 $string['enabletranscode_details'] = 'Cloud Poodll can transcode the recording to mp3/mp4';
-$string['language'] = 'Cloud Poodll Speaker Language';
+$string['language'] = 'Speaker Language';
 
 $string['useast1'] = 'US East';
 $string['tokyo'] = 'Tokyo, Japan (no transcription)';
@@ -75,9 +75,9 @@ $string['de-de'] = 'German(DE)';
 $string['hi-in'] = 'Hindi(IN)';
 $string['awsregion'] = 'AWS Region';
 $string['region'] = 'AWS Region';
-$string['expiredays'] = 'Cloud Poodll Days to keep file';
+$string['expiredays'] = 'Days to keep file';
 
-$string['timelimit'] = 'Cloud Poodll Rec. Time Limit';
+$string['timelimit'] = 'Recording Time Limit';
 $string['currentfeedback'] = 'Current Feedback:';
 $string['yes'] = 'yes';
 $string['no'] = 'no';
@@ -119,8 +119,8 @@ $string['privacy:metadata:fulltranscriptpurpose'] = 'The transcript with metadat
 $string['privacy:metadata:vttpurpose'] = 'The subtitle rendering of transcript for this attempt of the assignment.';
 $string['privacy:path'] = 'Feedback Text';
 
-$string['recordertype'] = 'Cloud Poodll Rec. Type';
-$string['recorderskin'] = 'Cloud Poodll Rec. Skin';
+$string['recordertype'] = 'Recorder Type';
+$string['recorderskin'] = 'Recorder Skin';
 $string['skinplain'] = 'Plain';
 $string['skinbmr'] = 'Burnt Rose';
 $string['skinfresh'] = 'Fresh (audio only)';
@@ -135,8 +135,8 @@ $string['fallbackupload'] = 'Upload';
 $string['fallbackiosupload'] = 'iOS: upload, else warning';
 $string['fallbackwarning'] = 'Warning';
 
-$string['playertype'] = 'Cloud Poodll Transcript Display (teacher)';
-$string['playertypestudent'] = 'Cloud Poodll Transcript Display(student)';
+$string['playertype'] = 'Transcript Display (teacher)';
+$string['playertypestudent'] = 'Transcript Display(student)';
 $string['playertypedefault'] = 'No transcript.';
 $string['playertypeinteractivetranscript'] = 'Interactive transcript';
 $string['playertypestandardtranscript'] = 'Static transcript';
@@ -160,6 +160,9 @@ $string['clicktoshow'] = "Show current feedback";
 
 $string['transcribernone'] = "No transcription";
 $string['transcriberamazon'] = "Normal transcription";
-$string['transcribergooglecloud'] = "Fast transcription(audio only)";
+$string['transcribergooglecloud'] = "Fast transcription(short audio only)";
+$string['divider']= '---------------{$a}----------------';
+$string['customname']= "Custom name";
+$string['customnamedetails']= "Set a custom name for the plugin(ie not 'Cloud Poodll Feedback') as displayed inside the plugin";
 
 
