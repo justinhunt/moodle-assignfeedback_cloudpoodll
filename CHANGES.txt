@@ -1,4 +1,7 @@
 Change List
 =========
-version 3.1.024(Build 2019070700)
+version 1.0.1(Build 2019082000)
+-Fixed enabletranscode which was always appearing to be checked
+
+version 1.0.0(Build 2019070700)
 -First release of Cloud Poodll Feedback

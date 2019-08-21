@@ -190,8 +190,8 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                 $adminconfig->defaultplayertypestudent;
         $enabletranscription = $this->get_config('enabletranscription') ? $this->get_config('enabletranscription') :
                 $adminconfig->enabletranscription;
-        $enabletranscode =
-                $this->get_config('enabletranscode') ? $this->get_config('enabletranscode') : $adminconfig->enabletranscode;
+        $enabletranscode = $this->get_config('enabletranscode')!==false ? $this->get_config('enabletranscode') :
+                $adminconfig->enabletranscode;
 
         //add a settings divider. Cloud Poodll has so many we should do this:
         $mform->addElement('static',constants::M_COMPONENT . '_dividerend', '',get_string('divider',constants::M_COMPONENT,$this->get_name()));
@@ -233,6 +233,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                 get_string("enabletranscription", constants::M_COMPONENT), $transcriber_options);
         $mform->setDefault(constants::M_COMPONENT . '_enabletranscription', $enabletranscription);
         $mform->disabledIf(constants::M_COMPONENT . '_enabletranscription', constants::M_COMPONENT . '_enabled', 'notchecked');
+        $mform->disabledIf(constants::M_COMPONENT . '_enabletranscription', constants::M_COMPONENT . '_enabletranscode', 'notchecked');
 
         // lang options.
         $lang_options = utils::get_lang_options();
