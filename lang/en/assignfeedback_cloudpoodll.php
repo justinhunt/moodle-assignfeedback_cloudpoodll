@@ -146,14 +146,20 @@ $string['defaultplayertypedetails'] =
         'Use the interactive or static transcript player if you are transcribing or show no transcript';
 $string['transcripttitle'] = 'Transcript';
 
+//these errors are displayed on settings page
 $string['displaysubs'] = '{$a->subscriptionname} : expires {$a->expiredate}';
-$string['noapiuser'] = "No API user entered. Read Aloud will not work correctly.";
-$string['noapisecret'] = "No API secret entered. Read Aloud will not work correctly.";
+$string['noapiuser'] = "No API user entered. This plugin will not work correctly.";
+$string['noapisecret'] = "No API secret entered. This plugin will not work correctly.";
 $string['credentialsinvalid'] = "The API user and secret entered could not be used to get access. Please check them.";
 $string['appauthorised'] = "Assign Feedback Cloud Poodll is authorised for this site.";
 $string['appnotauthorised'] = "Assign Feedback Cloud Poodll  is NOT authorised for this site.";
 $string['refreshtoken'] = "Refresh license information";
 $string['notokenincache'] = "Refresh to see license information. Contact Poodll support if there is a problem.";
+
+//these errors are displayed on activity page
+$string['nocredentials'] = 'API user and secret not entered. Please enter them on <a href="{$a}">the settings page.</a> You can get them from <a href="https://poodll.com/member">Poodll.com.</a>';
+$string['novalidcredentials'] = 'API user and secret were rejected and could not gain access. Please check them on <a href="{$a}">the settings page.</a> You can get them from <a href="https://poodll.com/member">Poodll.com.</a>';
+$string['nosubscriptions'] = "There is no current subscription for this site/plugin.";
 
 $string['clicktohide'] = "Hide current feedback";
 $string['clicktoshow'] = "Show current feedback";
@@ -162,7 +168,9 @@ $string['transcribernone'] = "No transcription";
 $string['transcriberamazon'] = "Normal transcription";
 $string['transcribergooglecloud'] = "Fast transcription(short audio only)";
 $string['divider']= '---------------{$a}----------------';
+
+$string['recorderdisplayname']= "Feedback Recorder";
 $string['customname']= "Custom name";
-$string['customnamedetails']= "Set a custom name for the plugin(ie not 'Cloud Poodll Feedback') as displayed inside the plugin";
+$string['customnamedetails']= "Set a custom name for the plugin(ie not 'Feedback Recorder') as displayed inside the plugin";
 
 

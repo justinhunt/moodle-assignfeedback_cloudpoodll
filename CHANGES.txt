@@ -1,5 +1,10 @@
 Change List
 =========
+version xxx
+-added better reporting of poor Cloud Poodll config settings
+-made recorder title customizable
+-corrected strings referringto ReadAloud
+
 version 1.0.1(Build 2019082000)
 -Fixed enabletranscode which was always appearing to be checked
 
