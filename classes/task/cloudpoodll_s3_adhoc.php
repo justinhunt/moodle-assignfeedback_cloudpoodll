@@ -88,6 +88,8 @@ class cloudpoodll_s3_adhoc extends \core\task\adhoc_task {
             $fetch_task = new \assignfeedback_cloudpoodll\task\cloudpoodll_s3_adhoc();
             $fetch_task->set_component(constants::M_COMPONENT);
             $fetch_task->set_custom_data($customdata);
+            //if we do not set the next run time it can extend the current cron job indef with a recurring task
+            $fetch_task->set_next_run_time(time()+30);
             // queue it.
             \core\task\manager::queue_adhoc_task($fetch_task);
         }
