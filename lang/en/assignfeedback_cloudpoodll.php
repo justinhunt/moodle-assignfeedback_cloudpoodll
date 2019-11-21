@@ -168,6 +168,7 @@ $string['transcribernone'] = "No transcription";
 $string['transcriberamazon'] = "Normal transcription";
 $string['transcribergooglecloud'] = "Fast transcription(short audio only)";
 $string['divider']= '---------------{$a}----------------';
+$string['customdivider']= '---------------{$a->customname} ("{$a->pluginname}")----------------';
 
 $string['recorderdisplayname']= "Feedback Recorder";
 $string['customname']= "Custom name";

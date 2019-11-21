@@ -194,7 +194,18 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                 $adminconfig->enabletranscode;
 
         //add a settings divider. Cloud Poodll has so many we should do this:
-        $mform->addElement('static',constants::M_COMPONENT . '_dividerend', '',get_string('divider',constants::M_COMPONENT,$this->get_name()));
+        //show a divider to keep settings manageable
+        $pluginname = get_string('pluginname',constants::M_COMPONENT);
+        $customname = get_config(constants::M_COMPONENT, 'customname');
+        if(!empty($customname)){
+            $args =new stdClass();
+            $args->pluginname = $pluginname;
+            $args->customname = $customname;
+            $divider = get_string('customdivider', constants::M_COMPONENT,$args);
+        }else{
+            $divider = get_string('divider',constants::M_COMPONENT,$pluginname);
+        }
+        $mform->addElement('static',constants::M_COMPONENT . '_divider', '',$divider);
 
         $rec_options = utils::fetch_options_recorders();
         $mform->addElement('select', constants::M_COMPONENT . '_recordertype', get_string("recordertype", constants::M_COMPONENT),
