@@ -68,13 +68,15 @@ class constants {
     const REGION_SAOPAULO = 'saopaulo';
     const REGION_FRANKFURT = 'frankfurt';
     const REGION_LONDON = 'london';
+    const REGION_SINGAPORE = 'singapore';
+    const REGION_MUMBAI = 'mumbai';
 
     const TRANSCRIBER_NONE = 0;
     const TRANSCRIBER_AMAZONTRANSCRIBE = 1;
     const TRANSCRIBER_GOOGLECLOUDSPEECH = 2;
 
     const LANG_ENUS = 'en-US';
-    const LANG_ENUK = 'en-GB';
+    const LANG_ENGB = 'en-GB';
     const LANG_ENAU = 'en-AU';
     const LANG_ESUS = 'es-US';
     const LANG_FRCA = 'fr-CA';
@@ -86,5 +88,24 @@ class constants {
     const LANG_HIIN = 'hi-IN';
     const LANG_ENIN = 'en-IN';
     const LANG_ESES = 'es-ES';
+
+    const LANG_ARAE ='ar-AE';
+    const LANG_ARSA ='ar-SA';
+    const LANG_ZHCN ='zh-CN';
+    const LANG_NLNL ='nl-NL';
+    const LANG_ENIE ='en-IE';
+    const LANG_ENWL ='en-WL';
+    const LANG_ENAB ='en-AB';
+    const LANG_FAIR ='fa-IR';
+    const LANG_DECH ='de-CH';
+    const LANG_HEIL ='he-IL';
+    const LANG_IDID ='id-ID';
+    const LANG_JAJP ='ja-JP';
+    const LANG_MSMY ='ms-MY';
+    const LANG_PTPT ='pt-PT';
+    const LANG_RURU ='ru-RU';
+    const LANG_TAIN ='ta-IN';
+    const LANG_TEIN ='te-IN';
+    const LANG_TRTR ='tr-TR';
 
 }

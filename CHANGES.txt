@@ -1,5 +1,9 @@
 Change List
 =========
+version 1.0.3(Build 2020012500)
+-added languages(arabic, chinese, portuguese, japanese, tamil, telegu, dutch, farsi, wales english, ireland english, scotland english, russian, turkish, malay, indonesian,hebrew, swiss german)
+-added user tagging
+
 version 1.0.2(Build 2019112100)
 -added better reporting of poor Cloud Poodll config settings
 -made recorder title customizable
