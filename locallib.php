@@ -448,7 +448,8 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
 
         $fetch_task->set_custom_data($customdata);
         // queue it.
-        \core\task\manager::queue_adhoc_task($fetch_task);
+        //
+        \core\task\manager::queue_adhoc_task($fetch_task,true);
         return true;
     }
 

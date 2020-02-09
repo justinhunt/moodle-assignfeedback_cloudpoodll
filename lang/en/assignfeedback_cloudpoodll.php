@@ -59,10 +59,12 @@ $string['ottawa'] = 'Ottawa, Canada (slow)';
 $string['frankfurt'] = 'Frankfurt, Germany (no transcription)';
 $string['london'] = 'London, U.K (slow)';
 $string['saopaulo'] = 'Sao Paulo, Brazil (no transcription)';
+$string['singapore']='Singapore';
+$string['mumbai']='Mumbai, India';
 $string['forever'] = 'Never expire';
 
 $string['en-us'] = 'English (US)';
-$string['en-uk'] = 'English (UK)';
+$string['en-gb'] = 'English (GB)';
 $string['en-au'] = 'English (AU)';
 $string['en-in'] = 'English (IN)';
 $string['es-es'] = 'Spanish (ES)';
