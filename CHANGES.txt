@@ -1,5 +1,8 @@
 Change List
 =========
+version 1.0.4(Build 2021031800)
+- Added better disable/hide to settings
+
 version 1.0.3(Build 2020012500)
 -added languages(arabic, chinese, portuguese, japanese, tamil, telegu, dutch, farsi, wales english, ireland english, scotland english, russian, turkish, malay, indonesian,hebrew, swiss german)
 -added user tagging

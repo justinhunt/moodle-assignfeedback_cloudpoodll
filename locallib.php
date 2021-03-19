@@ -205,7 +205,9 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         }else{
             $divider = get_string('divider',constants::M_COMPONENT,$pluginname);
         }
-        $mform->addElement('static',constants::M_COMPONENT . '_divider', '',$divider);
+
+        $mform->addElement('static', constants::M_COMPONENT . '_divider', '', $divider);
+
 
         $rec_options = utils::fetch_options_recorders();
         $mform->addElement('select', constants::M_COMPONENT . '_recordertype', get_string("recordertype", constants::M_COMPONENT),
@@ -274,9 +276,24 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         $mform->disabledIf(constants::M_COMPONENT . '_playertypestudent', constants::M_COMPONENT . '_enabletranscode',
                 'notchecked');
 
-        //Close our settings divider.
-        $mform->addElement('static',constants::M_COMPONENT . '_dividerend', '',get_string('divider',constants::M_COMPONENT,''));
+        //Close our settings divider
+        $mform->addElement('static', constants::M_COMPONENT . '_dividerend', '',
+                    get_string('divider', constants::M_COMPONENT, ''));
 
+        //If M3.4 or higher we can hide elements when we need to
+        if($CFG->version >= 2017111300) {
+            $mform->hideIf(constants::M_COMPONENT . '_recordertype', constants::M_COMPONENT . '_enabled', 'notchecked');
+            $mform->hideIf(constants::M_COMPONENT . '_recorderskin', constants::M_COMPONENT . '_enabled', 'notchecked');
+            $mform->hideIf(constants::M_COMPONENT . '_timelimit', constants::M_COMPONENT . '_enabled', 'notchecked');
+            $mform->hideIf(constants::M_COMPONENT . '_expiredays', constants::M_COMPONENT . '_enabled', 'notchecked');
+            $mform->hideIf(constants::M_COMPONENT . '_enabletranscode', constants::M_COMPONENT . '_enabled', 'notchecked');
+            $mform->hideIf(constants::M_COMPONENT . '_enabletranscription', constants::M_COMPONENT . '_enabled', 'notchecked');
+            $mform->hideIf(constants::M_COMPONENT . '_language', constants::M_COMPONENT . '_enabled', 'notchecked');
+            $mform->hideIf(constants::M_COMPONENT . '_playertype', constants::M_COMPONENT . '_enabled', 'notchecked');
+            $mform->hideIf(constants::M_COMPONENT . '_playertypestudent', constants::M_COMPONENT . '_enabled', 'notchecked');
+            $mform->hideIf(constants::M_COMPONENT . '_divider', constants::M_COMPONENT . '_enabled', 'notchecked');
+            $mform->hideIf(constants::M_COMPONENT . '_dividerend', constants::M_COMPONENT . '_enabled', 'notchecked');
+        }
     }
 
     /**
