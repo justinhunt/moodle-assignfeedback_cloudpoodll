@@ -206,7 +206,10 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
             $divider = get_string('divider',constants::M_COMPONENT,$pluginname);
         }
 
-        $mform->addElement('static', constants::M_COMPONENT . '_divider', '', $divider);
+        //If M3.4 or lower we show a divider
+        if($CFG->version < 2017111300) {
+            $mform->addElement('static', constants::M_COMPONENT . '_divider', '', $divider);
+        }
 
 
         $rec_options = utils::fetch_options_recorders();
@@ -276,9 +279,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         $mform->disabledIf(constants::M_COMPONENT . '_playertypestudent', constants::M_COMPONENT . '_enabletranscode',
                 'notchecked');
 
-        //Close our settings divider
-        $mform->addElement('static', constants::M_COMPONENT . '_dividerend', '',
-                    get_string('divider', constants::M_COMPONENT, ''));
+
 
         //If M3.4 or higher we can hide elements when we need to
         if($CFG->version >= 2017111300) {
@@ -291,8 +292,10 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
             $mform->hideIf(constants::M_COMPONENT . '_language', constants::M_COMPONENT . '_enabled', 'notchecked');
             $mform->hideIf(constants::M_COMPONENT . '_playertype', constants::M_COMPONENT . '_enabled', 'notchecked');
             $mform->hideIf(constants::M_COMPONENT . '_playertypestudent', constants::M_COMPONENT . '_enabled', 'notchecked');
-            $mform->hideIf(constants::M_COMPONENT . '_divider', constants::M_COMPONENT . '_enabled', 'notchecked');
-            $mform->hideIf(constants::M_COMPONENT . '_dividerend', constants::M_COMPONENT . '_enabled', 'notchecked');
+        }else{
+            //Close our settings divider
+            $mform->addElement('static', constants::M_COMPONENT . '_dividerend', '',
+                    get_string('divider', constants::M_COMPONENT, ''));
         }
     }
 
