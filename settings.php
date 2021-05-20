@@ -69,7 +69,7 @@ $settings->add(new admin_setting_configselect(constants::M_COMPONENT . '/default
 // transcription settings.
 $transcriber_options = utils::get_transcriber_options();
 $settings->add(new admin_setting_configselect(constants::M_COMPONENT . '/enabletranscription',
-        get_string('enabletranscription_details', constants::M_COMPONENT), '', constants::TRANSCRIBER_AMAZONTRANSCRIBE,
+        get_string('enabletranscription_details', constants::M_COMPONENT), '', constants::TRANSCRIBER_NONE,
         $transcriber_options));
 
 $langoptions = utils::get_lang_options();

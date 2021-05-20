@@ -567,6 +567,9 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                             'vtturl' =>$rawmediapath . '.vtt',
                             'lang'=>$this->get_config('language')
                     );
+                    if($islist){
+                        $playeropts['islist']=$islist;
+                    }
                     $audioplayer = $OUTPUT->render_from_template(constants::M_COMPONENT . '/audioplayer', $playeropts);
 
 
@@ -621,10 +624,12 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                         $randomid = html_writer::random_id('cloudpoodll_');
                         $playeropts=array(
                                 'playerid'=> $playerid ,
-                                'size'=>['width'=>$size->width,'height'=>$size->height],
                                 'mediaurl'=>$rawmediapath . '?cachekiller=' . $randomid,
                                 'lang'=>$this->get_config('language')
                         );
+                        if($islist){
+                            $playeropts['islist']=$islist;
+                        }
 
                         switch ($playertype) {
                             case constants::PLAYERTYPE_INTERACTIVETRANSCRIPT:
