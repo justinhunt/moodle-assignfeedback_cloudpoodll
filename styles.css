@@ -25,7 +25,7 @@ button.assignfeedback_cloudpoodll_deletesubmissionbutton {
 
 /* interactive transcript */
 .assignfeedback_cloudpoodll_transcriptcontainer {
-    max-width: 610px;
+    max-width: 480px;
     width: 100%;
     font-family: Arial, sans-serif;
    /* overflow-x: scroll; */
