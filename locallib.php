@@ -503,7 +503,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
     }
 
     public function fetch_feedback_player($feedbackcloudpoodll) {
-        global $PAGE;
+        global $PAGE, $OUTPUT;
 
         $playerstring = "";
         if ($feedbackcloudpoodll) {
@@ -557,20 +557,18 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                 case constants::REC_AUDIO:
                     // get player.
                     $playerid = html_writer::random_id(constants::M_COMPONENT . '_');
+                    $randomid = html_writer::random_id('cloudpoodll_');
                     $containerid = html_writer::random_id(constants::M_COMPONENT . '_');
                     $container = html_writer::div('', constants::M_COMPONENT . '_transcriptcontainer', array('id' => $containerid));
 
-                    // player template.
-                    $randomid = html_writer::random_id('cloudpoodll_');
-                    $audioplayer = "<audio id='@PLAYERID@' crossorigin='anonymous' controls='true'>";
-                    $audioplayer .= "<source src='@MEDIAURL@'>";
-                    $audioplayer .= "<track src='@VTTURL@' kind='captions' srclang='@LANG@' label='@LANG@' default='true'>";
-                    $audioplayer .= "</audio>";
-                    // template -> player.
-                    $audioplayer = str_replace('@PLAYERID@', $playerid, $audioplayer);
-                    $audioplayer = str_replace('@MEDIAURL@', $rawmediapath . '?cachekiller=' . $randomid, $audioplayer);
-                    $audioplayer = str_replace('@LANG@', $this->get_config('language'), $audioplayer);
-                    $audioplayer = str_replace('@VTTURL@', $rawmediapath . '.vtt', $audioplayer);
+                    $playeropts=array(
+                            'playerid'=> $playerid ,
+                            'mediaurl'=>$rawmediapath . '?cachekiller=' . $randomid,
+                            'vtturl' =>$rawmediapath . '.vtt',
+                            'lang'=>$this->get_config('language')
+                    );
+                    $audioplayer = $OUTPUT->render_from_template(constants::M_COMPONENT . '/audioplayer', $playeropts);
+
 
                     if ($size) {
                         switch ($playertype) {
@@ -621,6 +619,12 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
 
                         // player template.
                         $randomid = html_writer::random_id('cloudpoodll_');
+                        $playeropts=array(
+                                'playerid'=> $playerid ,
+                                'size'=>['width'=>$size->width,'height'=>$size->height],
+                                'mediaurl'=>$rawmediapath . '?cachekiller=' . $randomid,
+                                'lang'=>$this->get_config('language')
+                        );
 
                         switch ($playertype) {
                             case constants::PLAYERTYPE_INTERACTIVETRANSCRIPT:
@@ -628,17 +632,8 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                                     $playerstring = get_string('videoplaceholder', constants::M_COMPONENT);
                                     break;
                                 }
-
-                                $videoplayer =
-                                        "<video id='@PLAYERID@' class='nomediaplugin' crossorigin='anonymous' controls='true' width='$size->width' height='$size->height'>";
-                                $videoplayer .= "<source src='@MEDIAURL@'>";
-                                $videoplayer .= "<track src='@VTTURL@' kind='captions' srclang='@LANG@' label='@LANG@' default='true'>";
-                                $videoplayer .= "</video>";
-                                // template -> player.
-                                $videoplayer = str_replace('@PLAYERID@', $playerid, $videoplayer);
-                                $videoplayer = str_replace('@MEDIAURL@', $rawmediapath . '?cachekiller=' . $randomid, $videoplayer);
-                                $videoplayer = str_replace('@LANG@', $this->get_config('language'), $videoplayer);
-                                $videoplayer = str_replace('@VTTURL@', $rawmediapath . '.vtt', $videoplayer);
+                                $playeropts['vtturl']=$rawmediapath . '.vtt';
+                                $videoplayer = $OUTPUT->render_from_template(constants::M_COMPONENT . '/videoplayer', $playeropts);
                                 $playerstring .= $videoplayer . $container;
 
                                 // prepare AMD javascript for displaying feedback.
@@ -656,19 +651,10 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                                     break;
                                 }
 
-                                // $playerstring .= format_text("<a href='$rawmediapath?d=$size->width" . 'x' . "$size->height'>$filename</a>", FORMAT_HTML);
-                                $videoplayer =
-                                        "<video id='@PLAYERID@' crossorigin='anonymous' controls='true' width='$size->width' height='$size->height'>";
-                                $videoplayer .= "<source src='@MEDIAURL@'>";
                                 if ($vttdata) {
-                                    $videoplayer .= "<track src='@VTTURL@' kind='captions' srclang='@LANG@' label='@LANG@' default='true'>";
+                                    $playeropts['vtturl']=$rawmediapath . '.vtt';
                                 }
-                                $videoplayer .= "</video>";
-                                // template -> player.
-                                $videoplayer = str_replace('@PLAYERID@', $playerid, $videoplayer);
-                                $videoplayer = str_replace('@MEDIAURL@', $rawmediapath . '?cachekiller=' . $randomid, $videoplayer);
-                                $videoplayer = str_replace('@LANG@', $this->get_config('language'), $videoplayer);
-                                $videoplayer = str_replace('@VTTURL@', $rawmediapath . '.vtt', $videoplayer);
+                                $videoplayer = $OUTPUT->render_from_template(constants::M_COMPONENT . '/videoplayer', $playeropts);
                                 $playerstring .= $videoplayer;
                         }
                     } else {
