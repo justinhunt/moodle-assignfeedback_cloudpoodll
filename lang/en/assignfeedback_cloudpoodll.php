@@ -61,6 +61,8 @@ $string['london'] = 'London, U.K (slow)';
 $string['saopaulo'] = 'Sao Paulo, Brazil (no transcription)';
 $string['singapore']='Singapore';
 $string['mumbai']='Mumbai, India';
+$string['capetown'] = 'Capetown, South Africa';
+$string['bahrain'] = 'Bahrain';
 $string['forever'] = 'Never expire';
 
 $string['en-us'] = 'English (US)';

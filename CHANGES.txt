@@ -1,5 +1,9 @@
 Change List
 =========
+
+version 1.0.5(Build 2021052000)
+-added capetown and bahrain
+
 version 1.0.4(Build 2021031800)
 - Added better disable/hide to settings
 

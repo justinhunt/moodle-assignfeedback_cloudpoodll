@@ -70,6 +70,8 @@ class constants {
     const REGION_LONDON = 'london';
     const REGION_SINGAPORE = 'singapore';
     const REGION_MUMBAI = 'mumbai';
+    const REGION_CAPETOWN = 'capetown';
+    const REGION_BAHRAIN = 'bahrain';
 
     const TRANSCRIBER_NONE = 0;
     const TRANSCRIBER_AMAZONTRANSCRIBE = 1;
