@@ -1,5 +1,7 @@
 Change List
 =========
+version 1.0.6(Build 2021061100)
+-Fixed display of audio player which could be too small
 
 version 1.0.5(Build 2021052000)
 -added capetown and bahrain

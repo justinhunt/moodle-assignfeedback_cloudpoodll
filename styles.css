@@ -125,6 +125,7 @@ button.assignfeedback_cloudpoodll_deletesubmissionbutton {
 
 .assignfeedback_cloudpoodll_audio {
     width: 100%;
+    min-width: 240px;
 }
 
 .assignfeedback_cloudpoodll_audio_cont {
