@@ -151,6 +151,7 @@ $string['skinfresh'] = 'Fresh (audio only)';
 $string['skin123'] = 'One Two Three';
 $string['skinonce'] = 'Once';
 $string['skinupload'] = 'Upload';
+$string['skinscreen'] = 'Screen Recorder (video)';
 
 $string['fallback'] = 'non-HTML5 Fallback';
 $string['fallbackdetails'] =

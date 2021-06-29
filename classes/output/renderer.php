@@ -84,7 +84,7 @@ class renderer extends \plugin_renderer_base {
                 if ($r_options->recorderskin == constants::SKIN_BMR) {
                     $width = "360";
                     $height = "450";
-                } else if ($r_options->recorderskin == constants::SKIN_123) {
+                } else if ($r_options->recorderskin == constants::SKIN_123 || $r_options->recorderskin == constants::SKIN_SCREEN) {
                     $width = "450";// "360";
                     $height = "550";// "410";
                 } else if ($r_options->recorderskin == constants::SKIN_ONCE) {

@@ -1,5 +1,8 @@
 Change List
 =========
+version 1.0.6(Build 2021062700)
+- Added screen recorder option
+
 version 1.0.6(Build 2021061100)
 -Fixed display of audio player which could be too small
 
