@@ -190,8 +190,9 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                 $adminconfig->defaultplayertypestudent;
         $enabletranscription = $this->get_config('enabletranscription') ? $this->get_config('enabletranscription') :
                 $adminconfig->enabletranscription;
-        $enabletranscode = $this->get_config('enabletranscode')!==false ? $this->get_config('enabletranscode') :
-                $adminconfig->enabletranscode;
+        //hardcode this to be always on
+        //$enabletranscode = $this->get_config('enabletranscode')!==false ? $this->get_config('enabletranscode') :
+        //        $adminconfig->enabletranscode;
 
         //add a settings divider. Cloud Poodll has so many we should do this:
         //show a divider to keep settings manageable
@@ -236,11 +237,15 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         $mform->setDefault(constants::M_COMPONENT . '_expiredays', $expiredays);
         $mform->disabledIf(constants::M_COMPONENT . '_expiredays', constants::M_COMPONENT . '_enabled', 'notchecked');
 
-        // transcode settings.
+        // transcode settings. hardcoded to always transcode
+        $mform->addElement('hidden', constants::M_COMPONENT . '_enabletranscode',1);
+        $mform->setType(constants::M_COMPONENT . '_enabletranscode',PARAM_INT);
+        /*
         $mform->addElement('advcheckbox', constants::M_COMPONENT . '_enabletranscode',
                 get_string("enabletranscode", constants::M_COMPONENT));
         $mform->setDefault(constants::M_COMPONENT . '_enabletranscode', $enabletranscode);
         $mform->disabledIf(constants::M_COMPONENT . '_enabletranscode', constants::M_COMPONENT . '_enabled', 'notchecked');
+        */
 
         // transcription settings.
         // here add googlecloudspeech or amazontranscrobe options.
@@ -249,7 +254,8 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                 get_string("enabletranscription", constants::M_COMPONENT), $transcriber_options);
         $mform->setDefault(constants::M_COMPONENT . '_enabletranscription', $enabletranscription);
         $mform->disabledIf(constants::M_COMPONENT . '_enabletranscription', constants::M_COMPONENT . '_enabled', 'notchecked');
-        $mform->disabledIf(constants::M_COMPONENT . '_enabletranscription', constants::M_COMPONENT . '_enabletranscode', 'notchecked');
+        // transcode settings. hardcoded to always transcode
+        //$mform->disabledIf(constants::M_COMPONENT . '_enabletranscription', constants::M_COMPONENT . '_enabletranscode', 'notchecked');
 
         // lang options.
         $lang_options = utils::get_lang_options();
@@ -258,7 +264,8 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         $mform->setDefault(constants::M_COMPONENT . '_language', $language);
         $mform->disabledIf(constants::M_COMPONENT . '_language', constants::M_COMPONENT . '_enabled', 'notchecked');
         $mform->disabledIf(constants::M_COMPONENT . '_language', constants::M_COMPONENT . '_enabletranscription', 'eq', 0);
-        $mform->disabledIf(constants::M_COMPONENT . '_language', constants::M_COMPONENT . '_enabletranscode', 'notchecked');
+        // transcode settings. hardcoded to always transcode
+        //$mform->disabledIf(constants::M_COMPONENT . '_language', constants::M_COMPONENT . '_enabletranscode', 'notchecked');
 
         // playertype : teacher.
         $playertype_options = utils::fetch_options_interactivetranscript();
@@ -267,7 +274,8 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         $mform->setDefault(constants::M_COMPONENT . '_playertype', $playertype);
         $mform->disabledIf(constants::M_COMPONENT . '_playertype', constants::M_COMPONENT . '_enabled', 'notchecked');
         $mform->disabledIf(constants::M_COMPONENT . '_playertype', constants::M_COMPONENT . '_enabletranscription', 'eq', 0);
-        $mform->disabledIf(constants::M_COMPONENT . '_playertype', constants::M_COMPONENT . '_enabletranscode', 'notchecked');
+        // transcode settings. hardcoded to always transcode
+        //$mform->disabledIf(constants::M_COMPONENT . '_playertype', constants::M_COMPONENT . '_enabletranscode', 'notchecked');
 
         // playertype: student.
         $playertype_options = utils::fetch_options_interactivetranscript();
@@ -276,8 +284,9 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         $mform->setDefault(constants::M_COMPONENT . '_playertypestudent', $playertypestudent);
         $mform->disabledIf(constants::M_COMPONENT . '_playertypestudent', constants::M_COMPONENT . '_enabled', 'notchecked');
         $mform->disabledIf(constants::M_COMPONENT . '_playertypestudent', constants::M_COMPONENT . '_enabletranscription', 'eq', 0);
-        $mform->disabledIf(constants::M_COMPONENT . '_playertypestudent', constants::M_COMPONENT . '_enabletranscode',
-                'notchecked');
+        // transcode settings. hardcoded to always transcode
+        // $mform->disabledIf(constants::M_COMPONENT . '_playertypestudent', constants::M_COMPONENT . '_enabletranscode',
+        //        'notchecked');
 
 
 
@@ -287,7 +296,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
             $mform->hideIf(constants::M_COMPONENT . '_recorderskin', constants::M_COMPONENT . '_enabled', 'notchecked');
             $mform->hideIf(constants::M_COMPONENT . '_timelimit', constants::M_COMPONENT . '_enabled', 'notchecked');
             $mform->hideIf(constants::M_COMPONENT . '_expiredays', constants::M_COMPONENT . '_enabled', 'notchecked');
-            $mform->hideIf(constants::M_COMPONENT . '_enabletranscode', constants::M_COMPONENT . '_enabled', 'notchecked');
+          //  $mform->hideIf(constants::M_COMPONENT . '_enabletranscode', constants::M_COMPONENT . '_enabled', 'notchecked');
             $mform->hideIf(constants::M_COMPONENT . '_enabletranscription', constants::M_COMPONENT . '_enabled', 'notchecked');
             $mform->hideIf(constants::M_COMPONENT . '_language', constants::M_COMPONENT . '_enabled', 'notchecked');
             $mform->hideIf(constants::M_COMPONENT . '_playertype', constants::M_COMPONENT . '_enabled', 'notchecked');
@@ -359,7 +368,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         $r_options->recorderskin = $this->get_config('recorderskin');
         $r_options->timelimit = $this->get_config('timelimit');
         $r_options->expiredays = $this->get_config('expiredays');
-        $r_options->transcode = $this->get_config('enabletranscode');
+        $r_options->transcode = 1;//$this->get_config('enabletranscode'); // transcode settings. hardcoded to always transcode
         $r_options->transcribe = $this->get_config('enabletranscription');
         $r_options->language = $this->get_config('language');
         $r_options->awsregion = get_config(constants::M_COMPONENT, 'awsregion');
