@@ -31,6 +31,7 @@ class constants {
     const M_COMPONENT = 'assignfeedback_cloudpoodll';
     const M_TABLE = 'assignfeedback_cloudpoodll';
     const M_FILEAREA = 'feedbacks_cloudpoodll';
+    const M_URL = '/mod/assign/feedback/cloudpoodll';
     const M_SUBPLUGIN = 'cloudpoodll';
     const M_PLUGINSETTINGS = '/admin/settings.php?section=assignfeedback_cloudpoodll';
 
