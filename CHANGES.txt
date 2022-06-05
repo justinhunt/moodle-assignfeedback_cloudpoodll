@@ -1,5 +1,9 @@
 Change List
 =========
+Version 1.0.10 (Build 2022060500)
+- Changed AMD build steps
+- Change free trial jump link
+
 version 1.0.9(Build 2021122200)
 -Added credentials fetch code blocks
 
@@ -19,7 +23,7 @@ version 1.0.4(Build 2021031800)
 - Added better disable/hide to settings
 
 version 1.0.3(Build 2020012500)
--added languages(arabic, chinese, portuguese, japanese, tamil, telegu, dutch, farsi, wales english, ireland english, scotland english, russian, turkish, malay, indonesian,hebrew, swiss german)
+-added languages(arabic, chinese, portuguese, japanese, tamil, Telugu, dutch, farsi, wales english, ireland english, scotland english, russian, turkish, malay, indonesian,hebrew, swiss german)
 -added user tagging
 
 version 1.0.2(Build 2019112100)
