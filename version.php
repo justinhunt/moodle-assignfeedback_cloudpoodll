@@ -28,4 +28,4 @@ $plugin->version = 2021111000;
 $plugin->requires = 2016052300; // Moodle 3.1.
 $plugin->component = 'assignfeedback_cloudpoodll';
 $plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = '1.0.7(Build 2021111000)';
+$plugin->release   = '1.0.8(Build 2021111000)';
