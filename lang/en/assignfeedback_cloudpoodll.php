@@ -34,7 +34,7 @@ $string['privacy:metadata:gradepurpose'] = 'The grade ID associated with the com
 $string['privacy:metadata:tablesummary'] =
         'This stores cloudpoodll made by the graders as feedback for the student on their submission.';
 
-$string['recorder'] = 'Recorder Type';
+//$string['recorder'] = 'Recorder Type';
 $string['recorderaudio'] = 'Audio Recorder';
 $string['recordervideo'] = 'Video Recorder';
 $string['defaultrecorder'] = 'Recorder Type';
@@ -98,7 +98,7 @@ $string['te-in'] = 'Telugu';
 $string['tr-tr'] = 'Turkish';
 
 $string['awsregion'] = 'AWS Region';
-$string['region'] = 'AWS Region';
+//$string['region'] = 'AWS Region';
 $string['expiredays'] = 'Days to keep file';
 
 $string['timelimit'] = 'Recording Time Limit';
@@ -116,16 +116,16 @@ $string['displaysizelistdetails'] = '';
 $string['shownovideo'] = 'Do not display video';
 $string['videoplaceholder'] = ' [video submitted] ';
 $string['audioplaceholder'] = ' [audio submitted] ';
-$string['shownoimage'] = 'Do not display image';
+//$string['shownoimage'] = 'Do not display image';
 
 $string['setting_audio_heading'] = 'Audio player settings';
 $string['setting_audio_heading_details'] = 'Settings controlling player appearance in feedback review and list pages';
 $string['setting_video_heading'] = 'Video player settings';
 $string['setting_video_heading_details'] = 'Settings controlling player appearance in feedback review and list pages';
-$string['setting_snapshot_heading'] = 'Snapshot image settings';
-$string['setting_snapshot_heading_details'] = 'Settings controlling image appearance in feedback review and list pages';
-$string['setting_whiteboard_heading'] = 'Whiteboard image settings';
-$string['setting_whiteboard_heading_details'] = 'Settings controlling image appearance in feedback review and list pages';
+//$string['setting_snapshot_heading'] = 'Snapshot image settings';
+//$string['setting_snapshot_heading_details'] = 'Settings controlling image appearance in feedback review and list pages';
+//$string['setting_whiteboard_heading'] = 'Whiteboard image settings';
+//$string['setting_whiteboard_heading_details'] = 'Settings controlling image appearance in feedback review and list pages';
 $string['deletefeedback'] = 'Delete this feedback.';
 $string['reallydeletefeedback'] = 'Really delete this feedback?';
 
@@ -201,6 +201,6 @@ $string['customnamedetails']= "Set a custom name for the plugin(ie not 'Feedback
 
 $string['freetrial'] = "Get Cloud Poodll API Credentials and a Free Trial";
 $string['freetrial_desc'] = "A dialog should appear that allows you to register for a free trial with Poodll. After registering you should login to the members dashboard to get your API user and secret. And to register your site URL.";
-$string['memberdashboard'] = "Member Dashboard";
-$string['memberdashboard_desc'] = "";
+//$string['memberdashboard'] = "Member Dashboard";
+//$string['memberdashboard_desc'] = "";
 $string['fillcredentials']="Set API user and secret with existing credentials";
