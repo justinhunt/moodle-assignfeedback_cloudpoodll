@@ -37,6 +37,7 @@ class constants {
 
     const APPID = 'assignfeedback_cloudpoodll';
 
+    const REC_FREE = 'free';
     const REC_AUDIO = 'audio';
     const REC_VIDEO = 'video';
 
@@ -112,4 +113,10 @@ class constants {
     const LANG_TEIN ='te-IN';
     const LANG_TRTR ='tr-TR';
 
+    const SUBMISSIONTYPE_UNCLASSIFIED = 0;
+    const SUBMISSIONTYPE_VIDEO = 1;
+    const SUBMISSIONTYPE_AUDIO = 2;
+    const SUBMISSIONTYPE_TEXT = 3;
+
+    const TYPE_TEXT = 'feedbacktext';
 }

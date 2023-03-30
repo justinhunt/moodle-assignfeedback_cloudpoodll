@@ -1,99 +1,135 @@
-define(['jquery', 'core/log', 'assignfeedback_cloudpoodll/cloudpoodllloader', "core/str"], function ($, log, cloudpoodll, str) {
-    "use strict"; // jshint ;_;
+import $ from 'jquery';
+import log from 'core/log';
+import cloudpoodll from './cloudpoodllloader';
+import * as str from 'core/str';
 
-    log.debug('cloudpoodll feedback helper: initialising');
+log.debug('cloudpoodll feedback helper: initialising');
 
-    return {
+const instancemap = {};
+let registeredtoggler = false;
 
-        uploadstate: false,
-        togglestate: 0,
-        strings: {},
+export default class feedbackHandler {
 
-        init: function (opts) {
-            this.component = opts['component'];
+    uploadstate = false;
+    togglestate = 0;
+    strings = {};
+    controls = {};
 
-            this.register_controls();
-            this.register_events();
-            this.setup_recorder();
-        },
+    constructor(opts) {
+        this.component = opts['component'];
+        this.subtype = opts['subtype'] || '';
 
-        setup_recorder: function () {
-            var that = this;
-            var recorder_callback = function (evt) {
+        this.register_controls();
+        this.register_events();
+        this.setup_recorder();
+    }
+
+    static init(opts) {
+        return new feedbackHandler(opts);
+    }
+
+    static registerToggler() {
+        if (registeredtoggler) {
+            return;
+        }
+        registeredtoggler = true;
+        document.addEventListener('click', e => {
+            const toggleinput = e.target.closest('[data-action="toggle"]');
+            if (toggleinput) {
+                try {
+                    const togglecontainer = document.querySelector(toggleinput.dataset.target);
+                    if (togglecontainer) {
+                        const labelElement = toggleinput.closest('label.togglerecorder');
+                        const $togglecontainer = $(togglecontainer);
+                        if (toggleinput.checked) {
+                            $togglecontainer.collapse('show');
+                            labelElement.classList.add('enabledstate');
+                        } else {
+                            $togglecontainer.collapse('hide');
+                            labelElement.classList.remove('enabledstate');
+                        }
+                    }
+                } catch (e) {
+                    //do nothing
+                    log.debug(e);
+                }
+            }
+        });
+    }
+
+    setup_recorder() {
+        const recorderid = this.component + this.subtype + '_therecorder';
+        instancemap[recorderid] = Object.assign({}, this);
+        const recorder_callback = evt => {
+            if (instancemap.hasOwnProperty(evt.id)) {
+                const instance = instancemap[evt.id];
                 switch (evt.type) {
                     case 'recording':
                         if (evt.action === 'started') {
-                            that.controls.updatecontrol.val();
+                            instance.controls.updatecontrol.val();
                         }
                         break;
                     case 'awaitingprocessing':
-                        if (that.uploadstate != 'posted') {
-                            that.controls.updatecontrol.val(evt.mediaurl);
+                        if (instance.uploadstate != 'posted') {
+                            instance.controls.updatecontrol.val(evt.mediaurl);
                         }
-                        that.uploadstate = 'posted';
+                        instance.uploadstate = 'posted';
                         break;
                     case 'error':
                         alert('PROBLEM:' + evt.message);
                         break;
                 }
-            };
-            this.uploadstate = false;
-            cloudpoodll.init(this.component + '_therecorder', recorder_callback);
-        },
+            }
+        };
+        this.uploadstate = false;
+        cloudpoodll.init(recorderid, recorder_callback);
+    }
 
-        register_controls: function () {
-            var that = this;
-            this.controls = {};
-            this.controls.deletebutton = $('.' + this.component + '_deletefeedbackbutton');
-            this.controls.updatecontrol = $('#' + this.component + '_updatecontrol');
-            this.controls.currentcontainer = $('.' + this.component + '_currentfeedback');
-            this.controls.togglecontainer = $('.' + this.component + '_togglecontainer');
-            this.controls.togglebutton = $('.' + this.component + '_togglecontainer .togglebutton');
-            this.controls.toggletext = $('.' + this.component + '_togglecontainer .toggletext');
-            str.get_string('clicktohide', that.component).done(function (s) {
-                that.strings['clicktohide'] = s;
-            });
-            str.get_string('clicktoshow', that.component).done(function (s) {
-                that.strings['clicktoshow'] = s;
-            });
-        },
+    register_controls() {
+        this.controls.deletebutton = $('.' + this.component + this.subtype + '_deletefeedbackbutton');
+        this.controls.updatecontrol = $('#' + this.component + this.subtype + '_updatecontrol');
+        this.controls.currentcontainer = $('.' + this.component + this.subtype + '_currentfeedback');
+        this.controls.togglecontainer = $('.' + this.component + this.subtype + '_togglecontainer');
+        this.controls.togglebutton = $('.' + this.component + this.subtype + '_togglecontainer .togglebutton');
+        this.controls.toggletext = $('.' + this.component + this.subtype + '_togglecontainer .toggletext');
+        str.get_string('clicktohide', this.component).done(s => {
+            this.strings['clicktohide'] = s;
+        });
+        str.get_string('clicktoshow', this.component).done(s => {
+            this.strings['clicktoshow'] = s;
+        });
+    }
 
-        register_events: function () {
-            var that = this;
-            this.controls.deletebutton.click(function () {
-                if (that.controls.updatecontrol) {
-                    if (confirm(M.util.get_string('reallydeletefeedback', that.component))) {
-                        that.controls.updatecontrol.val(-1);
-                        that.controls.currentcontainer.html('');
-                    }
+    register_events() {
+        this.controls.deletebutton.click(() => {
+            if (this.controls.updatecontrol) {
+                if (confirm(M.util.get_string('reallydeletefeedback', this.component))) {
+                    this.controls.updatecontrol.val(-1);
+                    this.controls.currentcontainer.html('');
                 }
-            });
-            this.controls.togglebutton.click(function () {
-                that.toggle_currentfeedback(that);
-            });
-            this.controls.toggletext.click(function () {
-                that.toggle_currentfeedback(that);
-            });
-        },
+            }
+        });
+        this.controls.togglebutton.click(this.toggle_currentfeedback.bind(this));
+        this.controls.toggletext.click(this.toggle_currentfeedback.bind(this));
+    }
 
-        toggle_currentfeedback: function (that) {
-            var doToggleState = function () {
-                if (that.togglestate == 0) {
-                    that.controls.togglebutton.removeClass('fa-toggle-off');
-                    that.controls.togglebutton.addClass('fa-toggle-on');
-                    that.controls.toggletext.text(that.strings['clicktohide']);
-                    that.togglestate = 1;
-                } else {
-                    that.controls.togglebutton.removeClass('fa-toggle-on');
-                    that.controls.togglebutton.addClass('fa-toggle-off');
-                    that.controls.toggletext.text(that.strings['clicktoshow']);
-                    that.togglestate = 0;
-                }
-            };
-            that.controls.currentcontainer.toggle(
-                {duration: 300, complete: doToggleState}
-            );
-            return false;
-        }
-    };// end of return object.
-});
+    toggle_currentfeedback() {
+        const doToggleState = () => {
+            if (this.togglestate == 0) {
+                this.controls.togglebutton.removeClass('fa-toggle-off');
+                this.controls.togglebutton.addClass('fa-toggle-on');
+                this.controls.toggletext.text(this.strings['clicktohide']);
+                this.togglestate = 1;
+            } else {
+                this.controls.togglebutton.removeClass('fa-toggle-on');
+                this.controls.togglebutton.addClass('fa-toggle-off');
+                this.controls.toggletext.text(this.strings['clicktoshow']);
+                this.togglestate = 0;
+            }
+        };
+        this.controls.currentcontainer.toggle(
+            {duration: 300, complete: doToggleState}
+        );
+        return false;
+    }
+}// end of return object.

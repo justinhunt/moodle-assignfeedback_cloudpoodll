@@ -35,6 +35,13 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class assign_feedback_cloudpoodll extends assign_feedback_plugin {
+    /**
+     * @var array map of submission type and recording type
+     */
+    const SUBTYPEMAP = [
+        constants::REC_AUDIO => constants::SUBMISSIONTYPE_AUDIO,
+        constants::REC_VIDEO => constants::SUBMISSIONTYPE_VIDEO,
+    ];
 
     /**
      * Get the name of the online comment feedback plugin.
@@ -49,16 +56,10 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         }
     }
 
-    /**
-     * Get the feedback comment from the database.
-     *
-     * @param int $gradeid
-     * @return stdClass|false The feedback cloudpoodll for the given grade if it exists.
-     *                        False if it doesn't.
-     */
-    public function get_feedback_cloudpoodll($gradeid) {
+    public function get_allfeedbacks($grade) {
         global $DB;
-        return $DB->get_record(constants::M_TABLE, array('grade' => $gradeid));
+        return $DB->get_records(constants::M_TABLE, compact('grade'), 'id',
+            'type,id,filename,transcript,fulltranscript,vttdata,feedbacktext');
     }
 
     /**
@@ -69,19 +70,29 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
      * @return boolean True if the comment feedback has been modified, else false.
      */
     public function is_feedback_modified(stdClass $grade, stdClass $data) {
-        $url = '';
-        if ($grade) {
-            $feedbackcloudpoodll = $this->get_feedback_cloudpoodll($grade->id);
-            if ($feedbackcloudpoodll) {
-                $url = $feedbackcloudpoodll->{constants::NAME_UPDATE_CONTROL};
+        $allsubtypes = $this->get_all_subtypes();
+        if (!empty($grade) && !empty($allsubtypes)) {
+            $allfeedbacks = $this->get_allfeedbacks($grade->id);
+            foreach ($allsubtypes as $subtypeconst) {
+                $subtypeselected = !empty($data->recorders) && !empty($data->recorders[$subtypeconst]);
+                $filename = !empty($data->filename) && !empty($data->filename[$subtypeconst]) ? $data->filename[$subtypeconst] : '';
+                if (empty($subtypeselected)) {
+                    if (!empty($allfeedbacks[$subtypeconst])) {
+                        return true;
+                    }
+                } else if (in_array($subtypeconst, self::SUBTYPEMAP)) {
+                    if ($allfeedbacks[$subtypeconst]->filename != $filename) {
+                        return true;
+                    }
+                } else if ($subtypeconst == constants::SUBMISSIONTYPE_TEXT) {
+                    if ($allfeedbacks[$subtypeconst]->feedbacktext != $data->feedbacktext) {
+                        return true;
+                    }
+                }
             }
-        }
-
-        if ($url == $data->{constants::NAME_UPDATE_CONTROL}) {
             return false;
-        } else {
-            return true;
         }
+        return true;
     }
 
     /**
@@ -101,8 +112,6 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
     public function get_editor_fields() {
         return array('cloudpoodll' => get_string('pluginname', constants::M_COMPONENT));
     }
-
-
 
     /**
      * Save quickgrading changes.
@@ -190,38 +199,37 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                 $adminconfig->defaultplayertypestudent;
         $enabletranscription = $this->get_config('enabletranscription') ? $this->get_config('enabletranscription') :
                 $adminconfig->enabletranscription;
-        //hardcode this to be always on
-        //$enabletranscode = $this->get_config('enabletranscode')!==false ? $this->get_config('enabletranscode') :
-        //        $adminconfig->enabletranscode;
+        // hardcode this to be always on
+        // $enabletranscode = $this->get_config('enabletranscode')!==false ? $this->get_config('enabletranscode') :
+        // $adminconfig->enabletranscode;
 
-        //add a settings divider. Cloud Poodll has so many we should do this:
-        //show a divider to keep settings manageable
-        $pluginname = get_string('pluginname',constants::M_COMPONENT);
+        // add a settings divider. Cloud Poodll has so many we should do this:
+        // show a divider to keep settings manageable
+        $pluginname = get_string('pluginname', constants::M_COMPONENT);
         $customname = get_config(constants::M_COMPONENT, 'customname');
         if(!empty($customname)){
-            $args =new stdClass();
+            $args = new stdClass();
             $args->pluginname = $pluginname;
             $args->customname = $customname;
-            $divider = get_string('customdivider', constants::M_COMPONENT,$args);
+            $divider = get_string('customdivider', constants::M_COMPONENT, $args);
         }else{
-            $divider = get_string('divider',constants::M_COMPONENT,$pluginname);
+            $divider = get_string('divider', constants::M_COMPONENT, $pluginname);
         }
 
-        //If M3.4 or lower we show a divider
+        // If M3.4 or lower we show a divider
         if($CFG->version < 2017111300) {
             $mform->addElement('static', constants::M_COMPONENT . '_divider', '', $divider);
         }
 
-
-        $rec_options = utils::fetch_options_recorders();
+        $recoptions = utils::fetch_options_recorders();
         $mform->addElement('select', constants::M_COMPONENT . '_recordertype', get_string("recordertype", constants::M_COMPONENT),
-                $rec_options);
+                $recoptions);
         $mform->setDefault(constants::M_COMPONENT . '_recordertype', $recordertype);
         $mform->disabledIf(constants::M_COMPONENT . '_recordertype', constants::M_COMPONENT . '_enabled', 'notchecked');
 
-        $skin_options = utils::fetch_options_skins();
+        $skinoptions = utils::fetch_options_skins();
         $mform->addElement('select', constants::M_COMPONENT . '_recorderskin', get_string("recorderskin", constants::M_COMPONENT),
-                $skin_options);
+                $skinoptions);
         $mform->setDefault(constants::M_COMPONENT . '_recorderskin', $recorderskin);
         $mform->disabledIf(constants::M_COMPONENT . '_recorderskin', constants::M_COMPONENT . '_enabled', 'notchecked');
 
@@ -231,15 +239,15 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         $mform->disabledIf(constants::M_COMPONENT . '_timelimit', constants::M_COMPONENT . '_enabled', 'notchecked');
 
         // Add expire days.
-        $expire_options = utils::get_expiredays_options();
+        $expireoptions = utils::get_expiredays_options();
         $mform->addElement('select', constants::M_COMPONENT . '_expiredays', get_string("expiredays", constants::M_COMPONENT),
-                $expire_options);
+                $expireoptions);
         $mform->setDefault(constants::M_COMPONENT . '_expiredays', $expiredays);
         $mform->disabledIf(constants::M_COMPONENT . '_expiredays', constants::M_COMPONENT . '_enabled', 'notchecked');
 
         // transcode settings. hardcoded to always transcode
-        $mform->addElement('hidden', constants::M_COMPONENT . '_enabletranscode',1);
-        $mform->setType(constants::M_COMPONENT . '_enabletranscode',PARAM_INT);
+        $mform->addElement('hidden', constants::M_COMPONENT . '_enabletranscode', 1);
+        $mform->setType(constants::M_COMPONENT . '_enabletranscode', PARAM_INT);
         /*
         $mform->addElement('advcheckbox', constants::M_COMPONENT . '_enabletranscode',
                 get_string("enabletranscode", constants::M_COMPONENT));
@@ -249,60 +257,58 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
 
         // transcription settings.
         // here add googlecloudspeech or amazontranscrobe options.
-        $transcriber_options = utils::get_transcriber_options();
+        $transcriberoptions = utils::get_transcriber_options();
         $mform->addElement('select', constants::M_COMPONENT . '_enabletranscription',
-                get_string("enabletranscription", constants::M_COMPONENT), $transcriber_options);
+                get_string("enabletranscription", constants::M_COMPONENT), $transcriberoptions);
         $mform->setDefault(constants::M_COMPONENT . '_enabletranscription', $enabletranscription);
         $mform->disabledIf(constants::M_COMPONENT . '_enabletranscription', constants::M_COMPONENT . '_enabled', 'notchecked');
         // transcode settings. hardcoded to always transcode
-        //$mform->disabledIf(constants::M_COMPONENT . '_enabletranscription', constants::M_COMPONENT . '_enabletranscode', 'notchecked');
+        // $mform->disabledIf(constants::M_COMPONENT . '_enabletranscription', constants::M_COMPONENT . '_enabletranscode', 'notchecked');
 
         // lang options.
-        $lang_options = utils::get_lang_options();
+        $langoptions = utils::get_lang_options();
         $mform->addElement('select', constants::M_COMPONENT . '_language', get_string("language", constants::M_COMPONENT),
-                $lang_options);
+                $langoptions);
         $mform->setDefault(constants::M_COMPONENT . '_language', $language);
         $mform->disabledIf(constants::M_COMPONENT . '_language', constants::M_COMPONENT . '_enabled', 'notchecked');
         $mform->disabledIf(constants::M_COMPONENT . '_language', constants::M_COMPONENT . '_enabletranscription', 'eq', 0);
         // transcode settings. hardcoded to always transcode
-        //$mform->disabledIf(constants::M_COMPONENT . '_language', constants::M_COMPONENT . '_enabletranscode', 'notchecked');
+        // $mform->disabledIf(constants::M_COMPONENT . '_language', constants::M_COMPONENT . '_enabletranscode', 'notchecked');
 
         // playertype : teacher.
-        $playertype_options = utils::fetch_options_interactivetranscript();
+        $playertypeoptions = utils::fetch_options_interactivetranscript();
         $mform->addElement('select', constants::M_COMPONENT . '_playertype', get_string("playertype", constants::M_COMPONENT),
-                $playertype_options);
+                $playertypeoptions);
         $mform->setDefault(constants::M_COMPONENT . '_playertype', $playertype);
         $mform->disabledIf(constants::M_COMPONENT . '_playertype', constants::M_COMPONENT . '_enabled', 'notchecked');
         $mform->disabledIf(constants::M_COMPONENT . '_playertype', constants::M_COMPONENT . '_enabletranscription', 'eq', 0);
         // transcode settings. hardcoded to always transcode
-        //$mform->disabledIf(constants::M_COMPONENT . '_playertype', constants::M_COMPONENT . '_enabletranscode', 'notchecked');
+        // $mform->disabledIf(constants::M_COMPONENT . '_playertype', constants::M_COMPONENT . '_enabletranscode', 'notchecked');
 
         // playertype: student.
-        $playertype_options = utils::fetch_options_interactivetranscript();
+        $playertypeoptions = utils::fetch_options_interactivetranscript();
         $mform->addElement('select', constants::M_COMPONENT . '_playertypestudent',
-                get_string("playertypestudent", constants::M_COMPONENT), $playertype_options);
+                get_string("playertypestudent", constants::M_COMPONENT), $playertypeoptions);
         $mform->setDefault(constants::M_COMPONENT . '_playertypestudent', $playertypestudent);
         $mform->disabledIf(constants::M_COMPONENT . '_playertypestudent', constants::M_COMPONENT . '_enabled', 'notchecked');
         $mform->disabledIf(constants::M_COMPONENT . '_playertypestudent', constants::M_COMPONENT . '_enabletranscription', 'eq', 0);
         // transcode settings. hardcoded to always transcode
         // $mform->disabledIf(constants::M_COMPONENT . '_playertypestudent', constants::M_COMPONENT . '_enabletranscode',
-        //        'notchecked');
+        // 'notchecked');
 
-
-
-        //If M3.4 or higher we can hide elements when we need to
+        // If M3.4 or higher we can hide elements when we need to
         if($CFG->version >= 2017111300) {
             $mform->hideIf(constants::M_COMPONENT . '_recordertype', constants::M_COMPONENT . '_enabled', 'notchecked');
             $mform->hideIf(constants::M_COMPONENT . '_recorderskin', constants::M_COMPONENT . '_enabled', 'notchecked');
             $mform->hideIf(constants::M_COMPONENT . '_timelimit', constants::M_COMPONENT . '_enabled', 'notchecked');
             $mform->hideIf(constants::M_COMPONENT . '_expiredays', constants::M_COMPONENT . '_enabled', 'notchecked');
-          //  $mform->hideIf(constants::M_COMPONENT . '_enabletranscode', constants::M_COMPONENT . '_enabled', 'notchecked');
+            // $mform->hideIf(constants::M_COMPONENT . '_enabletranscode', constants::M_COMPONENT . '_enabled', 'notchecked');
             $mform->hideIf(constants::M_COMPONENT . '_enabletranscription', constants::M_COMPONENT . '_enabled', 'notchecked');
             $mform->hideIf(constants::M_COMPONENT . '_language', constants::M_COMPONENT . '_enabled', 'notchecked');
             $mform->hideIf(constants::M_COMPONENT . '_playertype', constants::M_COMPONENT . '_enabled', 'notchecked');
             $mform->hideIf(constants::M_COMPONENT . '_playertypestudent', constants::M_COMPONENT . '_enabled', 'notchecked');
         }else{
-            //Close our settings divider
+            // Close our settings divider
             $mform->addElement('static', constants::M_COMPONENT . '_dividerend', '',
                     get_string('divider', constants::M_COMPONENT, ''));
         }
@@ -318,11 +324,10 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
      */
     public function get_form_elements_for_user($grade, MoodleQuickForm $mform, stdClass $data, $userid) {
 
-        $submission = $this->assignment->get_user_submission($userid, false);
-        $feedbackcloudpoodll = false;
+        $feedbackcloudpoodll = [];
 
         if ($grade) {
-            $feedbackcloudpoodll = $this->get_feedback_cloudpoodll($grade->id);
+            $feedbackcloudpoodll = $this->get_allfeedbacks($grade->id);
         }
 
         $this->fetch_cloudpoodll_feedback_form($mform, $feedbackcloudpoodll);
@@ -330,80 +335,170 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         return true;
     }
 
-    public function fetch_cloudpoodll_feedback_form(MoodleQuickForm $mform, $feedbackcloudpoodll = false) {
+
+    public function get_all_subtypes() {
+        $selectedsubtype = $this->get_config('recordertype');
+        if ($selectedsubtype == constants::REC_FREE) {
+            $allsubtypes = [constants::SUBMISSIONTYPE_AUDIO, constants::SUBMISSIONTYPE_VIDEO, constants::SUBMISSIONTYPE_TEXT];
+        } else if (array_key_exists($selectedsubtype, self::SUBTYPEMAP)) {
+            $allsubtypes = (array) self::SUBTYPEMAP[$selectedsubtype];
+        } else {
+            $allsubtypes = [];
+        }
+        return $allsubtypes;
+    }
+
+    public function fetch_cloudpoodll_feedback_form(MoodleQuickForm $mform, $feedbackcloudpoodll = []) {
         global $CFG, $USER, $PAGE;
 
-        // prepare the AMD javascript for deletesubmission and showing the recorder.
-        $opts = array(
-                "component" => constants::M_COMPONENT
-        );
-        $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/feedbackhelper", 'init', array($opts));
-        $PAGE->requires->strings_for_js(array('reallydeletefeedback', 'clicktohide', 'clicktoshow'), constants::M_COMPONENT);
+        $allsubtypes = $this->get_all_subtypes();
+        if (empty($allsubtypes)) {
+            return;
+        }
+
+        // get recorder onscreen title
+        $displayname = get_config(constants::M_COMPONENT, 'customname');
+        if (empty($displayname)) {
+            $displayname = get_string('recorderdisplayname', constants::M_COMPONENT);
+        }
 
         // Get our renderers.
         $renderer = $PAGE->get_renderer(constants::M_COMPONENT);
 
-        if ($feedbackcloudpoodll && !empty($feedbackcloudpoodll->filename)) {
-
-            $deletefeedback = $renderer->fetch_delete_feedback();
-
-            // show current submission.
-            // show the previous response in a player or whatever and a delete button.
-            $feedbackplayer = $this->fetch_feedback_player($feedbackcloudpoodll);
-            $currentfeedback = $renderer->prepare_current_feedback($feedbackplayer, $deletefeedback);
-
-            $mform->addElement('static', 'currentfeedback',
-                    get_string('currentfeedback', constants::M_COMPONENT),
-                    $currentfeedback);
-
-        }
-
-        // output our hidden field which has the filename.
-        $mform->addElement('hidden', constants::NAME_UPDATE_CONTROL, '', array('id' => constants::ID_UPDATE_CONTROL));
-        $mform->setType(constants::NAME_UPDATE_CONTROL, PARAM_TEXT);
-
-        // recorder data.
-        $r_options = new stdClass();
-        $r_options->recordertype = $this->get_config('recordertype');
-        $r_options->recorderskin = $this->get_config('recorderskin');
-        $r_options->timelimit = $this->get_config('timelimit');
-        $r_options->expiredays = $this->get_config('expiredays');
-        $r_options->transcode = 1;//$this->get_config('enabletranscode'); // transcode settings. hardcoded to always transcode
-        $r_options->transcribe = $this->get_config('enabletranscription');
-        $r_options->language = $this->get_config('language');
-        $r_options->awsregion = get_config(constants::M_COMPONENT, 'awsregion');
-        $r_options->fallback = get_config(constants::M_COMPONENT, 'fallback');
-
         // fetch API token.
-        $api_user = get_config(constants::M_COMPONENT, 'apiuser');
-        $api_secret = get_config(constants::M_COMPONENT, 'apisecret');
+        $apiuser = get_config(constants::M_COMPONENT, 'apiuser');
+        $apisecret = get_config(constants::M_COMPONENT, 'apisecret');
+        $groupelements = $formelements = $formdata = [];
 
-        //check user has entered cred
-        if(empty($api_user) || empty($api_secret)){
-            $message = get_string('nocredentials',constants::M_COMPONENT,
-                    $CFG->wwwroot . constants::M_PLUGINSETTINGS);
-            $recorderhtml = $renderer->show_problembox($message);
-        }else{
-            //fetch token
-            $token = utils::fetch_token($api_user, $api_secret);
+        foreach ($allsubtypes as $subtypeconst) {
+            $subtypefeedback = !empty($feedbackcloudpoodll[$subtypeconst]) ? $feedbackcloudpoodll[$subtypeconst] : null;
 
-            //check token authenticated and no errors in it
-            $errormessage = utils::fetch_token_error($token);
-            if(!empty($errormessage)){
-                $recorderhtml = $renderer->show_problembox($errormessage);
+            switch ($subtypeconst) {
+                case constants::SUBMISSIONTYPE_AUDIO:
+                case constants::SUBMISSIONTYPE_VIDEO:
 
-            }else {
-                //All good. So lets fetch recorder html
-                $recorderhtml = $renderer->fetch_recorder($r_options, $token);
+                    // prepare the AMD javascript for deletesubmission and showing the recorder.
+                    $subtypename = array_flip(self::SUBTYPEMAP)[$subtypeconst];
+                    $opts = [
+                        "component" => constants::M_COMPONENT,
+                        "subtype" => '_' . $subtypename
+                    ];
+                    $hassubmission = !empty($subtypefeedback) && !empty($subtypefeedback->filename);
+
+                    // output our hidden field which has the filename.
+                    $hiddeninputattrs['id'] = str_replace(constants::M_COMPONENT, constants::M_COMPONENT . $opts['subtype'], constants::ID_UPDATE_CONTROL);
+                    $mform->addElement('hidden', constants::NAME_UPDATE_CONTROL.'['.$subtypeconst.']', '', $hiddeninputattrs);
+                    $mform->setType(constants::NAME_UPDATE_CONTROL.'['.$subtypeconst.']', PARAM_TEXT);
+
+                    $extraclasses = 'fa togglerecorder toggle' . $subtypename;
+                    $extraclasses .= ($subtypeconst == constants::SUBMISSIONTYPE_AUDIO) ? ' fa-microphone' : ' fa-video-camera';
+                    if ($hassubmission) {
+                        $extraclasses .= ' enabledstate';
+                        $formdata[constants::NAME_UPDATE_CONTROL.'['.$subtypeconst.']'] = $subtypefeedback->filename;
+                        $formdata['recorders[' . $subtypeconst .']'] = 1;
+                    }
+                    $groupelements[] = $mform->createElement('checkbox', $subtypeconst, null, null,
+                            ['class' => $extraclasses, 'id' => constants::M_COMPONENT . $opts['subtype'] . '_recorder',
+                            'data-target' => '#feedbackcontainer' . $opts['subtype'], 'data-action' => 'toggle']);
+
+                    // recorder data.
+                    $roptions = new stdClass();
+                    $roptions->recordertype = $subtypename;
+                    $roptions->subtype = $opts['subtype'];
+                    $roptions->recorderskin = $this->get_config('recorderskin');
+                    $roptions->timelimit = $this->get_config('timelimit');
+                    $roptions->expiredays = $this->get_config('expiredays');
+                    $roptions->transcode = 1;// $this->get_config('enabletranscode'); // transcode settings. hardcoded to always transcode
+                    $roptions->transcribe = $this->get_config('enabletranscription');
+                    $roptions->language = $this->get_config('language');
+                    $roptions->awsregion = get_config(constants::M_COMPONENT, 'awsregion');
+                    $roptions->fallback = get_config(constants::M_COMPONENT, 'fallback');
+
+                    // check user has entered cred
+                    if (empty($apiuser) || empty($apisecret)) {
+                        $message = get_string('nocredentials', constants::M_COMPONENT,
+                                $CFG->wwwroot . constants::M_PLUGINSETTINGS);
+                        $recorderbox = $renderer->show_problembox($message);
+                    } else {
+                        // fetch token
+                        $token = !empty($token) ? $token : utils::fetch_token($apiuser, $apisecret);
+
+                        // check token authenticated and no errors in it
+                        $errormessage = utils::fetch_token_error($token);
+                        if (!empty($errormessage)) {
+                            $recorderbox = $renderer->show_problembox($errormessage);
+
+                        } else {
+                            // All good. So lets fetch recorder html
+                            $recorderbox = $renderer->fetch_recorder($roptions, $token);
+                            $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/feedbackhelper", 'init', [$opts]);
+                        }
+
+                    }
+
+                    $recorderhtml = html_writer::div($recorderbox, '', ['id' => 'recordingtype' . $opts['subtype']]);
+
+                    $recordertypeheading = get_string($subtypeconst == constants::SUBMISSIONTYPE_VIDEO ? 'recordervideo' : 'recorderaudio', constants::M_COMPONENT);
+
+                    $formelements[] = $mform->createElement('html', html_writer::start_div(constants::M_COMPONENT . '_feedbackcontainer collapse' . ($subtypefeedback ? ' show' : ''),
+                                ['id' => 'feedbackcontainer' . $opts['subtype']]) . html_writer::tag('h5', $recordertypeheading));
+
+                    if ($hassubmission) {
+                        $deletefeedback = $renderer->fetch_delete_feedback($opts['subtype']);
+
+                        // show current submission.
+                        // show the previous response in a player or whatever and a delete button.
+                        $feedbackplayer = $this->fetch_feedback_player($subtypefeedback);
+                        $currentfeedback = $renderer->prepare_current_feedback($feedbackplayer, $deletefeedback, $opts['subtype']);
+
+                        $formelements[] = $mform->createElement('static', 'currentfeedback' . $opts['subtype'],
+                                get_string('currentfeedback', constants::M_COMPONENT), $currentfeedback);
+                    }
+
+                    $formelements[] = $mform->createElement('static', 'description' . $opts['subtype'], $recorderhtml);
+                    $formelements[] = $mform->createElement('html', html_writer::end_div());
+
+                    break;
+
+                case constants::SUBMISSIONTYPE_TEXT:
+                    $opts = [
+                        "subtype" => constants::TYPE_TEXT
+                    ];
+
+                    $extraclasses = 'fa fa-pencil togglerecorder toggle' . $opts['subtype'];
+                    if ($hassubmission = !empty($subtypefeedback)) {
+                        $formdata[constants::TYPE_TEXT] = ['text' => $subtypefeedback->feedbacktext];
+                        $formdata['recorders[' . $subtypeconst .']'] = 1;
+                        $extraclasses .= ' enabledstate';
+                    }
+                    $groupelements[] = $mform->createElement('checkbox', $subtypeconst, null, null,
+                            ['class' => $extraclasses, 'id' => constants::M_COMPONENT . $opts['subtype'] . '_recorder',
+                            'data-target' => '#feedbackcontainer' . $opts['subtype'], 'data-action' => 'toggle']);
+                    $formelements[] = $mform->createElement('html',
+                            html_writer::start_div(constants::M_COMPONENT . '_feedbackcontainer collapse' . ($hassubmission ? ' show' : ''),
+                            ['id' => 'feedbackcontainer' . $opts['subtype']]) . html_writer::tag('h5', get_string('recorderfeedbacktext', constants::M_COMPONENT)));
+                    $formelements[] = $mform->createElement('editor', constants::TYPE_TEXT, null, 'rows="5" cols="240"', ['enable_filemanagement' => false]);
+                    $formelements[] = $mform->createElement('html', html_writer::end_div());
+                    break;
             }
-
         }
 
-        //get recorder onscreen title
-        $displayname = get_config(constants::M_COMPONENT, 'customname');
-        if(empty($displayname)){$displayname = get_string('recorderdisplayname',constants::M_COMPONENT);}
+        if (!empty($groupelements)) {
+            $mform->addGroup($groupelements, 'recorders', '', '', true);
+        }
 
-        $mform->addElement('static', 'description', $displayname, $recorderhtml);
+        if (!empty($formelements)) {
+            foreach ($formelements as $formelement) {
+                $mform->addElement($formelement);
+            }
+            foreach ($formdata as $elname => $elvalue) {
+                $mform->setDefault($elname, $elvalue);
+            }
+        }
+
+        $PAGE->requires->strings_for_js(array('reallydeletefeedback', 'clicktohide', 'clicktoshow'), constants::M_COMPONENT);
+        $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/feedbackhelper", 'registerToggler', []);
+
         return true;
     }
 
@@ -419,66 +514,93 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
 
         // if filename is false, or empty, no update. possibly used changed something else on page.
         // possibly they did not record ... that will be caught elsewhere.
-        $filename = $data->filename;
-        if ($filename === false || empty($filename)) {
-            return true;
-        }
+        $allsubtypes = $this->get_all_subtypes();
+        $allfeedbacks = $this->get_allfeedbacks($grade->id);
+        $allsavedok = true;
 
         // get expiretime of this record.
+        $fileexpiry = 0;
         $expiredays = $this->get_config("expiredays");
         if ($expiredays < 9999) {
             $fileexpiry = time() + DAYSECS * $expiredays;
-        } else {
-            $fileexpiry = 0;
+        }
+        foreach ($allsubtypes as $subtypeconst) {
+            $savedok = false;
+            $thefeedback = !empty($allfeedbacks[$subtypeconst]) ? $allfeedbacks[$subtypeconst] : null;
+            $subtypeselected = !empty($data->recorders) && !empty($data->recorders[$subtypeconst]);
+            $filename = !empty($data->filename) && !empty($data->filename[$subtypeconst]) ? $data->filename[$subtypeconst] : '';
+            if (in_array($subtypeconst, self::SUBTYPEMAP)) {
+                if (!empty($thefeedback)) {
+                    if ($filename == '-1' || !$subtypeselected) {
+                        // this is a flag to delete the feedback.
+                        $DB->delete_records(constants::M_TABLE, ['id' => $thefeedback->id]);
+                        continue;
+                    } else {
+                        $thefeedback->{constants::NAME_UPDATE_CONTROL} = $filename;
+                        $thefeedback->fileexpiry = $fileexpiry;
+                        $savedok = $DB->update_record(constants::M_TABLE, $thefeedback);
+                    }
+                } else if ($subtypeselected) {
+                    $thefeedback = new stdClass();
+                    $thefeedback->type = $subtypeconst;
+                    $thefeedback->{constants::NAME_UPDATE_CONTROL} = $filename;
+                    $thefeedback->fileexpiry = $fileexpiry;
+                    $thefeedback->grade = $grade->id;
+                    $thefeedback->assignment = $this->assignment->get_instance()->id;
+                    $feedbackid = $DB->insert_record(constants::M_TABLE, $thefeedback);
+                    if ($feedbackid > 0) {
+                        $thefeedback->id = $feedbackid;
+                        $savedok = true;
+                    }
+                } else {
+                    continue;
+                }
+                if ($savedok) {
+                    $this->register_fetch_transcript_task($thefeedback);
+                }
+            } else {
+                $feedbacktext = !empty($data->feedbacktext) ? $data->feedbacktext['text'] : '';
+                if (empty($thefeedback)) {
+                    if (empty($subtypeselected)) {
+                        continue;
+                    }
+                    $thefeedback = new stdClass();
+                    $thefeedback->type = $subtypeconst;
+                    $thefeedback->grade = $grade->id;
+                    $thefeedback->assignment = $this->assignment->get_instance()->id;
+                    $thefeedback->feedbacktext = $feedbacktext;
+                    $feedbackid = $DB->insert_record(constants::M_TABLE, $thefeedback);
+                    if ($feedbackid > 0) {
+                        $thefeedback->id = $feedbackid;
+                        $savedok = true;
+                    }
+                } else if ($subtypeselected) {
+                    $thefeedback->feedbacktext = $feedbacktext;
+                    $savedok = $DB->update_record(constants::M_TABLE, $thefeedback);
+                } else {
+                    $DB->delete_records(constants::M_TABLE, ['id' => $thefeedback->id]);
+                    $savedok = true;
+                }
+            }
+            $allsavedok = $allsavedok && $savedok;
         }
 
-        $thefeedback = $this->get_feedback_cloudpoodll($grade->id);
-        $savedok = false;
-        if ($thefeedback) {
-            if ($filename == '-1') {
-                // this is a flag to delete the feedback.
-                $thefeedback->filename = '';
-                $thefeedback->fileexpiry = 0;
-                $thefeedback->vttdata = '';
-                $thefeedback->transcript = '';
-                $savedok = $DB->update_record(constants::M_TABLE, $thefeedback);
-                return $savedok;
-            } else {
-                $thefeedback->{constants::NAME_UPDATE_CONTROL} = $data->{constants::NAME_UPDATE_CONTROL};
-                $thefeedback->fileexpiry = $fileexpiry;
-                $savedok = $DB->update_record(constants::M_TABLE, $thefeedback);
-            }
-        } else {
-            $thefeedback = new stdClass();
-            $thefeedback->{constants::NAME_UPDATE_CONTROL} = $data->{constants::NAME_UPDATE_CONTROL};
-            $thefeedback->fileexpiry = $fileexpiry;
-            $thefeedback->grade = $grade->id;
-            $thefeedback->assignment = $this->assignment->get_instance()->id;
-            $feedbackid = $DB->insert_record(constants::M_TABLE, $thefeedback);
-            if ($feedbackid > 0) {
-                $thefeedback->id = $feedbackid;
-                $savedok = true;
-            }
-        }
-        if ($savedok) {
-            $this->register_fetch_transcript_task($thefeedback);
-        }
-        return $savedok;
+        return $allsavedok;
     }
 
     // register an adhoc task to pick up transcripts.
     public function register_fetch_transcript_task($cloudpoodllfeedback) {
-        $fetch_task = new \assignfeedback_cloudpoodll\task\cloudpoodll_s3_adhoc();
-        $fetch_task->set_component(constants::M_COMPONENT);
+        $fetchtask = new \assignfeedback_cloudpoodll\task\cloudpoodll_s3_adhoc();
+        $fetchtask->set_component(constants::M_COMPONENT);
 
         $customdata = new \stdClass();
         $customdata->feedback = $cloudpoodllfeedback;
         $customdata->taskcreationtime = time();
 
-        $fetch_task->set_custom_data($customdata);
+        $fetchtask->set_custom_data($customdata);
         // queue it.
-        //
-        \core\task\manager::queue_adhoc_task($fetch_task,true);
+
+        \core\task\manager::queue_adhoc_task($fetchtask, true);
         return true;
     }
 
@@ -490,9 +612,29 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
      * @return string
      */
     public function view_summary(stdClass $grade, & $showviewlink) {
-        $feedbackcloudpoodll = $this->get_feedback_cloudpoodll($grade->id);
+        $feedbackcloudpoodll = $this->get_allfeedbacks($grade->id);
         if ($feedbackcloudpoodll) {
-            return $this->fetch_feedback_player($feedbackcloudpoodll);
+            $cellhtml = '';
+            foreach ($this->get_all_subtypes() as $subtypeconst) {
+                if (!empty($feedbackcloudpoodll[$subtypeconst])) {
+                    $subtypefeedback = $feedbackcloudpoodll[$subtypeconst];
+                    switch($subtypeconst) {
+                        case constants::SUBMISSIONTYPE_VIDEO:
+                        case constants::SUBMISSIONTYPE_AUDIO:
+                            if (!empty($subtypefeedback->filename)) {
+                                $recordertypeheading = get_string($subtypeconst == constants::SUBMISSIONTYPE_VIDEO ? 'recordervideo' : 'recorderaudio', constants::M_COMPONENT);
+                                $cellhtml .= html_writer::tag('h5', $recordertypeheading);
+                                $cellhtml .= $this->fetch_feedback_player($subtypefeedback);
+                            }
+                            break;
+                        case constants::SUBMISSIONTYPE_TEXT:
+                            $cellhtml .= html_writer::tag('h5', get_string('recorderfeedbacktext', constants::M_COMPONENT));
+                            $cellhtml .= format_text($subtypefeedback->feedbacktext);
+                            break;
+                    }
+                }
+            }
+            return $cellhtml;
         }
         return '';
     }
@@ -504,11 +646,8 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
      * @return string
      */
     public function view(stdClass $grade) {
-
-        $feedbackcloudpoodll = $this->get_feedback_cloudpoodll($grade->id);
-        $playerstring = $this->fetch_feedback_player($feedbackcloudpoodll);
-
-        return $playerstring;
+        $showviewlink = false;
+        return $this->view_summary($grade, $showviewlink);
     }
 
     public function fetch_feedback_player($feedbackcloudpoodll) {
@@ -519,7 +658,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
             // The path to any media file we should play.
             $filename = $feedbackcloudpoodll->filename;
             $rawmediapath = $feedbackcloudpoodll->filename;
-            $mediapath = urlencode($rawmediapath);
+            //$mediapath = urlencode($rawmediapath);
             if (empty($feedbackcloudpoodll->vttdata)) {
                 $vttdata = false;
             } else {
@@ -527,31 +666,25 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
             }
 
             // are we a person who can grade?
-            $isgrader = false;
-            if (has_capability('mod/assign:grade', $this->assignment->get_context())) {
-                $isgrader = true;
-            }
+            $isgrader = has_capability('mod/assign:grade', $this->assignment->get_context());
             // is this a list page?
             $islist = optional_param('action', '', PARAM_TEXT) == 'grading';
         } else {
             return '';
         }
+        $recordertype = $this->get_config('recordertype');
+        if ($recordertype == constants::REC_FREE) {
+            $recordertype = array_flip(self::SUBTYPEMAP)[$feedbackcloudpoodll->type];
+        }
 
         // size params for our response players/images.
         // audio is a simple 1 or 0 for display or not.
-        $size = $this->fetch_player_size($this->get_config('recordertype'));
+        $size = $this->fetch_player_size($recordertype);
 
         // player type.
         $playertype = constants::PLAYERTYPE_DEFAULT;
         if ($vttdata && !$islist) {
-            switch ($isgrader) {
-                case true:
-                    $playertype = $this->get_config('playertype');
-                    break;
-                case false:
-                    $playertype = $this->get_config('playertypestudent');
-                    break;
-            }
+            $playertype = $isgrader ? $this->get_config('playertype') : $this->get_config('playertypestudent');
         }
 
         // if this is a playback area, for teacher, show a string if no file.
@@ -561,7 +694,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         } else {
 
             // prepare our response string, which will parsed and replaced with the necessary player.
-            switch ($this->get_config('recordertype')) {
+            switch ($recordertype) {
 
                 case constants::REC_AUDIO:
                     // get player.
@@ -570,17 +703,16 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     $containerid = html_writer::random_id(constants::M_COMPONENT . '_');
                     $container = html_writer::div('', constants::M_COMPONENT . '_transcriptcontainer', array('id' => $containerid));
 
-                    $playeropts=array(
-                            'playerid'=> $playerid ,
-                            'mediaurl'=>$rawmediapath . '?cachekiller=' . $randomid,
-                            'vtturl' =>$rawmediapath . '.vtt',
-                            'lang'=>$this->get_config('language')
+                    $playeropts = array(
+                            'playerid' => $playerid ,
+                            'mediaurl' => $rawmediapath . '?cachekiller=' . $randomid,
+                            'vtturl' => $rawmediapath . '.vtt',
+                            'lang' => $this->get_config('language')
                     );
-                    if($islist){
-                        $playeropts['islist']=$islist;
+                    if ($islist) {
+                        $playeropts['islist'] = $islist;
                     }
                     $audioplayer = $OUTPUT->render_from_template(constants::M_COMPONENT . '/audioplayer', $playeropts);
-
 
                     if ($size) {
                         switch ($playertype) {
@@ -623,7 +755,6 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                 case constants::REC_VIDEO:
                     if ($size) {
 
-
                         $playerid = html_writer::random_id(constants::M_COMPONENT . '_');
                         $containerid = html_writer::random_id(constants::M_COMPONENT . '_');
                         $container =
@@ -631,13 +762,13 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
 
                         // player template.
                         $randomid = html_writer::random_id('cloudpoodll_');
-                        $playeropts=array(
-                                'playerid'=> $playerid ,
-                                'mediaurl'=>$rawmediapath . '?cachekiller=' . $randomid,
-                                'lang'=>$this->get_config('language')
+                        $playeropts = array(
+                                'playerid' => $playerid ,
+                                'mediaurl' => $rawmediapath . '?cachekiller=' . $randomid,
+                                'lang' => $this->get_config('language')
                         );
-                        if($islist){
-                            $playeropts['islist']=$islist;
+                        if ($islist) {
+                            $playeropts['islist'] = $islist;
                         }
 
                         switch ($playertype) {
@@ -646,7 +777,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                                     $playerstring = get_string('videoplaceholder', constants::M_COMPONENT);
                                     break;
                                 }
-                                $playeropts['vtturl']=$rawmediapath . '.vtt';
+                                $playeropts['vtturl'] = $rawmediapath . '.vtt';
                                 $videoplayer = $OUTPUT->render_from_template(constants::M_COMPONENT . '/videoplayer', $playeropts);
                                 $playerstring .= $videoplayer . $container;
 
@@ -666,7 +797,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                                 }
 
                                 if ($vttdata) {
-                                    $playeropts['vtturl']=$rawmediapath . '.vtt';
+                                    $playeropts['vtturl'] = $rawmediapath . '.vtt';
                                 }
                                 $videoplayer = $OUTPUT->render_from_template(constants::M_COMPONENT . '/videoplayer', $playeropts);
                                 $playerstring .= $videoplayer;
@@ -801,8 +932,6 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
     public function is_empty(stdClass $grade) {
         return $this->view($grade) == '';
     }
-
-    /*
 
     /**
      * Return a description of external params suitable for uploading an feedback comment from a webservice.

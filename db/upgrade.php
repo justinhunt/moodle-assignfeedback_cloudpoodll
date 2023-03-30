@@ -31,7 +31,9 @@ defined('MOODLE_INTERNAL') || die();
  * @return bool
  */
 function xmldb_assignfeedback_cloudpoodll_upgrade($oldversion) {
-    global $CFG;
+    global $CFG, $DB;
+
+    $dbman = $DB->get_manager();
 
     // Moodle v2.8.0 release upgrade line.
     // Put any upgrade step following this.
@@ -50,6 +52,63 @@ function xmldb_assignfeedback_cloudpoodll_upgrade($oldversion) {
 
     // Automatically generated Moodle v3.3.0 release upgrade line.
     // Put any upgrade step following this.
+
+    if ($oldversion < 2022100701) {
+
+        require_once($CFG->libdir . '/filelib.php');
+
+        // Define field type to be added to assignfeedback_cloudpoodll.
+        $table = new xmldb_table('assignfeedback_cloudpoodll');
+        $field = new xmldb_field('type', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0', 'grade');
+
+        // Conditionally launch add field type.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define field feedbacktext to be added to assignfeedback_cloudpoodll.
+        $table = new xmldb_table('assignfeedback_cloudpoodll');
+        $field = new xmldb_field('feedbacktext', XMLDB_TYPE_TEXT, null, null, null, null, null, 'fileexpiry');
+
+        // Conditionally launch add field feedbacktext.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $feedbackset = $DB->get_recordset_sql('SELECT id,filename from {assignfeedback_cloudpoodll}');
+        foreach ($feedbackset as $feedback) {
+            if (!empty($feedback->filename)) {
+                $mimetype = mimeinfo('type', $feedback->filename);
+                switch($mimetype) {
+                    case 'video/mp4':
+                        $DB->set_field('assignfeedback_cloudpoodll', 'type',
+                            \assignfeedback_cloudpoodll\constants::SUBMISSIONTYPE_VIDEO, ['id' => $feedback->id]);
+                        break;
+                    case 'audio/mp3':
+                        $DB->set_field('assignfeedback_cloudpoodll', 'type',
+                            \assignfeedback_cloudpoodll\constants::SUBMISSIONTYPE_AUDIO, ['id' => $feedback->id]);
+                        break;
+                }
+            }
+        }
+        $feedbackset->close();
+
+        // Cloudpoodll savepoint reached.
+        upgrade_plugin_savepoint(true, 2022100701, 'assignfeedback', 'cloudpoodll');
+    }
+
+    if ($oldversion < 2022100702) {
+
+        // Define key uniqgradesubtype (unique) to be added to assignfeedback_cloudpoodll.
+        $table = new xmldb_table('assignfeedback_cloudpoodll');
+        $key = new xmldb_key('uniqgradesubtype', XMLDB_KEY_UNIQUE, ['grade', 'type']);
+
+        // Launch add key uniqgradesubtype.
+        $dbman->add_key($table, $key);
+
+        // Cloudpoodll savepoint reached.
+        upgrade_plugin_savepoint(true, 2022100702, 'assignfeedback', 'cloudpoodll');
+    }
 
     return true;
 }

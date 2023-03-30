@@ -31,22 +31,23 @@ defined('MOODLE_INTERNAL') || die();
 
 class renderer extends \plugin_renderer_base {
 
-    public function fetch_delete_feedback() {
+    public function fetch_delete_feedback($subtype = '') {
 
         $ds = \html_writer::tag('button',
                 get_string('deletefeedback', constants::M_COMPONENT),
-                array('type' => 'button', 'id' => constants::M_COMPONENT . '_deletefeedbackbutton',
-                        'class' => constants::M_COMPONENT . '_deletefeedbackbutton btn btn-secondary'));
+                array('type' => 'button', 'id' => constants::M_COMPONENT . $subtype . '_deletefeedbackbutton',
+                        'class' => constants::M_COMPONENT . $subtype . '_deletefeedbackbutton btn btn-secondary'));
 
         return $ds;
     }
 
-    public function prepare_current_feedback($feedbackplayer, $deletefeedback) {
+    public function prepare_current_feedback($feedbackplayer, $deletefeedback, $subtype = '') {
+        $containerclass = constants::M_COMPONENT . '_togglecontainer';
         $toggletext = \html_writer::tag('span', get_string('clicktoshow', constants::M_COMPONENT), array('class' => 'toggletext'));
         $togglebutton =
                 \html_writer::tag('span', '', array('class' => 'fa fa-2x fa-toggle-off togglebutton', 'aria-hidden' => 'true'));
-        $toggle = \html_writer::div($togglebutton . $toggletext, constants::M_COMPONENT . '_togglecontainer');
-        $cs = \html_writer::div($feedbackplayer . $deletefeedback, constants::M_COMPONENT . '_currentfeedback',
+        $toggle = \html_writer::div($togglebutton . $toggletext, constants::M_COMPONENT . $subtype . '_togglecontainer ' . $containerclass);
+        $cs = \html_writer::div($feedbackplayer . $deletefeedback, constants::M_COMPONENT . $subtype . '_currentfeedback',
                 array('style' => 'display: none;'));
         return $toggle . $cs;
     }
@@ -54,21 +55,21 @@ class renderer extends \plugin_renderer_base {
     /**
      * The html part of the recorder
      */
-    public function fetch_recorder($r_options, $token) {
-        global $CFG,$USER;
+    public function fetch_recorder($roptions, $token) {
+        global $CFG, $USER;
 
-        switch ($r_options->recordertype) {
+        switch ($roptions->recordertype) {
             case constants::REC_AUDIO:
                 // fresh
-                if ($r_options->recorderskin == constants::SKIN_FRESH) {
+                if ($roptions->recorderskin == constants::SKIN_FRESH) {
                     $width = "400";
                     $height = "300";
 
-                } else if ($r_options->recorderskin == constants::SKIN_PLAIN) {
+                } else if ($roptions->recorderskin == constants::SKIN_PLAIN) {
                     $width = "360";
                     $height = "190";
 
-                } else if ($r_options->recorderskin == constants::SKIN_UPLOAD) {
+                } else if ($roptions->recorderskin == constants::SKIN_UPLOAD) {
                     $width = "360";
                     $height = "150";
 
@@ -81,16 +82,16 @@ class renderer extends \plugin_renderer_base {
             case constants::REC_VIDEO:
             default:
                 // bmr 123 once
-                if ($r_options->recorderskin == constants::SKIN_BMR) {
+                if ($roptions->recorderskin == constants::SKIN_BMR) {
                     $width = "360";
                     $height = "450";
-                } else if ($r_options->recorderskin == constants::SKIN_123 || $r_options->recorderskin == constants::SKIN_SCREEN) {
+                } else if ($roptions->recorderskin == constants::SKIN_123 || $roptions->recorderskin == constants::SKIN_SCREEN) {
                     $width = "450";// "360";
                     $height = "550";// "410";
-                } else if ($r_options->recorderskin == constants::SKIN_ONCE) {
+                } else if ($roptions->recorderskin == constants::SKIN_ONCE) {
                     $width = "350";
                     $height = "290";
-                } else if ($r_options->recorderskin == constants::SKIN_UPLOAD) {
+                } else if ($roptions->recorderskin == constants::SKIN_UPLOAD) {
                     $width = "350";
                     $height = "310";
                     // standard
@@ -101,11 +102,11 @@ class renderer extends \plugin_renderer_base {
         }
 
         // transcribe.
-        $can_transcribe = utils::can_transcribe($r_options);
+        $cantranscribe = utils::can_transcribe($roptions);
         $transcribe = "0";
-        if ($can_transcribe && $r_options->transcribe) {
-            if ($r_options->recordertype == constants::REC_AUDIO) {
-                $transcribe = $r_options->transcribe;
+        if ($cantranscribe && $roptions->transcribe) {
+            if ($roptions->recordertype == constants::REC_AUDIO) {
+                $transcribe = $roptions->transcribe;
             } else {
                 $transcribe = constants::TRANSCRIBER_AMAZONTRANSCRIBE;
             }
@@ -119,7 +120,7 @@ class renderer extends \plugin_renderer_base {
         } else {
             $hints->encoder = 'auto';
         }
-        $string_hints = base64_encode(json_encode($hints));
+        $stringhints = base64_encode(json_encode($hints));
 
         // Set subtitles.
         switch ($transcribe) {
@@ -133,32 +134,36 @@ class renderer extends \plugin_renderer_base {
         }
 
         // transcode.
-        $transcode = $r_options->transcode ? "1" : "0";
+        $transcode = $roptions->transcode ? "1" : "0";
 
-        $recorderdiv = \html_writer::div('', constants::M_COMPONENT . '_notcenter',
-                array('id' => constants::ID_REC,
-                        'data-id' => 'therecorder',
-                        'data-parent' => $CFG->wwwroot,
-                        'data-localloader' => '/mod/assign/feedback/cloudpoodll/poodllloader.html',
-                        'data-owner' => hash('md5',$USER->username),
-                        'data-media' => $r_options->recordertype,
-                        'data-appid' => constants::APPID,
-                        'data-type' => $r_options->recorderskin,
-                        'data-width' => $width,
-                        'data-height' => $height,
-                        'data-updatecontrol' => constants::ID_UPDATE_CONTROL,
-                        'data-timelimit' => $r_options->timelimit,
-                        'data-transcode' => $transcode,
-                        'data-transcribe' => $transcribe,
-                        'data-subtitle' => $subtitle,
-                        'data-language' => $r_options->language,
-                        'data-expiredays' => $r_options->expiredays,
-                        'data-region' => $r_options->awsregion,
-                        'data-fallback' => $r_options->fallback,
-                        'data-hints' => $string_hints,
-                        'data-token' => $token
-                )
-        );
+        $recdivattributes = [
+            'id' => constants::ID_REC,
+            'data-id' => 'therecorder',
+            'data-parent' => $CFG->wwwroot,
+            'data-localloader' => '/mod/assign/feedback/cloudpoodll/poodllloader.html',
+            'data-owner' => hash('md5', $USER->username),
+            'data-media' => $roptions->recordertype,
+            'data-appid' => constants::APPID,
+            'data-type' => $roptions->recorderskin,
+            'data-width' => $width,
+            'data-height' => $height,
+            'data-updatecontrol' => constants::ID_UPDATE_CONTROL,
+            'data-timelimit' => $roptions->timelimit,
+            'data-transcode' => $transcode,
+            'data-transcribe' => $transcribe,
+            'data-subtitle' => $subtitle,
+            'data-language' => $roptions->language,
+            'data-expiredays' => $roptions->expiredays,
+            'data-region' => $roptions->awsregion,
+            'data-fallback' => $roptions->fallback,
+            'data-hints' => $stringhints,
+            'data-token' => $token
+        ];
+        if (!empty($roptions->subtype)) {
+            $recdivattributes['data-id'] = $recdivattributes['id'] = str_replace(constants::M_COMPONENT, constants::M_COMPONENT . $roptions->subtype , $recdivattributes['id']);
+            $recdivattributes['data-updatecontrol'] = str_replace(constants::M_COMPONENT, constants::M_COMPONENT . $roptions->subtype , $recdivattributes['data-updatecontrol']);
+        }
+        $recorderdiv = \html_writer::div('', constants::M_COMPONENT . '_notcenter', $recdivattributes);
 
         $containerdiv = \html_writer::div($recorderdiv, constants::CLASS_REC_CONTAINER . " ",
                 array('id' => constants::CLASS_REC_CONTAINER));

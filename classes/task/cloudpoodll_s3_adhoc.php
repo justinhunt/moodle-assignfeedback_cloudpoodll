@@ -51,6 +51,10 @@ class cloudpoodll_s3_adhoc extends \core\task\adhoc_task {
         $feedback = $cd->feedback;
         // $trace->output($cd->somedata).
 
+        if (!$DB->record_exists(constants::M_TABLE, ['id' => $feedback->id])) {
+            return false;
+        }
+
         $transcript = utils::fetch_transcriptdata($feedback->filename . '.txt');
         $fulltranscript = false;
         $vttdata = false;

@@ -29,8 +29,9 @@ defined('MOODLE_INTERNAL') || die();
 class utils {
 
     public static function fetch_options_recorders() {
-        $rec_options = array(constants::REC_AUDIO => get_string("recorderaudio", constants::M_COMPONENT),
-                constants::REC_VIDEO => get_string("recordervideo", constants::M_COMPONENT));
+        $rec_options[constants::REC_FREE] = get_string("recorderfree", constants::M_COMPONENT);
+        $rec_options[constants::REC_AUDIO] = get_string("recorderaudio", constants::M_COMPONENT);
+        $rec_options[constants::REC_VIDEO] = get_string("recordervideo", constants::M_COMPONENT);
         return $rec_options;
     }
 

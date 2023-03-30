@@ -36,7 +36,9 @@ $string['privacy:metadata:tablesummary'] =
 
 //$string['recorder'] = 'Recorder Type';
 $string['recorderaudio'] = 'Audio Recorder';
+$string['recorderfree'] = 'Free';
 $string['recordervideo'] = 'Video Recorder';
+$string['recorderfeedbacktext'] = 'Text Feedback';
 $string['defaultrecorder'] = 'Recorder Type';
 $string['defaultrecorderdetails'] = '';
 
