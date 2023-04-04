@@ -35,9 +35,9 @@ $string['privacy:metadata:tablesummary'] =
         'This stores cloudpoodll made by the graders as feedback for the student on their submission.';
 
 //$string['recorder'] = 'Recorder Type';
-$string['recorderaudio'] = 'Audio Recorder';
-$string['recorderfree'] = 'Free';
-$string['recordervideo'] = 'Video Recorder';
+$string['recorderaudio'] = 'Audio Feedback';
+$string['recorderfree'] = 'Audio, Video or Text Feedback';
+$string['recordervideo'] = 'Video Feedback';
 $string['recorderfeedbacktext'] = 'Text Feedback';
 $string['defaultrecorder'] = 'Recorder Type';
 $string['defaultrecorderdetails'] = '';
