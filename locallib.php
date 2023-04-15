@@ -687,6 +687,19 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
             $playertype = $isgrader ? $this->get_config('playertype') : $this->get_config('playertypestudent');
         }
 
+        //RTL for transcripts
+        //For right to left languages we want to add the RTL direction and right justify.
+        switch($this->get_config('language')){
+            case constants::LANG_ARAE:
+            case constants::LANG_ARSA:
+            case constants::LANG_FAIR:
+            case constants::LANG_HEIL:
+                $rtl = constants::M_COMPONENT. '_rtl';
+                break;
+            default:
+                $rtl = '';
+        }
+
         // if this is a playback area, for teacher, show a string if no file.
         if ((empty($filename) || strlen($filename) < 3)) {
             $playerstring .= "";
@@ -701,7 +714,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     $playerid = html_writer::random_id(constants::M_COMPONENT . '_');
                     $randomid = html_writer::random_id('cloudpoodll_');
                     $containerid = html_writer::random_id(constants::M_COMPONENT . '_');
-                    $container = html_writer::div('', constants::M_COMPONENT . '_transcriptcontainer', array('id' => $containerid));
+                    $container = html_writer::div('', constants::M_COMPONENT . '_transcriptcontainer ' . $rtl , array('id' => $containerid));
 
                     $playeropts = array(
                             'playerid' => $playerid ,
@@ -758,7 +771,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                         $playerid = html_writer::random_id(constants::M_COMPONENT . '_');
                         $containerid = html_writer::random_id(constants::M_COMPONENT . '_');
                         $container =
-                                html_writer::div('', constants::M_COMPONENT . '_transcriptcontainer', array('id' => $containerid));
+                                html_writer::div('', constants::M_COMPONENT . '_transcriptcontainer ' . $rtl, array('id' => $containerid));
 
                         // player template.
                         $randomid = html_writer::random_id('cloudpoodll_');

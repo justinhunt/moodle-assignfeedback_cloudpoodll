@@ -190,3 +190,7 @@ button.assignfeedback_cloudpoodll_deletesubmissionbutton {
 [data-groupname="recorders"] .togglerecorder.enabledstate {
     border-color: black;
 }
+.assignfeedback_cloudpoodll_rtl {
+    direction: rtl;
+    text-align: right;
+}
