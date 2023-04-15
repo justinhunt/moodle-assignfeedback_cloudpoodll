@@ -194,3 +194,11 @@ button.assignfeedback_cloudpoodll_deletesubmissionbutton {
     direction: rtl;
     text-align: right;
 }
+.assignfeedback_cloudpoodll_rtl .assignfeedback_cloudpoodll_transcript-text {
+    margin-left: 0px;
+    margin-right: 50px;
+}
+.assignfeedback_cloudpoodll_audio_cont {
+    width: 100%;
+    max-width: 480px;
+}

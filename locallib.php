@@ -370,6 +370,10 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         $apisecret = get_config(constants::M_COMPONENT, 'apisecret');
         $groupelements = $formelements = $formdata = [];
 
+        //if there is only one subtype then lets show it by default. Flag that here.
+        $showbydefault=false;
+        if(count($allsubtypes)==1){$showbydefault=true;}
+
         foreach ($allsubtypes as $subtypeconst) {
             $subtypefeedback = !empty($feedbackcloudpoodll[$subtypeconst]) ? $feedbackcloudpoodll[$subtypeconst] : null;
 
@@ -392,7 +396,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
 
                     $extraclasses = 'fa togglerecorder toggle' . $subtypename;
                     $extraclasses .= ($subtypeconst == constants::SUBMISSIONTYPE_AUDIO) ? ' fa-microphone' : ' fa-video-camera';
-                    if ($hassubmission) {
+                    if ($hassubmission || $showbydefault) {
                         $extraclasses .= ' enabledstate';
                         $formdata[constants::NAME_UPDATE_CONTROL.'['.$subtypeconst.']'] = $subtypefeedback->filename;
                         $formdata['recorders[' . $subtypeconst .']'] = 1;
@@ -440,22 +444,23 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
 
                     $recordertypeheading = get_string($subtypeconst == constants::SUBMISSIONTYPE_VIDEO ? 'recordervideo' : 'recorderaudio', constants::M_COMPONENT);
 
-                    $formelements[] = $mform->createElement('html', html_writer::start_div(constants::M_COMPONENT . '_feedbackcontainer collapse' . ($subtypefeedback ? ' show' : ''),
+                    $hideorshow = ($hassubmission || $showbydefault) ? ' show' : '';
+                    $formelements[] = $mform->createElement('html', html_writer::start_div(constants::M_COMPONENT . '_feedbackcontainer collapse' . $hideorshow,
                                 ['id' => 'feedbackcontainer' . $opts['subtype']]) . html_writer::tag('h5', $recordertypeheading));
 
-                    if ($hassubmission) {
-                        $deletefeedback = $renderer->fetch_delete_feedback($opts['subtype']);
+                        if ($hassubmission) {
+                            $deletefeedback = $renderer->fetch_delete_feedback($opts['subtype']);
 
-                        // show current submission.
-                        // show the previous response in a player or whatever and a delete button.
-                        $feedbackplayer = $this->fetch_feedback_player($subtypefeedback);
-                        $currentfeedback = $renderer->prepare_current_feedback($feedbackplayer, $deletefeedback, $opts['subtype']);
+                            // show current submission.
+                            // show the previous response in a player or whatever and a delete button.
+                            $feedbackplayer = $this->fetch_feedback_player($subtypefeedback);
+                            $currentfeedback = $renderer->prepare_current_feedback($feedbackplayer, $deletefeedback, $opts['subtype']);
 
-                        $formelements[] = $mform->createElement('static', 'currentfeedback' . $opts['subtype'],
-                                get_string('currentfeedback', constants::M_COMPONENT), $currentfeedback);
-                    }
+                            $formelements[] = $mform->createElement('static', 'currentfeedback' . $opts['subtype'],
+                                    get_string('currentfeedback', constants::M_COMPONENT), $currentfeedback);
+                        }
 
-                    $formelements[] = $mform->createElement('static', 'description' . $opts['subtype'], $recorderhtml);
+                        $formelements[] = $mform->createElement('static', 'description' . $opts['subtype'], $recorderhtml);
                     $formelements[] = $mform->createElement('html', html_writer::end_div());
 
                     break;
