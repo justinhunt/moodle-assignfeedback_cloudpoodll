@@ -43,6 +43,21 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         constants::REC_VIDEO => constants::SUBMISSIONTYPE_VIDEO,
     ];
 
+    public function is_enabled() {
+        return $this->get_config('enabled') && $this->is_configurable();
+    }
+
+    public function is_configurable() {
+        $context = context_course::instance($this->assignment->get_course()->id);
+        if ($this->get_config('enabled')) {
+            return true;
+        }
+        if (!has_capability('assignfeedback/' .  constants::M_SUBPLUGIN . ':use', $context)) {
+            return false;
+        }
+        return parent::is_configurable();
+    }
+
     /**
      * Get the name of the online comment feedback plugin.
      *

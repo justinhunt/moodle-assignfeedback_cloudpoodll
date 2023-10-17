@@ -113,6 +113,27 @@ class constants {
     const LANG_TEIN ='te-IN';
     const LANG_TRTR ='tr-TR';
 
+    const LANG_NONO ='no-NO';
+    const LANG_PLPL ='pl-PL';
+    const LANG_RORO ='ro-RO';
+    const LANG_SVSE ='sv-SE';
+    const LANG_UKUA ='uk-UA';
+    const LANG_EUES ='eu-ES';
+    const LANG_FIFI ='fi-FI';
+    const LANG_HUHU ='hu-HU';
+    const LANG_MINZ ='mi-NZ';
+    const LANG_BGBG = 'bg-BG';
+    const LANG_CSCZ = 'cs-CZ';
+    const LANG_ELGR = 'el-GR';
+    const LANG_HRHR = 'hr-HR';
+    const LANG_LTLT = 'lt-LT';
+    const LANG_LVLV = 'lv-LV';
+    const LANG_SKSK = 'sk-SK';
+    const LANG_SLSI = 'sl-SI';
+    const LANG_ISIS = 'is-IS';
+    const LANG_MKMK = 'mk-MK';
+    const LANG_SRRS = 'sr-RS';
+
     const SUBMISSIONTYPE_UNCLASSIFIED = 0;
     const SUBMISSIONTYPE_VIDEO = 1;
     const SUBMISSIONTYPE_AUDIO = 2;

@@ -1,5 +1,9 @@
 Change List
 =========
+Version 1.0.14 (Build 2023101700)
+- Added capability to allow admins to allow/disallow teachers to use feedback by role
+- Added more languages including Maori
+
 Version 1.0.13 (Build 2023041600)
 - Tweak to feedback recorders when only one selected in options
 - Added support for RTL on Arabic, Hebrew and Farsi transcripts
