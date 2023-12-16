@@ -354,7 +354,10 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
     public function get_all_subtypes() {
         $selectedsubtype = $this->get_config('recordertype');
         if ($selectedsubtype == constants::REC_FREE) {
-            $allsubtypes = [constants::SUBMISSIONTYPE_AUDIO, constants::SUBMISSIONTYPE_VIDEO, constants::SUBMISSIONTYPE_TEXT];
+            $allsubtypes = [constants::SUBMISSIONTYPE_AUDIO,
+                constants::SUBMISSIONTYPE_VIDEO,
+                constants::SUBMISSIONTYPE_TEXT,
+                constants::SUBMISSIONTYPE_SCREEN];
         } else if (array_key_exists($selectedsubtype, self::SUBTYPEMAP)) {
             $allsubtypes = (array) self::SUBTYPEMAP[$selectedsubtype];
         } else {
@@ -498,6 +501,29 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                             html_writer::start_div(constants::M_COMPONENT . '_feedbackcontainer collapse' . ($hassubmission ? ' show' : ''),
                             ['id' => 'feedbackcontainer' . $opts['subtype']]) . html_writer::tag('h5', get_string('recorderfeedbacktext', constants::M_COMPONENT)));
                     $formelements[] = $mform->createElement('editor', constants::TYPE_TEXT, null, 'rows="5" cols="240"', ['enable_filemanagement' => false]);
+                    $formelements[] = $mform->createElement('html', html_writer::end_div());
+                    break;
+
+                case constants::SUBMISSIONTYPE_SCREEN:
+                    $opts = [
+                        "subtype" => constants::TYPE_SCREEN
+                    ];
+                    $extraclasses = 'fa fa-desktop togglerecorder toggle' . $opts['subtype'];
+                    if ($hassubmission = !empty($subtypefeedback)) {
+                        $formdata[constants::NAME_UPDATE_CONTROL.'['.$subtypeconst.']'] = $subtypefeedback->filename;
+                        $formdata['recorders[' . $subtypeconst .']'] = 1;
+                        $extraclasses .= ' enabledstate';
+                    }
+                    $groupelements[] = $mform->createElement('checkbox', $subtypeconst, null, null,
+                        ['class' => $extraclasses, 'id' => constants::M_COMPONENT . $opts['subtype'] . '_recorder',
+                            'data-target' => '#feedbackcontainer' . $opts['subtype'], 'data-action' => 'toggle']);
+                    $formelements[] = $mform->createElement('html',
+                        html_writer::start_div(constants::M_COMPONENT . '_feedbackcontainer collapse' . ($hassubmission ? ' show' : ''),
+                            ['id' => 'feedbackcontainer' . $opts['subtype']]) . html_writer::tag('h5', get_string('recorderscreen', constants::M_COMPONENT)));
+
+                    //TO DO -  add launch button here
+                    $screenhtml = html_writer::tag('div', get_string('recorderscreen', constants::M_COMPONENT), ['class' => 'screenlaunchbutton']);
+                    $formelements[] = $mform->createElement('static', 'description' . $opts['subtype'], $screenhtml);
                     $formelements[] = $mform->createElement('html', html_writer::end_div());
                     break;
             }

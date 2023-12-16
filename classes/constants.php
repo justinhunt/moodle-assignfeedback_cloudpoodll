@@ -41,6 +41,7 @@ class constants {
     const REC_AUDIO = 'audio';
     const REC_VIDEO = 'video';
 
+    const REC_SCREEN = 'screen';
     const SKIN_PLAIN = 'standard';
     const SKIN_BMR = 'bmr';
     const SKIN_123 = 'onetwothree';
@@ -139,5 +140,8 @@ class constants {
     const SUBMISSIONTYPE_AUDIO = 2;
     const SUBMISSIONTYPE_TEXT = 3;
 
+    const SUBMISSIONTYPE_SCREEN = 4;
+
     const TYPE_TEXT = 'feedbacktext';
+    const TYPE_SCREEN = 'feedbackscreen';
 }
