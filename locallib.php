@@ -522,9 +522,19 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                             ['id' => 'feedbackcontainer' . $opts['subtype']]) . html_writer::tag('h5', get_string('recorderscreen', constants::M_COMPONENT)));
 
                     //TO DO -  add launch button here
-                    $screenhtml = html_writer::tag('div', get_string('recorderscreen', constants::M_COMPONENT), ['class' => 'screenlaunchbutton']);
+                    $screenhtml = html_writer::tag('div', "<button type='button' id='loombutton'>Do Loom</button>", ['class' => 'screenlaunchbutton']);
+                    $screenhtml .= html_writer::tag('div', "", ['id' => 'loomtarget']);
                     $formelements[] = $mform->createElement('static', 'description' . $opts['subtype'], $screenhtml);
+
+                    $loomapp = $renderer->render_from_template(constants::M_COMPONENT . '/loomapp',[]);
+                    $formelements[] = $mform->createElement('static', 'loomapp', $loomapp);
+
                     $formelements[] = $mform->createElement('html', html_writer::end_div());
+                    $opts = [
+                        "component" => constants::M_COMPONENT,
+                        "subtype" => '_' . $subtypename
+                    ];
+                    $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/loomloader", 'init', [$opts]);
                     break;
             }
         }
