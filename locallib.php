@@ -526,7 +526,13 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     $screenhtml .= html_writer::tag('div', "", ['id' => 'loomtarget']);
                     $formelements[] = $mform->createElement('static', 'description' . $opts['subtype'], $screenhtml);
 
-                    $loomapp = $renderer->render_from_template(constants::M_COMPONENT . '/loomapp',[]);
+                    $token = utils::fetch_token($apiuser, $apisecret);
+                    $region =  get_config(constants::M_COMPONENT, 'awsregion');
+                    $loomtoken = utils::fetch_loom_token($token, $region);
+                    $opts = [
+                        "jws" => $loomtoken
+                    ];
+                    $loomapp = $renderer->render_from_template(constants::M_COMPONENT . '/loomapp',$opts);
                     $formelements[] = $mform->createElement('static', 'loomapp', $loomapp);
 
                     $formelements[] = $mform->createElement('html', html_writer::end_div());

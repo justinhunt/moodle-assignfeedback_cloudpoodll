@@ -4,7 +4,6 @@
     import * as loomembed from "https://www.unpkg.com/@loomhq/loom-embed@1.2.2/dist/esm/index.js?module";
 
 
-    const PUBLIC_APP_ID = "public-app-id-obtained-from-developer-portal";
     const BUTTON_ID = "loombutton";
 
     function insertEmbedPlayer(html) {
@@ -31,7 +30,7 @@
         }
 
         const { configureButton } = await setup({
-            publicAppId: PUBLIC_APP_ID,
+            jws: '{{jws}}'
         });
 
         const sdkButton = configureButton({ element: button });
