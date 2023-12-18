@@ -689,6 +689,11 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
      * @return string
      */
     public function view_summary(stdClass $grade, & $showviewlink) {
+        global $PAGE;
+
+        // Get our renderers.
+        $renderer = $PAGE->get_renderer(constants::M_COMPONENT);
+
         $feedbackcloudpoodll = $this->get_allfeedbacks($grade->id);
         if ($feedbackcloudpoodll) {
             $cellhtml = '';
@@ -703,6 +708,12 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                                 $cellhtml .= html_writer::tag('h5', $recordertypeheading);
                                 $cellhtml .= $this->fetch_feedback_player($subtypefeedback);
                             }
+                            break;
+                        case constants::SUBMISSIONTYPE_SCREEN:
+                            $cellhtml .= html_writer::tag('h5', get_string('recorderfeedbackscreen', constants::M_COMPONENT));
+                            $opts=['mediaurl'=>$subtypefeedback->filename];
+                            $loomplayer = $renderer->render_from_template(constants::M_COMPONENT . '/loomplayer',$opts);
+                            $cellhtml .= $loomplayer;
                             break;
                         case constants::SUBMISSIONTYPE_TEXT:
                             $cellhtml .= html_writer::tag('h5', get_string('recorderfeedbacktext', constants::M_COMPONENT));
@@ -725,10 +736,6 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
     public function view(stdClass $grade) {
         $showviewlink = false;
         return $this->view_summary($grade, $showviewlink);
-    }
-
-    public function fetch_screen_player($mediaurl){
-
     }
 
     public function fetch_feedback_player($feedbackcloudpoodll) {
