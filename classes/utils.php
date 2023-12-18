@@ -28,8 +28,8 @@ defined('MOODLE_INTERNAL') || die();
 
 class utils {
 
-    const CLOUDPOODLL = 'https://vbox.poodll.com/cphost';
-    //const CLOUDPOODLL = 'https://cloud.poodll.com';
+    //const CLOUDPOODLL = 'https://vbox.poodll.com/cphost';
+    const CLOUDPOODLL = 'https://cloud.poodll.com';
 
     public static function fetch_options_recorders() {
         $rec_options[constants::REC_FREE] = get_string("recorderfree", constants::M_COMPONENT);

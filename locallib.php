@@ -521,6 +521,11 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                         html_writer::start_div(constants::M_COMPONENT . '_feedbackcontainer collapse' . ($hassubmission ? ' show' : ''),
                             ['id' => 'feedbackcontainer' . $opts['subtype']]) . html_writer::tag('h5', get_string('recorderscreen', constants::M_COMPONENT)));
 
+                    // output our hidden field which has the filename.
+                       $hiddeninputattrs['id'] = str_replace(constants::M_COMPONENT, constants::M_COMPONENT . $opts['subtype'], constants::ID_UPDATE_CONTROL);
+                       $mform->addElement('hidden', constants::NAME_UPDATE_CONTROL.'['.$subtypeconst.']', '', $hiddeninputattrs);
+                       $mform->setType(constants::NAME_UPDATE_CONTROL.'['.$subtypeconst.']', PARAM_TEXT);
+
                     //TO DO -  add launch button here
                     $screenhtml = html_writer::tag('div', "<button type='button' id='loombutton'>Do Loom</button>", ['class' => 'screenlaunchbutton']);
                     $screenhtml .= html_writer::tag('div', "", ['id' => 'loomtarget']);
@@ -530,10 +535,11 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     $region =  get_config(constants::M_COMPONENT, 'awsregion');
                     $loomtoken = utils::fetch_loom_token($token, $region);
                     $opts = [
-                        "jws" => $loomtoken
+                        "jws" => $loomtoken,
+                        "videourlfield" => $hiddeninputattrs['id']
                     ];
-                    $loomapp = $renderer->render_from_template(constants::M_COMPONENT . '/loomapp',$opts);
-                    $formelements[] = $mform->createElement('static', 'loomapp', $loomapp);
+                       $loomapp = $renderer->render_from_template(constants::M_COMPONENT . '/loomapp',$opts);
+                       $formelements[] = $mform->createElement('static', 'loomapp', $loomapp);
 
                     $formelements[] = $mform->createElement('html', html_writer::end_div());
                     $opts = [

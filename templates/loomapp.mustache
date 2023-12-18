@@ -36,11 +36,16 @@
         const sdkButton = configureButton({ element: button });
 
         sdkButton.on("insert-click", async (video) => {
-            const { html } = await oembed(video.sharedUrl, { width: 400 });
+            document.getElementById('{{videourlfield}}').value= video.sharedUrl;
+            const { html } = await loomembed(video.sharedUrl, { width: 400 });
             insertEmbedPlayer(html);
         });
+
+
     }
 
     init();
 
 </script>
+
+<div id="loomtarget"></div>
