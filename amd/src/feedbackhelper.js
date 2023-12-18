@@ -10,7 +10,6 @@ let registeredtoggler = false;
 
 export default class feedbackHandler {
 
-    uploadstate = false;
     togglestate = 0;
     strings = {};
     controls = {};
@@ -58,33 +57,6 @@ export default class feedbackHandler {
 
     }
 
-    setup_recorder() {
-        const recorderid = this.component + this.subtype + '_therecorder';
-        instancemap[recorderid] = Object.assign({}, this);
-        const recorder_callback = evt => {
-            if (instancemap.hasOwnProperty(evt.id)) {
-                const instance = instancemap[evt.id];
-                switch (evt.type) {
-                    case 'recording':
-                        if (evt.action === 'started') {
-                            instance.controls.updatecontrol.val();
-                        }
-                        break;
-                    case 'awaitingprocessing':
-                        if (instance.uploadstate != 'posted') {
-                            instance.controls.updatecontrol.val(evt.mediaurl);
-                        }
-                        instance.uploadstate = 'posted';
-                        break;
-                    case 'error':
-                        alert('PROBLEM:' + evt.message);
-                        break;
-                }
-            }
-        };
-        this.uploadstate = false;
-        cloudpoodll.init(recorderid, recorder_callback);
-    }
 
     register_controls() {
         this.controls.deletebutton = $('.' + this.component + this.subtype + '_deletefeedbackbutton');

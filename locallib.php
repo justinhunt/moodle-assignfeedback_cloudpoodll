@@ -455,6 +455,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                             // All good. So lets fetch recorder html
                             $recorderbox = $renderer->fetch_recorder($roptions, $token);
                             $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/feedbackhelper", 'init', [$opts]);
+                            $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/setuprecorder", 'init', [$opts]);
                         }
 
                     }
@@ -506,9 +507,10 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     break;
 
                 case constants::SUBMISSIONTYPE_SCREEN:
-
+                    $subtypename = array_flip(self::SUBTYPEMAP)[constants::TYPE_SCREEN]
                     $opts = [
-                        "subtype" => constants::TYPE_SCREEN
+                        "component" => constants::M_COMPONENT,
+                        "subtype" => '_' .  $subtypename
                     ];
                     $extraclasses = 'fa fa-desktop togglerecorder toggle' . $opts['subtype'];
                     if ($hassubmission = !empty($subtypefeedback) && !empty($subtypefeedback->filename)) {
@@ -551,8 +553,8 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     ];
                    $loomapp = $renderer->render_from_template(constants::M_COMPONENT . '/loomapp',$opts);
                    $formelements[] = $mform->createElement('static', 'loomapp', $loomapp);
-
                     $formelements[] = $mform->createElement('html', html_writer::end_div());
+                    $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/feedbackhelper", 'init', [$opts]);
                     break;
             }
         }
