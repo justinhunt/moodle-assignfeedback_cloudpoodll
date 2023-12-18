@@ -533,6 +533,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                         $opts['mediaurl']=$subtypefeedback->filename;
                         $loomplayer = $renderer->render_from_template(constants::M_COMPONENT . '/loomplayer',$opts);
                         $currentfeedback = $renderer->prepare_current_feedback($loomplayer, $deletefeedback, $opts['subtype']);
+                        $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/feedbackhelper", 'init', [$opts]);
 
                         $formelements[] = $mform->createElement('static', 'currentfeedback' . $opts['subtype'],
                             get_string('currentfeedback', constants::M_COMPONENT), $currentfeedback);
@@ -547,14 +548,14 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     $token = utils::fetch_token($apiuser, $apisecret);
                     $region =  get_config(constants::M_COMPONENT, 'awsregion');
                     $loomtoken = utils::fetch_loom_token($token, $region);
-                    $opts = [
+                    $loomappopts = [
                         "jws" => $loomtoken,
                         "videourlfield" => $hiddeninputattrs['id']
                     ];
-                   $loomapp = $renderer->render_from_template(constants::M_COMPONENT . '/loomapp',$opts);
+                   $loomapp = $renderer->render_from_template(constants::M_COMPONENT . '/loomapp',$loomappopts);
                    $formelements[] = $mform->createElement('static', 'loomapp', $loomapp);
                     $formelements[] = $mform->createElement('html', html_writer::end_div());
-                    $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/feedbackhelper", 'init', [$opts]);
+
                     break;
             }
         }
