@@ -6,7 +6,6 @@ import * as str from 'core/str';
 log.debug('cloudpoodll feedback helper: initialising');
 
 const instancemap = {};
-let registeredtoggler = false;
 
 export default class feedbackHandler {
 
@@ -26,35 +25,6 @@ export default class feedbackHandler {
         return new feedbackHandler(opts);
     }
 
-    static registerToggler() {
-        if (registeredtoggler) {
-            return;
-        }
-        registeredtoggler = true;
-        document.addEventListener('click', e => {
-            const toggleinput = e.target.closest('[data-action="toggle"]');
-            if (toggleinput) {
-                try {
-                    const togglecontainer = document.querySelector(toggleinput.dataset.target);
-                    if (togglecontainer) {
-                        const labelElement = toggleinput.closest('label.togglerecorder');
-                        const $togglecontainer = $(togglecontainer);
-                        if (toggleinput.checked) {
-                            $togglecontainer.collapse('show');
-                            labelElement.classList.add('enabledstate');
-                        } else {
-                            $togglecontainer.collapse('hide');
-                            labelElement.classList.remove('enabledstate');
-                        }
-                    }
-                } catch (e) {
-                    //do nothing
-                    log.debug(e);
-                }
-            }
-        });
-
-    }
 
 
     register_controls() {

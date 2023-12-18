@@ -554,7 +554,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                    $loomapp = $renderer->render_from_template(constants::M_COMPONENT . '/loomapp',$opts);
                    $formelements[] = $mform->createElement('static', 'loomapp', $loomapp);
                     $formelements[] = $mform->createElement('html', html_writer::end_div());
-                    $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/feedbackhelper", 'init', $opts);
+                    $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/feedbackhelper", 'init', [$opts]);
                     break;
             }
         }
