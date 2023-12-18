@@ -41,6 +41,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
     const SUBTYPEMAP = [
         constants::REC_AUDIO => constants::SUBMISSIONTYPE_AUDIO,
         constants::REC_VIDEO => constants::SUBMISSIONTYPE_VIDEO,
+        constants::REC_SCREEN => constants::SUBMISSIONTYPE_SCREEN,
     ];
 
     public function is_enabled() {
@@ -478,7 +479,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                                     get_string('currentfeedback', constants::M_COMPONENT), $currentfeedback);
                         }
 
-                        $formelements[] = $mform->createElement('static', 'description' . $opts['subtype'], $recorderhtml);
+                    $formelements[] = $mform->createElement('static', 'description' . $opts['subtype'], $recorderhtml);
                     $formelements[] = $mform->createElement('html', html_writer::end_div());
 
                     break;
@@ -505,11 +506,12 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     break;
 
                 case constants::SUBMISSIONTYPE_SCREEN:
+
                     $opts = [
                         "subtype" => constants::TYPE_SCREEN
                     ];
                     $extraclasses = 'fa fa-desktop togglerecorder toggle' . $opts['subtype'];
-                    if ($hassubmission = !empty($subtypefeedback)) {
+                    if ($hassubmission = !empty($subtypefeedback) && !empty($subtypefeedback->filename)) {
                         $formdata[constants::NAME_UPDATE_CONTROL.'['.$subtypeconst.']'] = $subtypefeedback->filename;
                         $formdata['recorders[' . $subtypeconst .']'] = 1;
                         $extraclasses .= ' enabledstate';
@@ -521,16 +523,25 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                         html_writer::start_div(constants::M_COMPONENT . '_feedbackcontainer collapse' . ($hassubmission ? ' show' : ''),
                             ['id' => 'feedbackcontainer' . $opts['subtype']]) . html_writer::tag('h5', get_string('recorderscreen', constants::M_COMPONENT)));
 
-                    // output our hidden field which has the filename.
-                       $hiddeninputattrs['id'] = str_replace(constants::M_COMPONENT, constants::M_COMPONENT . $opts['subtype'], constants::ID_UPDATE_CONTROL);
-                       $mform->addElement('hidden', constants::NAME_UPDATE_CONTROL.'['.$subtypeconst.']', '', $hiddeninputattrs);
-                       $mform->setType(constants::NAME_UPDATE_CONTROL.'['.$subtypeconst.']', PARAM_TEXT);
+                    if ($hassubmission) {
+                        $deletefeedback = $renderer->fetch_delete_feedback($opts['subtype']);
 
-                    //TO DO -  add launch button here
-                    $screenhtml = html_writer::tag('div', "<button type='button' id='loombutton'>Do Loom</button>", ['class' => 'screenlaunchbutton']);
-                    $screenhtml .= html_writer::tag('div', "", ['id' => 'loomtarget']);
-                    $formelements[] = $mform->createElement('static', 'description' . $opts['subtype'], $screenhtml);
+                        // show current submission.
+                        // show the previous response in a player or whatever and a delete button.
+                        $opts=['mediaurl'=>$subtypefeedback->filename];
+                        $loomplayer = $renderer->render_from_template(constants::M_COMPONENT . '/loomplayer',$opts);
+                        $currentfeedback = $renderer->prepare_current_feedback($loomplayer, $deletefeedback, $opts['subtype']);
 
+                        $formelements[] = $mform->createElement('static', 'currentfeedback' . $opts['subtype'],
+                            get_string('currentfeedback', constants::M_COMPONENT), $currentfeedback);
+                    }
+
+                // output our hidden field which has the filename.
+                   $hiddeninputattrs['id'] = str_replace(constants::M_COMPONENT, constants::M_COMPONENT . $opts['subtype'], constants::ID_UPDATE_CONTROL);
+                   $mform->addElement('hidden', constants::NAME_UPDATE_CONTROL.'['.$subtypeconst.']', '', $hiddeninputattrs);
+                   $mform->setType(constants::NAME_UPDATE_CONTROL.'['.$subtypeconst.']', PARAM_TEXT);
+
+                    //Loom Launcher
                     $token = utils::fetch_token($apiuser, $apisecret);
                     $region =  get_config(constants::M_COMPONENT, 'awsregion');
                     $loomtoken = utils::fetch_loom_token($token, $region);
@@ -538,15 +549,10 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                         "jws" => $loomtoken,
                         "videourlfield" => $hiddeninputattrs['id']
                     ];
-                       $loomapp = $renderer->render_from_template(constants::M_COMPONENT . '/loomapp',$opts);
-                       $formelements[] = $mform->createElement('static', 'loomapp', $loomapp);
+                   $loomapp = $renderer->render_from_template(constants::M_COMPONENT . '/loomapp',$opts);
+                   $formelements[] = $mform->createElement('static', 'loomapp', $loomapp);
 
                     $formelements[] = $mform->createElement('html', html_writer::end_div());
-                    $opts = [
-                        "component" => constants::M_COMPONENT,
-                        "subtype" => '_' . $subtypename
-                    ];
-                    $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/loomloader", 'init', [$opts]);
                     break;
             }
         }
@@ -716,6 +722,10 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
     public function view(stdClass $grade) {
         $showviewlink = false;
         return $this->view_summary($grade, $showviewlink);
+    }
+
+    public function fetch_screen_player($mediaurl){
+
     }
 
     public function fetch_feedback_player($feedbackcloudpoodll) {

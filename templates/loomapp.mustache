@@ -1,14 +1,13 @@
+<button type='button' id='{{uniqid}}_launcher' class="af_cp_loomlaunchbutton">Do Loom</button>
+<div id="{{uniqid}}_target"></div>
 <script type="module">
     import {setup} from "https://www.unpkg.com/@loomhq/record-sdk@2.36.18/dist/esm/index.js?module";
     import {isSupported} from "https://www.unpkg.com/@loomhq/record-sdk@2.36.18/dist/esm/is-supported.js?module";
     import * as loomembed from "https://www.unpkg.com/@loomhq/loom-embed@1.2.2/dist/esm/index.js?module";
 
 
-    const BUTTON_ID = "loombutton";
-
     function insertEmbedPlayer(html) {
-        const target = document.getElementById("loomtarget");
-
+        const target = document.getElementById("{{uniqid}}_target");
         if (target) {
             target.innerHTML = html;
         }
@@ -23,8 +22,7 @@
         }
 
 
-        const button = document.getElementById(BUTTON_ID);
-
+        const button = document.getElementById('{{uniqid}}_launcher');
         if (!button) {
             return;
         }
@@ -34,18 +32,12 @@
         });
 
         const sdkButton = configureButton({ element: button });
-
         sdkButton.on("insert-click", async (video) => {
             document.getElementById('{{videourlfield}}').value= video.sharedUrl;
-            const { html } = await loomembed(video.sharedUrl, { width: 400 });
+            const { html } = await loomembed.oembed(video.sharedUrl, { width: 400 });
             insertEmbedPlayer(html);
         });
-
-
     }
-
     init();
 
 </script>
-
-<div id="loomtarget"></div>
