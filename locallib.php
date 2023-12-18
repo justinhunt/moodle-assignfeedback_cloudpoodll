@@ -710,7 +710,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                             }
                             break;
                         case constants::SUBMISSIONTYPE_SCREEN:
-                            $cellhtml .= html_writer::tag('h5', get_string('recorderfeedbackscreen', constants::M_COMPONENT));
+                            $cellhtml .= html_writer::tag('h5', get_string('recorderscreen', constants::M_COMPONENT));
                             $opts=['mediaurl'=>$subtypefeedback->filename];
                             $loomplayer = $renderer->render_from_template(constants::M_COMPONENT . '/loomplayer',$opts);
                             $cellhtml .= $loomplayer;
