@@ -530,7 +530,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
 
                         // show current submission.
                         // show the previous response in a player or whatever and a delete button.
-                        $opts=['mediaurl'=>$subtypefeedback->filename];
+                        $opts['mediaurl']=$subtypefeedback->filename;
                         $loomplayer = $renderer->render_from_template(constants::M_COMPONENT . '/loomplayer',$opts);
                         $currentfeedback = $renderer->prepare_current_feedback($loomplayer, $deletefeedback, $opts['subtype']);
 
