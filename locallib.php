@@ -507,7 +507,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     break;
 
                 case constants::SUBMISSIONTYPE_SCREEN:
-                    $subtypename = array_flip(self::SUBTYPEMAP)[constants::TYPE_SCREEN]
+                    $subtypename = array_flip(self::SUBTYPEMAP)[constants::TYPE_SCREEN];
                     $opts = [
                         "component" => constants::M_COMPONENT,
                         "subtype" => '_' .  $subtypename
