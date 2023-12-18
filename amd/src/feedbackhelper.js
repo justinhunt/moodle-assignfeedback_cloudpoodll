@@ -20,7 +20,6 @@ export default class feedbackHandler {
 
         this.register_controls();
         this.register_events();
-        this.setup_recorder();
     }
 
     static init(opts) {
