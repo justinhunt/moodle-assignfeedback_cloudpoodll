@@ -1,5 +1,8 @@
 Change List
 =========
+Version 1.0.15 (Build 2024012500)
+- Added screencast feedback (beta)
+
 Version 1.0.14 (Build 2023101700)
 - Added capability to allow admins to allow/disallow teachers to use feedback by role
 - Added more languages including Maori
