@@ -36,6 +36,7 @@ class utils {
         $rec_options[constants::REC_AUDIO] = get_string("recorderaudio", constants::M_COMPONENT);
         $rec_options[constants::REC_VIDEO] = get_string("recordervideo", constants::M_COMPONENT);
         $rec_options[constants::REC_SCREEN] = get_string("recorderscreen", constants::M_COMPONENT);
+        $rec_options[constants::REC_CORRECTIONS] = get_string("recordercorrections", constants::M_COMPONENT);
         return $rec_options;
     }
 

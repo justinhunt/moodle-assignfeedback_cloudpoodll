@@ -40,8 +40,9 @@ class constants {
     const REC_FREE = 'free';
     const REC_AUDIO = 'audio';
     const REC_VIDEO = 'video';
-
     const REC_SCREEN = 'screen';
+    const REC_CORRECTIONS = 'corrections';
+
     const SKIN_PLAIN = 'standard';
     const SKIN_BMR = 'bmr';
     const SKIN_123 = 'onetwothree';
@@ -139,9 +140,10 @@ class constants {
     const SUBMISSIONTYPE_VIDEO = 1;
     const SUBMISSIONTYPE_AUDIO = 2;
     const SUBMISSIONTYPE_TEXT = 3;
-
     const SUBMISSIONTYPE_SCREEN = 4;
+    const SUBMISSIONTYPE_CORRECTIONS = 5;
 
     const TYPE_TEXT = 'feedbacktext';
     const TYPE_SCREEN = 'feedbackscreen';
+    const TYPE_CORRECTIONS = 'feedbackcorrections';
 }

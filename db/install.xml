@@ -16,7 +16,9 @@
         <FIELD NAME="fulltranscript" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="full transcript data of file"/>
         <FIELD NAME="vttdata" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="vtt data associated with file"/>
         <FIELD NAME="fileexpiry" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="file expiry date"/>
-        <FIELD NAME="feedbacktext" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="feedbacktext" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="file expiry date"/>
+        <FIELD NAME="submittedtext" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="submitted text"/>
+        <FIELD NAME="correctedtext" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="corrected text"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this feedback"/>

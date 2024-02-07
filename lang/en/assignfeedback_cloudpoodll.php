@@ -37,9 +37,11 @@ $string['cloudpoodll:use'] = 'Allow use of Cloud Poodll feedback';
 
 //$string['recorder'] = 'Recorder Type';
 $string['recorderaudio'] = 'Audio Feedback';
-$string['recorderfree'] = 'Audio, Video, Screencast or Text Feedback';
+$string['recorderfree'] = 'Audio, Video, Screen,Text or Corrections Feedback';
 $string['recordervideo'] = 'Video Feedback';
 $string['recorderscreen'] = 'Screencast Feedback (beta)';
+$string['recordercorrections'] = 'Corrections Feedback';
+$string['recorderfeedbackcorrections'] = 'Corrections Feedback';
 $string['recorderfeedbacktext'] = 'Text Feedback';
 $string['defaultrecorder'] = 'Recorder Type';
 $string['defaultrecorderdetails'] = '';
