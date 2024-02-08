@@ -515,7 +515,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
 
                     $extraclasses = 'fa fa-pencil togglerecorder toggle' . $opts['subtype'];
                     if ($hassubmission = !empty($subtypefeedback)) {
-                        $formdata[constants::TYPE_TEXT] = ['text' => $subtypefeedback->feedbacktext];
+                        $formdata[constants::TYPE_CORRECTIONS] = ['text' => $subtypefeedback->feedbacktext];
                         $formdata['recorders[' . $subtypeconst .']'] = 1;
                         $extraclasses .= ' enabledstate';
                     }
@@ -524,8 +524,8 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                             'data-target' => '#feedbackcontainer' . $opts['subtype'], 'data-action' => 'toggle']);
                     $formelements[] = $mform->createElement('html',
                         html_writer::start_div(constants::M_COMPONENT . '_feedbackcontainer collapse' . ($hassubmission ? ' show' : ''),
-                            ['id' => 'feedbackcontainer' . $opts['subtype']]) . html_writer::tag('h5', get_string('recorderfeedbacktext', constants::M_COMPONENT)));
-                    $formelements[] = $mform->createElement('editor', constants::TYPE_TEXT, null, 'rows="5" cols="240"', ['enable_filemanagement' => false]);
+                            ['id' => 'feedbackcontainer' . $opts['subtype']]) . html_writer::tag('h5', get_string('recorderfeedbackcorrections', constants::M_COMPONENT)));
+                    $formelements[] = $mform->createElement('textarea', constants::TYPE_CORRECTIONS, null, 'wrap="virtual" rows="10" cols="50"');
                     $formelements[] = $mform->createElement('html', html_writer::end_div());
                     break;
 
