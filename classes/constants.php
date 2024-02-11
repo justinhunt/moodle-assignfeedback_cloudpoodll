@@ -40,6 +40,8 @@ class constants {
     const REC_FREE = 'free';
     const REC_AUDIO = 'audio';
     const REC_VIDEO = 'video';
+
+    const REC_TEXT = 'text';
     const REC_SCREEN = 'screen';
     const REC_CORRECTIONS = 'corrections';
 

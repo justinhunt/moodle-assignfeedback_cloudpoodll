@@ -38,11 +38,17 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
     /**
      * @var array map of submission type and recording type
      */
-    const SUBTYPEMAP = [
+    const SUBTYPEMAP_ALL = [
         constants::REC_AUDIO => constants::SUBMISSIONTYPE_AUDIO,
         constants::REC_VIDEO => constants::SUBMISSIONTYPE_VIDEO,
         constants::REC_SCREEN => constants::SUBMISSIONTYPE_SCREEN,
+        constants::REC_TEXT => constants::SUBMISSIONTYPE_TEXT,
         constants::REC_CORRECTIONS => constants::SUBMISSIONTYPE_CORRECTIONS,
+    ];
+    const SUBTYPEMAP_RECORDERS = [
+        constants::REC_AUDIO => constants::SUBMISSIONTYPE_AUDIO,
+        constants::REC_VIDEO => constants::SUBMISSIONTYPE_VIDEO,
+        constants::REC_SCREEN => constants::SUBMISSIONTYPE_SCREEN
     ];
 
     public function is_enabled() {
@@ -76,7 +82,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
     public function get_allfeedbacks($grade) {
         global $DB;
         return $DB->get_records(constants::M_TABLE, compact('grade'), 'id',
-            'type,id,filename,transcript,fulltranscript,vttdata,feedbacktext');
+            'type,id,filename,transcript,fulltranscript,vttdata,feedbacktext,submittedtext,correctedtext');
     }
 
     /**
@@ -97,12 +103,17 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     if (!empty($allfeedbacks[$subtypeconst])) {
                         return true;
                     }
-                } else if (in_array($subtypeconst, self::SUBTYPEMAP)) {
+                } else if (in_array($subtypeconst, self::SUBTYPEMAP_RECORDERS)) {
                     if ($allfeedbacks[$subtypeconst]->filename != $filename) {
                         return true;
                     }
                 } else if ($subtypeconst == constants::SUBMISSIONTYPE_TEXT) {
                     if ($allfeedbacks[$subtypeconst]->feedbacktext != $data->feedbacktext) {
+                        return true;
+                    }
+                } else if ($subtypeconst == constants::SUBMISSIONTYPE_CORRECTIONS) {
+                    if ($allfeedbacks[$subtypeconst]->correctedtext != $data->correctedtext ||
+                        $allfeedbacks[$subtypeconst]->suggestedtext != $data->suggestedtext) {
                         return true;
                     }
                 }
@@ -361,8 +372,8 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                 constants::SUBMISSIONTYPE_TEXT,
                 constants::SUBMISSIONTYPE_SCREEN,
                 constants::SUBMISSIONTYPE_CORRECTIONS];
-        } else if (array_key_exists($selectedsubtype, self::SUBTYPEMAP)) {
-            $allsubtypes = (array) self::SUBTYPEMAP[$selectedsubtype];
+        } else if (array_key_exists($selectedsubtype, self::SUBTYPEMAP_ALL)) {
+            $allsubtypes = (array) self::SUBTYPEMAP_ALL[$selectedsubtype];
         } else {
             $allsubtypes = [];
         }
@@ -403,7 +414,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                 case constants::SUBMISSIONTYPE_VIDEO:
 
                     // prepare the AMD javascript for deletesubmission and showing the recorder.
-                    $subtypename = array_flip(self::SUBTYPEMAP)[$subtypeconst];
+                    $subtypename = array_flip(self::SUBTYPEMAP_RECORDERS)[$subtypeconst];
                     $opts = [
                         "component" => constants::M_COMPONENT,
                         "subtype" => '_' . $subtypename
@@ -515,7 +526,8 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
 
                     $extraclasses = 'fa fa-pencil togglerecorder toggle' . $opts['subtype'];
                     if ($hassubmission = !empty($subtypefeedback)) {
-                        $formdata[constants::TYPE_CORRECTIONS] = ['text' => $subtypefeedback->feedbacktext];
+                        $formdata['submittedtext'] =  $subtypefeedback->submittedtext;
+                        $formdata['correctedtext'] =  $subtypefeedback->correctedtext;
                         $formdata['recorders[' . $subtypeconst .']'] = 1;
                         $extraclasses .= ' enabledstate';
                     }
@@ -525,12 +537,13 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     $formelements[] = $mform->createElement('html',
                         html_writer::start_div(constants::M_COMPONENT . '_feedbackcontainer collapse' . ($hassubmission ? ' show' : ''),
                             ['id' => 'feedbackcontainer' . $opts['subtype']]) . html_writer::tag('h5', get_string('recorderfeedbackcorrections', constants::M_COMPONENT)));
-                    $formelements[] = $mform->createElement('textarea', constants::TYPE_CORRECTIONS, null, 'wrap="virtual" rows="10" cols="50"');
+                    $formelements[] = $mform->createElement('textarea', 'submittedtext', null, 'wrap="virtual" rows="10" cols="50"');
+                    $formelements[] = $mform->createElement('textarea', 'correctedtext', null, 'wrap="virtual" rows="10" cols="50"');
                     $formelements[] = $mform->createElement('html', html_writer::end_div());
                     break;
 
                 case constants::SUBMISSIONTYPE_SCREEN:
-                    $subtypename = array_flip(self::SUBTYPEMAP)[constants::SUBMISSIONTYPE_SCREEN];
+                    $subtypename = array_flip(self::SUBTYPEMAP_RECORDERS)[constants::SUBMISSIONTYPE_SCREEN];
                     $opts = [
                         "component" => constants::M_COMPONENT,
                         "subtype" => '_' .  $subtypename
@@ -612,8 +625,6 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
     public function save(stdClass $grade, stdClass $data) {
         global $DB;
 
-        // if filename is false, or empty, no update. possibly used changed something else on page.
-        // possibly they did not record ... that will be caught elsewhere.
         $allsubtypes = $this->get_all_subtypes();
         $allfeedbacks = $this->get_allfeedbacks($grade->id);
         $allsavedok = true;
@@ -624,12 +635,15 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         if ($expiredays < 9999) {
             $fileexpiry = time() + DAYSECS * $expiredays;
         }
+
+        //Though it's a bit naff, we will loop through all the subtypes and save them one by one as separate feedback records.
         foreach ($allsubtypes as $subtypeconst) {
             $savedok = false;
             $thefeedback = !empty($allfeedbacks[$subtypeconst]) ? $allfeedbacks[$subtypeconst] : null;
             $subtypeselected = !empty($data->recorders) && !empty($data->recorders[$subtypeconst]);
             $filename = !empty($data->filename) && !empty($data->filename[$subtypeconst]) ? $data->filename[$subtypeconst] : '';
-            if (in_array($subtypeconst, self::SUBTYPEMAP)) {
+            //Recorded feedback - audio / video  / screen
+            if (in_array($subtypeconst, self::SUBTYPEMAP_RECORDERS)) {
                 if (!empty($thefeedback)) {
                     if ($filename == '-1' || !$subtypeselected) {
                         // this is a flag to delete the feedback.
@@ -658,7 +672,8 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                 if ($savedok) {
                     $this->register_fetch_transcript_task($thefeedback);
                 }
-            } else {
+            //Comments feedback
+            } elseif($subtypeconst==constants::SUBMISSIONTYPE_TEXT) {
                 $feedbacktext = !empty($data->feedbacktext) ? $data->feedbacktext['text'] : '';
                 if (empty($thefeedback)) {
                     if (empty($subtypeselected)) {
@@ -681,7 +696,38 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     $DB->delete_records(constants::M_TABLE, ['id' => $thefeedback->id]);
                     $savedok = true;
                 }
+            //Corrections feedback
+            } else if($subtypeconst==constants::SUBMISSIONTYPE_CORRECTIONS) {
+                $submittedtext = !empty($data->submittedtext) ? $data->submittedtext : '';
+                $correctedtext = !empty($data->correctedtext) ? $data->correctedtext : '';
+                if (empty($thefeedback)) {
+                    if (empty($subtypeselected)) {
+                        continue;
+                    }
+                    $thefeedback = new stdClass();
+                    $thefeedback->type = $subtypeconst;
+                    $thefeedback->grade = $grade->id;
+                    $thefeedback->assignment = $this->assignment->get_instance()->id;
+                    $thefeedback->submittedtext = $submittedtext;
+                    $thefeedback->correctedtext = $correctedtext;
+                    $feedbackid = $DB->insert_record(constants::M_TABLE, $thefeedback);
+                    if ($feedbackid > 0) {
+                        $thefeedback->id = $feedbackid;
+                        $savedok = true;
+                    }
+                } else if ($subtypeselected) {
+                    $thefeedback->submittedtext = $submittedtext;
+                    $thefeedback->correctedtext = $correctedtext;
+                    $savedok = $DB->update_record(constants::M_TABLE, $thefeedback);
+                } else {
+                    $DB->delete_records(constants::M_TABLE, ['id' => $thefeedback->id]);
+                    $savedok = true;
+                }
+
             }
+
+            //from here we either hava a thefeedback object with data ... or we do not.
+
             $allsavedok = $allsavedok && $savedok;
         }
 
@@ -745,7 +791,9 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
 
                         case constants::SUBMISSIONTYPE_CORRECTIONS:
                             $cellhtml .= html_writer::tag('h5', get_string('recorderfeedbackcorrections', constants::M_COMPONENT));
-                            $cellhtml .= format_text($subtypefeedback->feedbacktext);
+                            ai
+                            $cellhtml .= format_text($subtypefeedback->submittedtext);
+                            $cellhtml .= format_text($subtypefeedback->correctedtext);
                             break;
                     }
                 }
@@ -790,7 +838,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         }
         $recordertype = $this->get_config('recordertype');
         if ($recordertype == constants::REC_FREE) {
-            $recordertype = array_flip(self::SUBTYPEMAP)[$feedbackcloudpoodll->type];
+            $recordertype = array_flip(self::SUBTYPEMAP_ALL)[$feedbackcloudpoodll->type];
         }
 
         // size params for our response players/images.

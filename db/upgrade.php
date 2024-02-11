@@ -110,12 +110,12 @@ function xmldb_assignfeedback_cloudpoodll_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2022100702, 'assignfeedback', 'cloudpoodll');
     }
 
-    if($oldversion < 2024020700){
+    if($oldversion < 2024020701){
         // Define field feedbacktext to be added to assignfeedback_cloudpoodll.
         $table = new xmldb_table('assignfeedback_cloudpoodll');
         $fields=[];
         $fields[] = new xmldb_field('submittedtext', XMLDB_TYPE_TEXT, null, null, null, null, null );
-        $fields[] = new xmldb_field('feedbacktext', XMLDB_TYPE_TEXT, null, null, null, null, null);
+        $fields[] = new xmldb_field('correctedtext', XMLDB_TYPE_TEXT, null, null, null, null, null);
 
         foreach($fields as $field) {
             if (!$dbman->field_exists($table, $field)) {
@@ -124,7 +124,7 @@ function xmldb_assignfeedback_cloudpoodll_upgrade($oldversion) {
         }
 
         // Cloudpoodll savepoint reached.
-        upgrade_plugin_savepoint(true, 2024020700, 'assignfeedback', 'cloudpoodll');
+        upgrade_plugin_savepoint(true, 2024020701, 'assignfeedback', 'cloudpoodll');
     }
 
     return true;
