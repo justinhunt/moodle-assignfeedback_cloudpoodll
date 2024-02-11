@@ -854,10 +854,10 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         //RTL for transcripts
         //For right to left languages we want to add the RTL direction and right justify.
         switch($this->get_config('language')){
-            case constants::LANG_ARAE:
-            case constants::LANG_ARSA:
-            case constants::LANG_FAIR:
-            case constants::LANG_HEIL:
+            case constants::M_LANG_ARAE:
+            case constants::M_LANG_ARSA:
+            case constants::M_LANG_FAIR:
+            case constants::M_LANG_HEIL:
                 $rtl = constants::M_COMPONENT. '_rtl';
                 break;
             default:

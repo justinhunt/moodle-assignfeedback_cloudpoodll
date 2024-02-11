@@ -1,0 +1,77 @@
+<?php
+/**
+ * External.
+ *
+ * @package mod_solo
+ * @author  Justin Hunt - Poodll.com
+ */
+
+
+namespace assignfeedback_cloudpoodll;
+
+global $CFG;
+require_once($CFG->libdir . '/externallib.php');
+
+use context_module;
+use external_api;
+use external_function_parameters;
+use external_value;
+use external_single_structure;
+use external_multiple_structure;
+use assignfeedback_cloudpoodll\utils;
+use assignfeedback_cloudpoodll\aitranscript;
+
+/**
+ * External class.
+ *
+ * @package assignsubmission_cloudpoodll
+ * @author  Justin Hunt - Poodll.com
+ */
+class external extends external_api {
+
+    public static function check_grammar($text, $activityid) {
+        global $DB, $USER;
+
+        $params = self::validate_parameters(self::check_grammar_parameters(), [
+            'text' => $text,
+            'activityid' => $activityid]);
+        extract($params);
+
+        $mod = $DB->get_record(constants::M_TABLE, ['id' => $activityid], '*', MUST_EXIST);
+        if (!$mod) {
+            return "";
+        }
+
+        $siteconfig = get_config(constants::M_COMPONENT);
+        $token = utils::fetch_token($siteconfig->apiuser, $siteconfig->apisecret);
+        $textanalyser = new textanalyser($token,$text,$mod->region,$mod->ttslanguage);
+        $suggestions = $textanalyser->fetch_grammar_correction();
+        if($suggestions==$text || empty($suggestions)){
+            return "";
+        }
+
+        //if we have suggestions, mark those up and return them
+        $direction="r2l";//"l2r";
+        list($grammarerrors,$grammarmatches,$insertioncount) = \assignfeedback_cloudpoodll\utils::fetch_grammar_correction_diff($text, $suggestions,$direction);
+        $markedupsuggestions = \assignfeedback_cloudpoodll\aitranscriptutils::render_passage($suggestions,'corrections');
+        $ret = [];
+        $ret['grammarerrors'] = $grammarerrors;
+        $ret['grammarmatches'] = $grammarmatches;
+        $ret['suggestions'] = $markedupsuggestions;
+
+        return json_encode($ret);
+
+    }
+
+    public static function check_grammar_parameters() {
+        return new external_function_parameters([
+            'text' => new external_value(PARAM_TEXT),
+            'activityid' => new external_value(PARAM_INT)
+        ]);
+    }
+
+    public static function check_grammar_returns() {
+        return new external_value(PARAM_RAW);
+    }
+
+}

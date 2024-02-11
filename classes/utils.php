@@ -107,58 +107,58 @@ class utils {
 
     public static function get_lang_options() {
         return array(
-            constants::LANG_ENUS => get_string('en-us', constants::M_COMPONENT),
-            constants::LANG_ENAU => get_string('en-au', constants::M_COMPONENT),
-            constants::LANG_ENGB => get_string('en-gb', constants::M_COMPONENT),
-            constants::LANG_ENIE => get_string('en-ie', constants::M_COMPONENT),
-            constants::LANG_ENWL => get_string('en-wl', constants::M_COMPONENT),
-            constants::LANG_ENAB => get_string('en-ab', constants::M_COMPONENT),
-            constants::LANG_ENIN => get_string('en-in', constants::M_COMPONENT),
-            constants::LANG_ARAE => get_string('ar-ae', constants::M_COMPONENT),
-            constants::LANG_ARSA => get_string('ar-sa', constants::M_COMPONENT),
-            constants::LANG_EUES => get_string('eu-es', constants::M_COMPONENT),
-            constants::LANG_ZHCN => get_string('zh-cn', constants::M_COMPONENT),
-            constants::LANG_FAIR => get_string('fa-ir', constants::M_COMPONENT),
-            constants::LANG_FIFI => get_string('fi-fi', constants::M_COMPONENT),
-            constants::LANG_FRCA => get_string('fr-ca', constants::M_COMPONENT),
-            constants::LANG_FRFR => get_string('fr-fr', constants::M_COMPONENT),
-            constants::LANG_DEDE => get_string('de-de', constants::M_COMPONENT),
-            constants::LANG_DECH => get_string('de-ch', constants::M_COMPONENT),
-            constants::LANG_NLNL => get_string('nl-nl', constants::M_COMPONENT),
-            constants::LANG_HEIL => get_string('he-il', constants::M_COMPONENT),
-            constants::LANG_HIIN => get_string('hi-in', constants::M_COMPONENT),
-            constants::LANG_HUHU => get_string('hu-hu', constants::M_COMPONENT),
-            constants::LANG_IDID => get_string('id-id', constants::M_COMPONENT),
-            constants::LANG_ITIT => get_string('it-it', constants::M_COMPONENT),
-            constants::LANG_JAJP => get_string('ja-jp', constants::M_COMPONENT),
-            constants::LANG_KOKR => get_string('ko-kr', constants::M_COMPONENT),
-            constants::LANG_MINZ => get_string('mi-nz', constants::M_COMPONENT),
-            constants::LANG_MSMY => get_string('ms-my', constants::M_COMPONENT),
-            constants::LANG_NONO => get_string('no-no', constants::M_COMPONENT),
-            constants::LANG_PLPL => get_string('pl-pl', constants::M_COMPONENT),
-            constants::LANG_PTPT => get_string('pt-pt', constants::M_COMPONENT),
-            constants::LANG_PTBR => get_string('pt-br', constants::M_COMPONENT),
-            constants::LANG_RORO => get_string('ro-ro', constants::M_COMPONENT),
-            constants::LANG_RURU => get_string('ru-ru', constants::M_COMPONENT),
-            constants::LANG_ESES => get_string('es-es', constants::M_COMPONENT),
-            constants::LANG_ESUS => get_string('es-us', constants::M_COMPONENT),
-            constants::LANG_SVSE => get_string('sv-se', constants::M_COMPONENT),
-            constants::LANG_TAIN => get_string('ta-in', constants::M_COMPONENT),
-            constants::LANG_TEIN => get_string('te-in', constants::M_COMPONENT),
-            constants::LANG_TRTR => get_string('tr-tr', constants::M_COMPONENT),
-            constants::LANG_UKUA => get_string('uk-ua', constants::M_COMPONENT),
+            constants::M_LANG_ENUS => get_string('en-us', constants::M_COMPONENT),
+            constants::M_LANG_ENAU => get_string('en-au', constants::M_COMPONENT),
+            constants::M_LANG_ENGB => get_string('en-gb', constants::M_COMPONENT),
+            constants::M_LANG_ENIE => get_string('en-ie', constants::M_COMPONENT),
+            constants::M_LANG_ENWL => get_string('en-wl', constants::M_COMPONENT),
+            constants::M_LANG_ENAB => get_string('en-ab', constants::M_COMPONENT),
+            constants::M_LANG_ENIN => get_string('en-in', constants::M_COMPONENT),
+            constants::M_LANG_ARAE => get_string('ar-ae', constants::M_COMPONENT),
+            constants::M_LANG_ARSA => get_string('ar-sa', constants::M_COMPONENT),
+            constants::M_LANG_EUES => get_string('eu-es', constants::M_COMPONENT),
+            constants::M_LANG_ZHCN => get_string('zh-cn', constants::M_COMPONENT),
+            constants::M_LANG_FAIR => get_string('fa-ir', constants::M_COMPONENT),
+            constants::M_LANG_FIFI => get_string('fi-fi', constants::M_COMPONENT),
+            constants::M_LANG_FRCA => get_string('fr-ca', constants::M_COMPONENT),
+            constants::M_LANG_FRFR => get_string('fr-fr', constants::M_COMPONENT),
+            constants::M_LANG_DEDE => get_string('de-de', constants::M_COMPONENT),
+            constants::M_LANG_DECH => get_string('de-ch', constants::M_COMPONENT),
+            constants::M_LANG_NLNL => get_string('nl-nl', constants::M_COMPONENT),
+            constants::M_LANG_HEIL => get_string('he-il', constants::M_COMPONENT),
+            constants::M_LANG_HIIN => get_string('hi-in', constants::M_COMPONENT),
+            constants::M_LANG_HUHU => get_string('hu-hu', constants::M_COMPONENT),
+            constants::M_LANG_IDID => get_string('id-id', constants::M_COMPONENT),
+            constants::M_LANG_ITIT => get_string('it-it', constants::M_COMPONENT),
+            constants::M_LANG_JAJP => get_string('ja-jp', constants::M_COMPONENT),
+            constants::M_LANG_KOKR => get_string('ko-kr', constants::M_COMPONENT),
+            constants::M_LANG_MINZ => get_string('mi-nz', constants::M_COMPONENT),
+            constants::M_LANG_MSMY => get_string('ms-my', constants::M_COMPONENT),
+            constants::M_LANG_NONO => get_string('no-no', constants::M_COMPONENT),
+            constants::M_LANG_PLPL => get_string('pl-pl', constants::M_COMPONENT),
+            constants::M_LANG_PTPT => get_string('pt-pt', constants::M_COMPONENT),
+            constants::M_LANG_PTBR => get_string('pt-br', constants::M_COMPONENT),
+            constants::M_LANG_RORO => get_string('ro-ro', constants::M_COMPONENT),
+            constants::M_LANG_RURU => get_string('ru-ru', constants::M_COMPONENT),
+            constants::M_LANG_ESES => get_string('es-es', constants::M_COMPONENT),
+            constants::M_LANG_ESUS => get_string('es-us', constants::M_COMPONENT),
+            constants::M_LANG_SVSE => get_string('sv-se', constants::M_COMPONENT),
+            constants::M_LANG_TAIN => get_string('ta-in', constants::M_COMPONENT),
+            constants::M_LANG_TEIN => get_string('te-in', constants::M_COMPONENT),
+            constants::M_LANG_TRTR => get_string('tr-tr', constants::M_COMPONENT),
+            constants::M_LANG_UKUA => get_string('uk-ua', constants::M_COMPONENT),
 
-            constants::LANG_BGBG => get_string('bg-bg', constants::M_COMPONENT),
-            constants::LANG_CSCZ => get_string('cs-cz', constants::M_COMPONENT),
-            constants::LANG_ELGR => get_string('el-gr', constants::M_COMPONENT),
-            constants::LANG_HRHR => get_string('hr-hr', constants::M_COMPONENT),
-            constants::LANG_LTLT => get_string('lt-lt', constants::M_COMPONENT),
-            constants::LANG_LVLV => get_string('lv-lv', constants::M_COMPONENT),
-            constants::LANG_SKSK => get_string('sk-sk', constants::M_COMPONENT),
-            constants::LANG_SLSI => get_string('sl-si', constants::M_COMPONENT),
-            constants::LANG_ISIS => get_string('is-is', constants::M_COMPONENT),
-            constants::LANG_MKMK => get_string('mk-mk', constants::M_COMPONENT),
-            constants::LANG_SRRS => get_string('sr-rs', constants::M_COMPONENT)
+            constants::M_LANG_BGBG => get_string('bg-bg', constants::M_COMPONENT),
+            constants::M_LANG_CSCZ => get_string('cs-cz', constants::M_COMPONENT),
+            constants::M_LANG_ELGR => get_string('el-gr', constants::M_COMPONENT),
+            constants::M_LANG_HRHR => get_string('hr-hr', constants::M_COMPONENT),
+            constants::M_LANG_LTLT => get_string('lt-lt', constants::M_COMPONENT),
+            constants::M_LANG_LVLV => get_string('lv-lv', constants::M_COMPONENT),
+            constants::M_LANG_SKSK => get_string('sk-sk', constants::M_COMPONENT),
+            constants::M_LANG_SLSI => get_string('sl-si', constants::M_COMPONENT),
+            constants::M_LANG_ISIS => get_string('is-is', constants::M_COMPONENT),
+            constants::M_LANG_MKMK => get_string('mk-mk', constants::M_COMPONENT),
+            constants::M_LANG_SRRS => get_string('sr-rs', constants::M_COMPONENT)
         );
     }
 
@@ -416,4 +416,95 @@ class utils {
         }
         return $transcript;
     }
+
+    public static function fetch_grammar_correction_diff($selftranscript,$correction,$direction='l2r'){
+
+
+        //turn the passage and transcript into an array of words
+        $alternatives = diff::fetchAlternativesArray('');
+        $wildcards = diff::fetchWildcardsArray($alternatives);
+
+        //the direction of diff depends on which text we want to mark up. Because we only highlight
+        //this is because if we show the pre-text (eg student typed text) we can not highlight corrections .. they are not there
+        //if we show post-text (eg corrections) we can not highlight mistakes .. they are not there
+        //the diffs tell us where the diffs are with relation to text A
+        if($direction=='l2r') {
+            $passagebits = diff::fetchWordArray($selftranscript);
+            $transcriptbits = diff::fetchWordArray($correction);
+        }else {
+            $passagebits = diff::fetchWordArray($correction);
+            $transcriptbits = diff::fetchWordArray($selftranscript);
+        }
+
+        //fetch sequences of transcript/passage matched words
+        // then prepare an array of "differences"
+        $passagecount = count($passagebits);
+        $transcriptcount = count($transcriptbits);
+        //rough estimate of insertions
+        $insertioncount = $transcriptcount - $passagecount;
+        if($insertioncount<0){$insertioncount=0;}
+
+        $language = constants::M_LANG_ENUS;
+        $sequences = diff::fetchSequences($passagebits,$transcriptbits,$alternatives,$language);
+
+        //fetch diffs
+        $diffs = diff::fetchDiffs($sequences, $passagecount,$transcriptcount);
+        $diffs = diff::applyWildcards($diffs,$passagebits,$wildcards);
+
+
+        //from the array of differences build error data, match data, markers, scores and metrics
+        $errors = new \stdClass();
+        $matches = new \stdClass();
+        $currentword=0;
+        $lastunmodified=0;
+        //loop through diffs
+        foreach($diffs as $diff){
+            $currentword++;
+            switch($diff[0]){
+                case Diff::UNMATCHED:
+                    //we collect error info so we can count and display them on passage
+                    $error = new \stdClass();
+                    $error->word=$passagebits[$currentword-1];
+                    $error->wordnumber=$currentword;
+                    $errors->{$currentword}=$error;
+                    break;
+
+                case Diff::MATCHED:
+                    //we collect match info so we can play audio from selected word
+                    $match = new \stdClass();
+                    $match->word=$passagebits[$currentword-1];
+                    $match->pposition=$currentword;
+                    $match->tposition = $diff[1];
+                    $match->audiostart=0;//not meaningful when processing corrections
+                    $match->audioend=0;//not meaningful when processing corrections
+                    $match->altmatch=$diff[2];//not meaningful when processing corrections
+                    $matches->{$currentword}=$match;
+                    $lastunmodified = $currentword;
+                    break;
+
+                default:
+                    //do nothing
+                    //should never get here
+
+            }
+        }
+        $sessionendword = $lastunmodified;
+
+        //discard errors that happen after session end word.
+        $errorcount = 0;
+        $finalerrors = new \stdClass();
+        foreach($errors as $key=>$error) {
+            if ($key < $sessionendword) {
+                $finalerrors->{$key} = $error;
+                $errorcount++;
+            }
+        }
+        //finalise and serialise session errors
+        $sessionerrors = json_encode($finalerrors);
+        $sessionmatches = json_encode($matches);
+
+        return [$sessionerrors,$sessionmatches,$insertioncount];
+
+    }
+
 }
