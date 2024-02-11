@@ -791,9 +791,30 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
 
                         case constants::SUBMISSIONTYPE_CORRECTIONS:
                             $cellhtml .= html_writer::tag('h5', get_string('recorderfeedbackcorrections', constants::M_COMPONENT));
-                            ai
-                            $cellhtml .= format_text($subtypefeedback->submittedtext);
-                            $cellhtml .= format_text($subtypefeedback->correctedtext);
+                            //add passage
+                            $cellhtml .= \assignfeedback_cloudpoodll\aitranscriptutils::render_passage($subtypefeedback->submittedtext);
+                            //add corrections
+                            $corrections=  "<div class='asf_cp_corrections_cont'>";
+                            $corrections .= \assignfeedback_cloudpoodll\aitranscriptutils::render_passage($subtypefeedback->correctedtext,'corrected');
+                            $corrections.= "</div>";
+                            $cellhtml .= $corrections;
+
+                            //do js for corrections, which is where the mark up is applied
+                            $direction = 'r2l';
+                            list($grammarerrors, $grammarmatches, $insertioncount) =
+                                utils::fetch_grammar_correction_diff($subtypefeedback->submittedtext, $subtypefeedback->correctedtext, $direction);
+                            //here we set up any info we need to pass into javascript
+                            $correctionsopts = Array();
+                            $correctionsopts['sessionerrors'] = $grammarerrors; //these are words different from those in original
+                            $correctionsopts['sessionmatches'] = $grammarmatches; //these are words missing from the original
+                            $correctionsopts['opts_id'] = 'assignfeedback_cloudpoodll_correctionopts';
+                            $jsonstring = json_encode($correctionsopts);
+                            $opts_html =
+                                \html_writer::tag('input', '', array('id' => $correctionsopts['opts_id'], 'type' => 'hidden', 'value' => $jsonstring));
+                            $PAGE->requires->js_call_amd("assignfeedback_cloudpoodll/correctionsmarkup", 'init', array(array('id' => $correctionsopts['opts_id'])));
+
+                            //these need to be returned and echo'ed to the page
+                            $cellhtml .= $opts_html;
                             break;
                     }
                 }

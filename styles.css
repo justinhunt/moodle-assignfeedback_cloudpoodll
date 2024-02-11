@@ -202,3 +202,37 @@ button.assignfeedback_cloudpoodll_deletesubmissionbutton {
     width: 100%;
     max-width: 480px;
 }
+
+.asf_cp_grading_passageword.asf_cp_aicorrected {
+    background-color: lightpink;
+}
+
+.asf_cp_grading_passageword.asf_cp_aiunmatched {
+    /*background-color: lightgrey;*/
+}
+
+.asf_cp_grading_passagespace.asf_cp_aiunmatched {
+    /*background-color: lightgrey;*/
+    text-decoration: underline #0000FF;
+    font-weight: bold;
+}
+.asf_cp_corrections {
+    text-align: left;
+    font-style: normal;
+}
+
+span.asf_cp_corrections_suggestedword {
+    font-weight: bold;
+    background-color: lightgreen;
+}
+
+span.asf_cp_corrections_omittedword {
+    font-weight: bold;
+    background-color: lightgreen;
+    word-spacing: 5px;
+}
+
+
+.asf_cp_corrections_cont {
+    margin-bottom: 48px;
+}

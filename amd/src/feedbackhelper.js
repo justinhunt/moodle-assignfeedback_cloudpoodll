@@ -12,6 +12,7 @@ export default class feedbackHandler {
     togglestate = 0;
     strings = {};
     controls = {};
+    registeredtoggler = false;
 
     constructor(opts) {
         this.component = opts['component'];
@@ -73,5 +74,35 @@ export default class feedbackHandler {
             {duration: 300, complete: doToggleState}
         );
         return false;
+    }
+
+    static registerToggler() {
+        if (this.registeredtoggler) {
+            return;
+        }
+        this.registeredtoggler = true;
+        document.addEventListener('click', e => {
+            const toggleinput = e.target.closest('[data-action="toggle"]');
+            if (toggleinput) {
+                try {
+                    const togglecontainer = document.querySelector(toggleinput.dataset.target);
+                    if (togglecontainer) {
+                        const labelElement = toggleinput.closest('label.togglerecorder');
+                        const $togglecontainer = $(togglecontainer);
+                        if (toggleinput.checked) {
+                            $togglecontainer.collapse('show');
+                            labelElement.classList.add('enabledstate');
+                        } else {
+                            $togglecontainer.collapse('hide');
+                            labelElement.classList.remove('enabledstate');
+                        }
+                    }
+                } catch (e) {
+                    //do nothing
+                    log.debug(e);
+                }
+            }
+        });
+
     }
 }// end of return object.
