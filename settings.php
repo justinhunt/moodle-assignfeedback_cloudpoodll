@@ -120,6 +120,11 @@ $settings->add(new admin_setting_configselect(constants::M_COMPONENT . '/default
         get_string('defaultrecorder', constants::M_COMPONENT),
         get_string('defaultrecorderdetails', constants::M_COMPONENT), constants::REC_AUDIO, $rec_options));
 
+//corrections language
+$settings->add(new admin_setting_configselect(constants::M_COMPONENT . '/correctionslanguage',
+    get_string('correctionslanguage', constants::M_COMPONENT),
+    get_string('correctionslanguagedetails', constants::M_COMPONENT), 'en-US', $langoptions));
+
 // Default html5 fallback.
 $fallback_options = utils::fetch_options_fallback();
 $settings->add(new admin_setting_configselect(constants::M_COMPONENT . '/fallback',

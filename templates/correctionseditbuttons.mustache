@@ -1,0 +1,13 @@
+<a class="btn asf_cp_checkgrammarbutton grammarsuggestionstrigger" id="asf_cp_checkgrammarbutton" data-src="#submittedtext" data-language="{{language}}" data-target="#correctedtext" href="#">
+    {{#str}}grammarandspellingsuggestions, assignfeedback_cloudpoodll{{/str}}
+</a>
+
+{{#js}}
+    require([
+    "jquery",
+    "core/log",
+    "assignfeedback_cloudpoodll/grammarsuggestions",
+    ], function ($,log,grammarsuggestions) {
+    grammarsuggestions.init();
+    });
+{{/js}}

@@ -11,13 +11,11 @@ define(['jquery', 'core/log','assignfeedback_cloudpoodll/definitions','core/str'
         //controls
         controls: {},
         ready: false,
-        activityid: 0,
         checking: '... checking ...',
         nosuggestions: 'No suggestions',
 
         //init the module
-        init: function(activityid){
-            this.activityid=activityid;
+        init: function(){
             this.ready=false;
             this.init_strings();
             this.register_controls();
@@ -32,35 +30,36 @@ define(['jquery', 'core/log','assignfeedback_cloudpoodll/definitions','core/str'
 
         //load all the controls so we do not have to do it later
         register_controls: function(){
-            this.controls.grammarsuggestionscont = $('#' + def.grammarsuggestionscont);
-            this.controls.checkgrammarbutton = $('.' + def.checkgrammarbutton);
-            this.controls.passagecontainer = $('.' + def.passagecontainer);//TO DO set this
+            this.controls.checkgrammarbutton = $('.grammarsuggestionstrigger');
         },
 
         //attach the various event handlers we need
         register_events: function() {
             var that = this;
             that.controls.checkgrammarbutton.click(function(e){
-                that.check_grammar(that);
+                //collect source and target from data-src and data-target
+                var srcelement = $(this).data('src');
+                var targetelement = $(this).data('target');
+                var language = $(this).data('language');
+                that.check_grammar(that,srcelement,targetelement,language);
                 return false;
             });
         },//end of register events
 
-        check_grammar: function (that) {
+        check_grammar: function (that,srcelement,targetelement,language) {
 
             //do the check
-            var text = that.controls.passagecontainer.val();
+            var text = $(srcelement).val();
             //but quit if its empty
             if(!text || text==='' || text.trim()===''){
                 return;
             }
-            that.controls.grammarsuggestionscont.text(that.checking);
+            $(targetelement).text(that.checking);
             Ajax.call([{
                 methodname: 'assignfeedback_cloudpoodll_check_grammar',
                 args: {
-                    activityid: that.activityid,
-                    text: text
-
+                    text: text,
+                    language: language
                 },
                 done: function (ajaxresult) {
 
@@ -68,9 +67,9 @@ define(['jquery', 'core/log','assignfeedback_cloudpoodll/definitions','core/str'
                     if (payloadobject) {
                         if(payloadobject.grammarerrors.length<3){
                             //hacky but fast way to flag no errors
-                            that.controls.grammarsuggestionscont.text(that.nosuggestions);
+                            $(targetelement).text(that.nosuggestions);
                         }else{
-                            that.controls.grammarsuggestionscont.html(payloadobject.suggestions);
+                            $(targetelement).html(payloadobject.suggestions);
                             var opts = [];
                             opts['sessionerrors'] = payloadobject.grammarerrors;
                             opts['sessionmatches'] = payloadobject.grammarmatches;
@@ -79,7 +78,7 @@ define(['jquery', 'core/log','assignfeedback_cloudpoodll/definitions','core/str'
 
                     }else{
                         //something went wrong, user does not really need to know details
-                        that.controls.grammarsuggestionscont.text(that.nosuggestions);
+                        $(targetelement).text(that.nosuggestions);
                         log.debug('result not fetched');
                     }
 

@@ -203,6 +203,9 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         // playertype student.
         $this->set_config('playertypestudent', $data->{constants::M_COMPONENT . '_playertypestudent'});
 
+        // corrections language.
+        $this->set_config('correctionslanguage', $data->{constants::M_COMPONENT . '_correctionslanguage'});
+
         return true;
     }
 
@@ -222,6 +225,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         $timelimit = $this->get_config('timelimit') ? $this->get_config('timelimit') : 0;
         $expiredays = $this->get_config('expiredays') ? $this->get_config('expiredays') : $adminconfig->expiredays;
         $language = $this->get_config('language') ? $this->get_config('language') : $adminconfig->language;
+        $correctionslanguage = $this->get_config('correctionslanguage') ? $this->get_config('correctionslanguage') : $adminconfig->correctionslanguage;
         $playertype = $this->get_config('playertype') ? $this->get_config('playertype') : $adminconfig->defaultplayertype;
         $playertypestudent = $this->get_config('playertypestudent') ? $this->get_config('playertypestudent') :
                 $adminconfig->defaultplayertypestudent;
@@ -324,6 +328,12 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         // $mform->disabledIf(constants::M_COMPONENT . '_playertypestudent', constants::M_COMPONENT . '_enabletranscode',
         // 'notchecked');
 
+        // corrections language options.
+        $mform->addElement('select', constants::M_COMPONENT . '_correctionslanguage', get_string("correctionslanguage", constants::M_COMPONENT),
+            $langoptions);
+        $mform->setDefault(constants::M_COMPONENT . '_correctionslanguage', $correctionslanguage);
+        $mform->disabledIf(constants::M_COMPONENT . '_correctionslanguage', constants::M_COMPONENT . '_enabled', 'notchecked');
+
         // If M3.4 or higher we can hide elements when we need to
         if($CFG->version >= 2017111300) {
             $mform->hideIf(constants::M_COMPONENT . '_recordertype', constants::M_COMPONENT . '_enabled', 'notchecked');
@@ -335,6 +345,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
             $mform->hideIf(constants::M_COMPONENT . '_language', constants::M_COMPONENT . '_enabled', 'notchecked');
             $mform->hideIf(constants::M_COMPONENT . '_playertype', constants::M_COMPONENT . '_enabled', 'notchecked');
             $mform->hideIf(constants::M_COMPONENT . '_playertypestudent', constants::M_COMPONENT . '_enabled', 'notchecked');
+            $mform->hideIf(constants::M_COMPONENT . '_correctionslanguage', constants::M_COMPONENT . '_enabled', 'notchecked');
         }else{
             // Close our settings divider
             $mform->addElement('static', constants::M_COMPONENT . '_dividerend', '',
@@ -537,7 +548,16 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     $formelements[] = $mform->createElement('html',
                         html_writer::start_div(constants::M_COMPONENT . '_feedbackcontainer collapse' . ($hassubmission ? ' show' : ''),
                             ['id' => 'feedbackcontainer' . $opts['subtype']]) . html_writer::tag('h5', get_string('recorderfeedbackcorrections', constants::M_COMPONENT)));
+                   //submitted text textarea
                     $formelements[] = $mform->createElement('textarea', 'submittedtext', null, 'wrap="virtual" rows="10" cols="50"');
+
+                    //action buttons for corrections
+                    $actionbuttonopts = [
+                        "language" => $this->get_config('correctionslanguage')
+                    ];
+                    $actionbuttons = $renderer->render_from_template(constants::M_COMPONENT . '/correctionseditbuttons',$actionbuttonopts);
+                    $formelements[] = $mform->createElement('static', 'asf_cp_actionbuttons', $actionbuttons);
+                    //corrected text textarea
                     $formelements[] = $mform->createElement('textarea', 'correctedtext', null, 'wrap="virtual" rows="10" cols="50"');
                     $formelements[] = $mform->createElement('html', html_writer::end_div());
                     break;

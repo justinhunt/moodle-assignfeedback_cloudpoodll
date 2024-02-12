@@ -29,22 +29,18 @@ use assignfeedback_cloudpoodll\aitranscript;
  */
 class external extends external_api {
 
-    public static function check_grammar($text, $activityid) {
+    public static function check_grammar($text,$language) {
         global $DB, $USER;
 
         $params = self::validate_parameters(self::check_grammar_parameters(), [
             'text' => $text,
-            'activityid' => $activityid]);
+            'language' => $language]);
         extract($params);
 
-        $mod = $DB->get_record(constants::M_TABLE, ['id' => $activityid], '*', MUST_EXIST);
-        if (!$mod) {
-            return "";
-        }
-
         $siteconfig = get_config(constants::M_COMPONENT);
+        $region = $siteconfig->awsregion;
         $token = utils::fetch_token($siteconfig->apiuser, $siteconfig->apisecret);
-        $textanalyser = new textanalyser($token,$text,$mod->region,$mod->ttslanguage);
+        $textanalyser = new textanalyser($token,$text,$region,$language);
         $suggestions = $textanalyser->fetch_grammar_correction();
         if($suggestions==$text || empty($suggestions)){
             return "";
@@ -66,7 +62,7 @@ class external extends external_api {
     public static function check_grammar_parameters() {
         return new external_function_parameters([
             'text' => new external_value(PARAM_TEXT),
-            'activityid' => new external_value(PARAM_INT)
+            'language' => new external_value(PARAM_TEXT)
         ]);
     }
 
