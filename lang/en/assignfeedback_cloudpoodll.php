@@ -240,3 +240,4 @@ $string['checking']=' ... checking ... ';
 $string['nosuggestions'] = "No suggestions.";
 $string['correctionslanguage']='Corrections language';
 $string['correctionslanguagedetails']='If using AI powered corrections for the student submission(transcript/text), set the default language of submissions here.';
+$string['getgrammarsuggestions'] = "Get Grammar Suggestions";

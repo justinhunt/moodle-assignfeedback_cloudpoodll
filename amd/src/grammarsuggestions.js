@@ -1,5 +1,5 @@
-define(['jquery', 'core/log','assignfeedback_cloudpoodll/definitions','core/str','core/ajax','core/notification','assignfeedback_cloudpoodll/correctionsmarkup'],
-    function ($, log, def, str, Ajax, notification,correctionsmarkup) {
+define(['jquery', 'core/log','core/str','core/ajax','core/notification','assignfeedback_cloudpoodll/correctionsmarkup'],
+    function ($, log, str, Ajax, notification,correctionsmarkup) {
     "use strict"; // jshint ;_;
     /*
     This file does small report
@@ -16,6 +16,7 @@ define(['jquery', 'core/log','assignfeedback_cloudpoodll/definitions','core/str'
 
         //init the module
         init: function(){
+            log.debug('Grammar suggestions: initialising');
             this.ready=false;
             this.init_strings();
             this.register_controls();
