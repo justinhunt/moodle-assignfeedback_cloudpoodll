@@ -552,13 +552,18 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     $formelements[] = $mform->createElement('textarea', 'submittedtext', null, 'wrap="virtual" rows="10" cols="50"');
 
                     //action buttons for corrections
+                    $language = $this->get_config('correctionslanguage');
+                    if(empty($language)){
+                        $language = constants::M_LANG_ENUS;
+                    }
                     $actionbuttonopts = [
-                        "language" => $this->get_config('correctionslanguage')
+                        "language" => $language
                     ];
                     $actionbuttons = $renderer->render_from_template(constants::M_COMPONENT . '/correctionseditbuttons',$actionbuttonopts);
                     $formelements[] = $mform->createElement('static', 'asf_cp_actionbuttons', $actionbuttons);
                     //corrected text textarea
                     $formelements[] = $mform->createElement('textarea', 'correctedtext', null, 'wrap="virtual" rows="10" cols="50"');
+                    $formelements[] = $mform->createElement('html', html_writer::div('', 'asf_cp_difference', ['id' => 'id_differencediv']));
                     $formelements[] = $mform->createElement('html', html_writer::end_div());
                     break;
 
