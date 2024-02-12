@@ -28,10 +28,23 @@ define(['jquery', 'core/log'], function ($, log) {
             suggestedwords: {}
         },
 
+        justmarkup: function (correctionsdiv, sessionerrors,sessionmatches) {
+            //register the controls
+            this.controls.correctionscontainer = $(correctionsdiv);
+            //set the options
+            this.options.suggestedwords = JSON.parse(sessionerrors);
+            this.options.grammarmatches = JSON.parse(sessionmatches);
+            //do the markup
+            this.markup_suggestedwords();
+            this.markup_unmatchedwords();
+
+        },
 
         init: function (config) {
 
-            //pick up opts from html
+
+
+            //pick up opts from html (if any) and set them
             var theid = '#' + config['id'];
             var configcontrol = $(theid).get(0);
             if (configcontrol) {
@@ -71,6 +84,7 @@ define(['jquery', 'core/log'], function ($, log) {
 
             //markup suggested words
             this.markup_suggestedwords();
+
             //mark up unmatched words
             this.markup_unmatchedwords();
 

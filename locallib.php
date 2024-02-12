@@ -563,8 +563,9 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     $formelements[] = $mform->createElement('static', 'asf_cp_actionbuttons', $actionbuttons);
                     //corrected text textarea
                     $formelements[] = $mform->createElement('textarea', 'correctedtext', null, 'wrap="virtual" rows="10" cols="50"');
-                    $formelements[] = $mform->createElement('html', html_writer::div('', 'asf_cp_difference', ['id' => 'id_differencediv']));
+                    $formelements[] = $mform->createElement('html', html_writer::div('', 'asf_cp_corrections_cont', ['id' => 'id_differencediv']));
                     $formelements[] = $mform->createElement('html', html_writer::end_div());
+                    $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/previewcorrections", 'init', []);
                     break;
 
                 case constants::SUBMISSIONTYPE_SCREEN:

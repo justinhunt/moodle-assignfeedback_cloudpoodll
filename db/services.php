@@ -16,5 +16,13 @@ $functions = array(
         'capabilities'=> 'assignfeedback/cloudpoodll:use',
         'type'        => 'read',
         'ajax'        => true,
+    ),
+    'assignfeedback_cloudpoodll_render_diffs' => array(
+        'classname'   => '\assignfeedback_cloudpoodll\external',
+        'methodname'  => 'render_diffs',
+        'description' => 'render diffs between two texts',
+        'capabilities'=> 'assignfeedback/cloudpoodll:use',
+        'type'        => 'read',
+        'ajax'        => true,
     )
 );

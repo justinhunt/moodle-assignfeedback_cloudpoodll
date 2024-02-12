@@ -71,4 +71,39 @@ class external extends external_api {
         return new external_value(PARAM_RAW);
     }
 
+    public static function render_diffs($passage,$corrections) {
+        global $DB, $USER;
+
+        $params = self::validate_parameters(self::render_diffs_parameters(), [
+            'passage' => $passage,
+            'corrections' => $corrections]);
+        extract($params);
+
+        //if we have suggestions, mark those up and return them
+        $direction="r2l";//"l2r";
+        list($grammarerrors,$grammarmatches,$insertioncount) = \assignfeedback_cloudpoodll\utils::fetch_grammar_correction_diff($passage, $corrections,$direction);
+        $markedupsuggestions = \assignfeedback_cloudpoodll\aitranscriptutils::render_passage($corrections,'corrections');
+        $ret = [];
+        $ret['grammarerrors'] = $grammarerrors;
+        $ret['grammarmatches'] = $grammarmatches;
+        $ret['suggestions'] = $suggestions;
+        $ret['markedupsuggestions'] = $markedupsuggestions;
+
+        return json_encode($ret);
+
+    }
+
+    public static function render_diffs_parameters() {
+        return new external_function_parameters([
+            'passage' => new external_value(PARAM_TEXT),
+            'corrections' => new external_value(PARAM_TEXT)
+        ]);
+    }
+
+    public static function render_diffs_returns() {
+        return new external_value(PARAM_RAW);
+    }
+
+
+
 }

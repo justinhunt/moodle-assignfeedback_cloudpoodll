@@ -50,6 +50,7 @@ define(['jquery', 'core/log','core/str','core/ajax','core/notification','assignf
                 that.check_grammar(that,srcselector ,targetselector,differenceselector ,language);
                 return false;
             });
+
         },//end of register events
 
         //to make this useful in case of a div/span/textarea ..
@@ -113,6 +114,8 @@ define(['jquery', 'core/log','core/str','core/ajax','core/notification','assignf
                             var opts = [];
                             opts['sessionerrors'] = payloadobject.grammarerrors;
                             opts['sessionmatches'] = payloadobject.grammarmatches;
+                            //markup corrections
+                            correctionsmarkup.justmarkup(differenceselector,payloadobject.grammarerrors,payloadobject.grammarmatches);
                         }
 
                     }else{
