@@ -27,10 +27,12 @@ define(['jquery', 'core/log','core/str','core/ajax','core/notification','assignf
 
         //load all the controls so we do not have to do it later
         register_controls: function(){
-            log.debug('Grammar suggestions: registering controls');
+            log.debug('preview corrections: registering controls');
             this.controls.submittedtextarea = $('#id_submittedtext');
             this.controls.correctionstextarea = $('#id_correctedtext');
-            this.controls.previewcontainer = $('.asf_cp_corrections_cont');
+            this.controls.correctionscontainer = $('.asf_cp_corrections_cont');
+            this.controls.previewcontainer = $('.asf_cp_correctionspreview_cont');
+            this.controls.animcontainer = $('#asf_cp_correctionspreview_anim');
         },
 
         //attach the various event handlers we need
@@ -41,9 +43,9 @@ define(['jquery', 'core/log','core/str','core/ajax','core/notification','assignf
             that.controls.correctionstextarea.on('input', function() {
                 clearTimeout(that.previewtimer);   // clear the timer whenever the input is changed
                 that.previewtimer = setTimeout(function(
-                ) {  // after 5s, log something to the console
+                ) {  // after 2.5s, log something to the console
                     that.render_and_markup();
-                }, 5000);
+                }, 2500);
             });
 
         },//end of register events
@@ -59,6 +61,9 @@ define(['jquery', 'core/log','core/str','core/ajax','core/notification','assignf
                 return;
             }
 
+            //show the spinner animation
+            that.controls.animcontainer.show();
+
             Ajax.call([{
                 methodname: 'assignfeedback_cloudpoodll_render_diffs',
                 args: {
@@ -66,12 +71,17 @@ define(['jquery', 'core/log','core/str','core/ajax','core/notification','assignf
                     corrections: thecorrections,
                 },
                 done: function (ajaxresult) {
-
+                    that.controls.animcontainer.hide(); //hide the spinner
                     var payloadobject = JSON.parse(ajaxresult);
                     if (payloadobject) {
                         if(payloadobject.markedupsuggestions.length>3){
-                            that.controls.previewcontainer.html(payloadobject.markedupsuggestions);
-                            correctionsmarkup.justmarkup( that.controls.previewcontainer,payloadobject.grammarerrors,payloadobject.grammarmatches);
+                            that.controls.correctionscontainer.html(payloadobject.markedupsuggestions);
+                            correctionsmarkup.justmarkup( that.controls.correctionscontainer,
+                                payloadobject.grammarerrors,
+                                payloadobject.grammarmatches,
+                                payloadobject.insertioncount);
+                            //initially the preview container is hidden
+                            that.controls.previewcontainer.show();
                         }
                     }else{
                         //something went wrong, user does not really need to know details

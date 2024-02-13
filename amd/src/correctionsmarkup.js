@@ -25,15 +25,17 @@ define(['jquery', 'core/log'], function ($, log) {
         options: {
             errorwords: {},
             grammarmatches: {},
-            suggestedwords: {}
+            suggestedwords: {},
+            insertioncount: 0
         },
 
-        justmarkup: function (correctionsdiv, sessionerrors,sessionmatches) {
+        justmarkup: function (correctionsdiv, sessionerrors,sessionmatches,insertioncount) {
             //register the controls
             this.controls.correctionscontainer = $(correctionsdiv);
             //set the options
             this.options.suggestedwords = JSON.parse(sessionerrors);
             this.options.grammarmatches = JSON.parse(sessionmatches);
+            this.options.insertioncount = insertioncount;
             //do the markup
             this.markup_suggestedwords();
             this.markup_unmatchedwords();
@@ -41,8 +43,6 @@ define(['jquery', 'core/log'], function ($, log) {
         },
 
         init: function (config) {
-
-
 
             //pick up opts from html (if any) and set them
             var theid = '#' + config['id'];
@@ -64,12 +64,19 @@ define(['jquery', 'core/log'], function ($, log) {
                     this.options.grammarmatches  = {};
                 }
 
+                if (opts['insertioncount'] !== '') {
+                    this.options.insertioncount = opts['insertioncount'];
+                }else{
+                    this.options.insertioncount = 0;
+                }
 
             } else if(config.hasOwnProperty('sessionerrors') &&
-                config.hasOwnProperty('sessionmatches')){
+                config.hasOwnProperty('sessionmatches') &&
+                config.hasOwnProperty('insertioncount')){
 
                 this.options.suggestedwords = JSON.parse(config['sessionerrors']);
                 this.options.grammarmatches = JSON.parse(config['sessionmatches']);
+                this.options.insertioncount = config['insertioncount'];
 
             } else {
                 //if there is no config we might as well give up
@@ -152,18 +159,25 @@ define(['jquery', 'core/log'], function ($, log) {
             );
             //sadly the above code only takes us to the last match. NOT to the last suggestion
             //so from the last match to the end of passage (if there are any words left) we mark those up too
+            //we use the insertion count to guess the transcript indexes of end words. This is used to highlight passage on mouseover in view summary
            //m.options.grammarmatches is js object, so we can't use array functions on it.
             if(Object.keys(m.options.grammarmatches).length > 0) {
                 var lastpposition=0;
+                var lasttposition=0;
                 $.each(m.options.grammarmatches, function (index, lastmatch) {
-                    lastpposition = lastmatch.pposition;
+                    lastpposition = Number(lastmatch.pposition);
+                    lasttposition = Number(lastmatch.tposition);
                 });
                 var lastwordnumber = Number(lastpposition);
+                var tpositions = [];
+                for(var i = lasttposition + 1; i <= lasttposition + m.options.insertioncount + 1; i++) {
+                    tpositions.push(i);
+                }
                 var allwords = $('.' + m.cd.correctionscontainer + ' .' + m.cd.wordclass);
                 allwords.filter(function() {
                     var wordNumber = Number($(this).data('wordnumber'));
                     return wordNumber > lastwordnumber && !$(this).hasClass(m.cd.suggestionclass);
-                }).addClass(m.cd.suggestionclass);
+                }).addClass(m.cd.suggestionclass).attr('data-tpositions', tpositions.join(','));
             }
 
         },

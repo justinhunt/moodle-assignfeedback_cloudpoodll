@@ -205,6 +205,9 @@ class diff{
 
     //Do some adhoc match judgement based on common language transcription errors by AI
     public static function generous_match($passageword,$transcriptword,$language){
+        //In cloud poodll feedback we do not need generous matching (we never really do actually)
+        return false;
+
         $lang = substr($language,0,2);
         switch($lang){
             case 'en':

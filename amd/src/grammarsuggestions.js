@@ -115,7 +115,14 @@ define(['jquery', 'core/log','core/str','core/ajax','core/notification','assignf
                             opts['sessionerrors'] = payloadobject.grammarerrors;
                             opts['sessionmatches'] = payloadobject.grammarmatches;
                             //markup corrections
-                            correctionsmarkup.justmarkup(differenceselector,payloadobject.grammarerrors,payloadobject.grammarmatches);
+                            correctionsmarkup.justmarkup(differenceselector,
+                                payloadobject.grammarerrors,
+                                payloadobject.grammarmatches,
+                                payloadobject.insertioncount);
+                            //initially the preview container is hidden
+                            //HACK .. to do un-hardcode this
+                            $('.asf_cp_correctionspreview_cont').show();
+
                         }
 
                     }else{
