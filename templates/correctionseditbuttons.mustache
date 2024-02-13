@@ -2,13 +2,3 @@
    data-src="#id_submittedtext" data-language="{{language}}" data-target="#id_correctedtext" data-difference="#id_differencediv" href="#">
     {{#str}}getgrammarsuggestions, assignfeedback_cloudpoodll{{/str}}
 </a>
-
-{{#js}}
-    require([
-    "jquery",
-    "core/log",
-    "assignfeedback_cloudpoodll/grammarsuggestions",
-    ], function ($,log,grammarsuggestions) {
-    grammarsuggestions.init();
-    });
-{{/js}}

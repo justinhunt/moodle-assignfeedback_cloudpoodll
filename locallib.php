@@ -548,7 +548,11 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     $formelements[] = $mform->createElement('html',
                         html_writer::start_div(constants::M_COMPONENT . '_feedbackcontainer collapse' . ($hassubmission ? ' show' : ''),
                             ['id' => 'feedbackcontainer' . $opts['subtype']]) . html_writer::tag('h5', get_string('recorderfeedbackcorrections', constants::M_COMPONENT)));
-                   //submitted text textarea
+
+                    //submitted text textarea
+                    $s_instructions = $renderer->render_from_template(constants::M_COMPONENT . '/correctionsinstructions',
+                        ['instructions'=>get_string('submittedtext_instructions', constants::M_COMPONENT),'extraclass'=>'asf_cp_submittedta']);
+                    $formelements[] = $mform->createElement('static', 'asf_cp_instructions1', $s_instructions);
                     $formelements[] = $mform->createElement('textarea', 'submittedtext', null, 'wrap="virtual" rows="10" cols="50"');
 
                     //action buttons for corrections
@@ -556,15 +560,21 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     if(empty($language)){
                         $language = constants::M_LANG_ENUS;
                     }
-                    $actionbuttonopts = [
-                        "language" => $language
-                    ];
+                    $actionbuttonopts = ["language" => $language];
                     $actionbuttons = $renderer->render_from_template(constants::M_COMPONENT . '/correctionseditbuttons',$actionbuttonopts);
                     $formelements[] = $mform->createElement('static', 'asf_cp_actionbuttons', $actionbuttons);
+
                     //corrected text textarea
+                    $c_instructions = $renderer->render_from_template(constants::M_COMPONENT . '/correctionsinstructions',
+                        ['instructions'=>get_string('correctedtext_instructions', constants::M_COMPONENT),'extraclass'=>'asf_cp_correctedta']);
+                    $formelements[] = $mform->createElement('static', 'asf_cp_instructions2', $c_instructions);
                     $formelements[] = $mform->createElement('textarea', 'correctedtext', null, 'wrap="virtual" rows="10" cols="50"');
+                    $p_instructions = $renderer->render_from_template(constants::M_COMPONENT . '/correctionsinstructions',
+                        ['instructions'=>get_string('previewtext_instructions', constants::M_COMPONENT), 'extraclass'=>'asf_cp_previewd']);
+                    $formelements[] = $mform->createElement('static', 'asf_cp_instructions3', $p_instructions);
                     $formelements[] = $mform->createElement('html', html_writer::div('', 'asf_cp_corrections_cont', ['id' => 'id_differencediv']));
                     $formelements[] = $mform->createElement('html', html_writer::end_div());
+                    $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/grammarsuggestions", 'init', []);
                     $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/previewcorrections", 'init', []);
                     break;
 

@@ -145,10 +145,27 @@ define(['jquery', 'core/log'], function ($, log) {
 
         markup_suggestedwords: function () {
             var m = this;
+            //this will give all the words up until the last match (passage/corrections
             $.each(m.options.suggestedwords, function (index) {
                     $('.' + m.cd.correctionscontainer + ' #' + m.cd.wordclass + '_' + (m.options.suggestedwords[index].wordnumber)).addClass(m.cd.suggestionclass);
                 }
             );
+            //sadly the above code only takes us to the last match. NOT to the last suggestion
+            //so from the last match to the end of passage (if there are any words left) we mark those up too
+           //m.options.grammarmatches is js object, so we can't use array functions on it.
+            if(Object.keys(m.options.grammarmatches).length > 0) {
+                var lastpposition=0;
+                $.each(m.options.grammarmatches, function (index, lastmatch) {
+                    lastpposition = lastmatch.pposition;
+                });
+                var lastwordnumber = Number(lastpposition);
+                var allwords = $('.' + m.cd.correctionscontainer + ' .' + m.cd.wordclass);
+                allwords.filter(function() {
+                    var wordNumber = Number($(this).data('wordnumber'));
+                    return wordNumber > lastwordnumber && !$(this).hasClass(m.cd.suggestionclass);
+                }).addClass(m.cd.suggestionclass);
+            }
+
         },
 
         //now we step through all the matched words, and look for "gaps"
