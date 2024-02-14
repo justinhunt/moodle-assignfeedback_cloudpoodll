@@ -577,6 +577,8 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     $formelements[] = $mform->createElement('textarea', 'correctedtext', null, 'wrap="virtual" rows="8" cols="100"');
                     $correctionspreview= $renderer->render_from_template(constants::M_COMPONENT . '/correctionspreview',[]);
                     $formelements[] = $mform->createElement('static', 'asf_cp_correctionspreview', $correctionspreview);
+                    //end of collapsible div
+                    $formelements[] = $mform->createElement('html', html_writer::end_div());
                     $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/grammarsuggestions", 'init', []);
                     $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/previewcorrections", 'init', []);
                     $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/fetchsubmission", 'init', []);
@@ -844,6 +846,11 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                             break;
 
                         case constants::SUBMISSIONTYPE_CORRECTIONS:
+                            //if our text is empty we don't show it
+                            if(empty($subtypefeedback->submittedtext) || empty($subtypefeedback->correctedtext) ) {
+                                break;
+                            }
+
                             //if its a list, show a truncated version
                             if($islist){
                                 $cellhtml .= shorten_text($subtypefeedback->correctedtext,70);
