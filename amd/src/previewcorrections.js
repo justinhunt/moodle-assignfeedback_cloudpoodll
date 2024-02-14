@@ -5,7 +5,7 @@ define(['jquery', 'core/log','core/str','core/ajax','core/notification','assignf
     This file does small report
      */
 
-    log.debug('Grammar suggestions: initialising');
+    log.debug('Preview corrections: initialising');
 
     return {
         //controls
@@ -14,10 +14,11 @@ define(['jquery', 'core/log','core/str','core/ajax','core/notification','assignf
 
         //init the module
         init: function(){
-            log.debug('Preview corrections: feedback cloudpoodll initialising');
             this.init_strings();
             this.register_controls();
             this.register_events();
+            //on first load do render. If we have are loading an existing feedback we should preview the correctons
+            this.render_and_markup();
         },
 
         init_strings: function(){
@@ -27,7 +28,7 @@ define(['jquery', 'core/log','core/str','core/ajax','core/notification','assignf
 
         //load all the controls so we do not have to do it later
         register_controls: function(){
-            log.debug('preview corrections: registering controls');
+            this.controls.textareas = $('#id_submittedtext, #id_correctedtext');
             this.controls.submittedtextarea = $('#id_submittedtext');
             this.controls.correctionstextarea = $('#id_correctedtext');
             this.controls.correctionscontainer = $('.asf_cp_corrections_cont');
@@ -39,8 +40,8 @@ define(['jquery', 'core/log','core/str','core/ajax','core/notification','assignf
         register_events: function() {
             var that = this;
 
-
-            that.controls.correctionstextarea.on('input', function() {
+            //if either text area changes start the timer to do a preview
+            that.controls.textareas.on('input', function() {
                 clearTimeout(that.previewtimer);   // clear the timer whenever the input is changed
                 that.previewtimer = setTimeout(function(
                 ) {  // after 2.5s, log something to the console

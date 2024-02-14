@@ -557,7 +557,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
 
                     //action buttons for submissions
                     $subbuttonopts = [];
-                    $subbutton = $renderer->render_from_template(constants::M_COMPONENT . '/fetchsubmission',$subbuttonopts);
+                    $subbutton = $renderer->render_from_template(constants::M_COMPONENT . '/fetchsubmissionbutton',$subbuttonopts);
                     $formelements[] = $mform->createElement('static', 'asf_cp_sub_actionbuttons', $subbutton);
                     $formelements[] = $mform->createElement('textarea', 'submittedtext', null, 'wrap="virtual" rows="8" cols="100"');
 
@@ -567,7 +567,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                         $language = constants::M_LANG_ENUS;
                     }
                     $corrbuttonopts = ["language" => $language];
-                    $corrbutton = $renderer->render_from_template(constants::M_COMPONENT . '/correctionseditbuttons',$corrbuttonopts);
+                    $corrbutton = $renderer->render_from_template(constants::M_COMPONENT . '/fetchcorrectionsbutton',$corrbuttonopts);
                     $formelements[] = $mform->createElement('static', 'asf_cp_corr_actionbuttons', $corrbutton);
 
                     //corrected text textarea
@@ -800,6 +800,9 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
     public function view_summary(stdClass $grade, & $showviewlink) {
         global $PAGE;
 
+        $islist = optional_param('action','',PARAM_TEXT)=='grading';
+        $showviewlink = $islist;//is this a list page
+
         // Get our renderers.
         $renderer = $PAGE->get_renderer(constants::M_COMPONENT);
 
@@ -819,25 +822,38 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                             }
                             break;
                         case constants::SUBMISSIONTYPE_SCREEN:
+                            //if it's a list, show a truncated version
+                            if($islist){
+                                $cellhtml .= get_string('recorderscreen', constants::M_COMPONENT);
+                                break;
+                            }
+
                             $cellhtml .= html_writer::tag('h5', get_string('recorderscreen', constants::M_COMPONENT));
                             $opts=['mediaurl'=>$subtypefeedback->filename];
                             $loomplayer = $renderer->render_from_template(constants::M_COMPONENT . '/loomplayer',$opts);
                             $cellhtml .= $loomplayer;
                             break;
                         case constants::SUBMISSIONTYPE_TEXT:
+                            //if it's a list, show a truncated version
+                            if($islist){
+                                $cellhtml .= shorten_text($subtypefeedback->feedbacktext,70);
+                                break;
+                            }
                             $cellhtml .= html_writer::tag('h5', get_string('recorderfeedbacktext', constants::M_COMPONENT));
                             $cellhtml .= format_text($subtypefeedback->feedbacktext);
                             break;
 
                         case constants::SUBMISSIONTYPE_CORRECTIONS:
-                            $cellhtml .= html_writer::tag('h5', get_string('recorderfeedbackcorrections', constants::M_COMPONENT));
-                            //add passage
-                            $cellhtml .= \assignfeedback_cloudpoodll\aitranscriptutils::render_passage($subtypefeedback->submittedtext);
-                            //add corrections
-                            $corrections=  "<div class='asf_cp_corrections_cont'>";
-                            $corrections .= \assignfeedback_cloudpoodll\aitranscriptutils::render_passage($subtypefeedback->correctedtext,'corrected');
-                            $corrections.= "</div>";
-                            $cellhtml .= $corrections;
+                            //if its a list, show a truncated version
+                            if($islist){
+                                $cellhtml .= shorten_text($subtypefeedback->correctedtext,70);
+                                break;
+                            }
+
+                            $correctionsopts=[];
+                            $correctionsopts['submittedtext']  = \assignfeedback_cloudpoodll\aitranscriptutils::render_passage($subtypefeedback->submittedtext);
+                            $correctionsopts['correctedtext']  = \assignfeedback_cloudpoodll\aitranscriptutils::render_passage($subtypefeedback->correctedtext,'corrected');
+                            $cellhtml .=    $renderer->render_from_template(constants::M_COMPONENT . '/correctionsfullsummary', $correctionsopts);
 
                             //do js for corrections, which is where the mark up is applied
                             $direction = 'r2l';

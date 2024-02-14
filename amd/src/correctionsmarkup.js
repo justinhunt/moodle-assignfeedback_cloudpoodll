@@ -49,7 +49,6 @@ define(['jquery', 'core/log'], function ($, log) {
             var configcontrol = $(theid).get(0);
             if (configcontrol) {
                 var opts = JSON.parse(configcontrol.value);
-                log.debug(opts);
                 $(theid).remove();
 
 
@@ -80,14 +79,11 @@ define(['jquery', 'core/log'], function ($, log) {
 
             } else {
                 //if there is no config we might as well give up
-                log.debug('Corrections Markup js: No config found on page. Giving up.');
                 return;
             }
 
             //register the controls
             this.register_controls();
-
-            log.debug(this.options);
 
             //markup suggested words
             this.markup_suggestedwords();
