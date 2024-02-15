@@ -203,8 +203,12 @@ button.assignfeedback_cloudpoodll_deletesubmissionbutton {
     max-width: 480px;
 }
 
-.asf_cp_grading_passageword.asf_cp_aicorrected {
+.asf_cp_grading_passageword.asf_cp_aicorrected, .asf_cp_grading_passagespace.asf_cp_aicorrected {
     background-color: lightpink;
+}
+
+.asf_cp_grading_passageword.asf_cp_aiomitted, .asf_cp_grading_passagespace.asf_cp_aiomitted {
+    text-decoration: line-through;
 }
 
 .asf_cp_grading_passageword.asf_cp_aiunmatched {

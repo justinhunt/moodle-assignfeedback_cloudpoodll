@@ -13,13 +13,18 @@ define(['jquery', 'core/log'], function ($, log) {
             correctionscontainer: 'asf_cp_corrections_cont',
             insertclass: 'asf_cp_finediffinsertion',
             passagewordclass: 'asf_cp_grading_passageword',
+            passagespaceclass: 'asf_cp_grading_passagespace',
             //previously removed
             wordclass: 'asf_cp_grading_correctionsword',
             spaceclass: 'asf_cp_grading_correctionsspace',
             suggestionclass: 'asf_cp_corrections_suggestedword',
+            insertionclass: 'asf_cp_corrections_insertionword',
             wordomittedclass: 'asf_cp_corrections_omittedword',
             aiunmatched: 'asf_cp_aiunmatched',
-            aicorrected: 'asf_cp_aicorrected'
+            aicorrected: 'asf_cp_aicorrected',
+            aiomitted: 'asf_cp_aiomitted',
+            aiinserted: 'asf_cp_aiinserted',
+            aisuggested: 'asf_cp_aisuggested',
         },
 
         options: {
@@ -108,8 +113,18 @@ define(['jquery', 'core/log'], function ($, log) {
             //set up event handlers
             this.controls.correctionscontainer.on('click','.' + this.cd.wordclass + ',.' + this.cd.spaceclass, function () {
                 var tpositions = $(this).attr('data-tpositions');
-                if (typeof tpositions === 'undefined' || tpositions === '') {return;}
-                that.highlightoriginal(tpositions);
+                if (typeof tpositions === 'undefined' || tpositions === '') {
+                    return;
+                }
+
+                var correctiontype = '';//defaults to none .. its just highlighting
+                //any correction will be a suggestion but it might also be an insertion or an omission which overrides suggestion
+                if($(this).hasClass(that.cd.suggestionclass)){correctiontype='suggestion';}
+                if($(this).hasClass(that.cd.insertionclass)){correctiontype='insertion';}
+                if($(this).hasClass(that.cd.wordomittedclass)){correctiontype='omission';}
+
+                //perform highlighting
+                that.highlightoriginal(tpositions,correctiontype);
                 setTimeout(function () {
                     that.dehighlightoriginal(tpositions);
                 }, 1000);
@@ -117,9 +132,17 @@ define(['jquery', 'core/log'], function ($, log) {
 
             // Use mouseover event for highlighting
             this.controls.correctionscontainer.on('mouseover', '.' + this.cd.wordclass + ',.' + this.cd.spaceclass,  function () {
+                //if there is no transcript positions then we cannot highlight, so just return
                 var tpositions = $(this).attr('data-tpositions');
                 if (typeof tpositions === 'undefined' || tpositions === '') {return;}
-                that.highlightoriginal(tpositions);
+
+                var correctiontype = '';//defaults to none .. its just highlighting and not corrected
+                //any correction will be a suggestion but it might also be an insertion or an omission which overrides suggestion
+                if($(this).hasClass(that.cd.suggestionclass)){correctiontype='suggestion';}
+                if($(this).hasClass(that.cd.insertionclass)){correctiontype='insertion';}
+                if($(this).hasClass(that.cd.wordomittedclass)){correctiontype='omission';}
+                //perform highlighting
+                that.highlightoriginal(tpositions,correctiontype);
             });
 
             // Use mouseout event for de-highlighting
@@ -130,19 +153,43 @@ define(['jquery', 'core/log'], function ($, log) {
             });
         },
 
-        highlightoriginal: function (tpositionstring) {
+        highlightoriginal: function (tpositionstring,correctiontype) {
             var that = this;
             var tpositions = tpositionstring.split(',');
-            $.each(tpositions, function (index, tposition) {
-                $('#' + that.cd.passagewordclass + '_' + tposition).addClass(that.cd.aicorrected);
-            });
+            var correctionsclasses = [];
+            correctionsclasses.push(that.cd.aicorrected);
+            if(correctiontype==='insertion') {
+                correctionsclasses.push(that.cd.aiinserted);
+            }else if(correctiontype==='omission') {
+                correctionsclasses.push(that.cd.aiomitted);
+            }else if (correctiontype==='suggestion') {
+                correctionsclasses.push(that.cd.aisuggestion);
+            }
+
+
+            //$.each(tpositions, function (index, tposition) {
+            for (var i = 0; i < tpositions.length; i++) {
+                var tposition = tpositions[i];
+                if(correctiontype==='insertion') {
+                    //if the word is an insertion, then we only highlight spaces, because no word is altered in the original
+                    $('#' + that.cd.passagespaceclass + '_' + tposition).addClass(correctionsclasses);
+                } else {
+                    $('#' + that.cd.passagewordclass + '_' + tposition).addClass(correctionsclasses);
+                    //to highlight connecting spaces we check if we are between tpositions
+                    if(i < tpositions.length - 1) {
+                        $('#' + that.cd.passagespaceclass + '_' + tposition).addClass(correctionsclasses);
+                    }
+                }
+            }
 
         },
         dehighlightoriginal: function (tpositionstring) {
             var that = this;
+            var correctionsclasses = [that.cd.aicorrected, that.cd.aiinserted, that.cd.aiomitted, that.cd.aisuggestion];
             var tpositions = tpositionstring.split(',');
             $.each(tpositions, function (index, tposition) {
-                $('#' + that.cd.passagewordclass + '_' + tposition).removeClass(that.cd.aicorrected);
+                $('#' + that.cd.passagewordclass + '_' + tposition).removeClass(correctionsclasses);
+                $('#' + that.cd.passagespaceclass + '_' + tposition).removeClass(correctionsclasses);
             });
         },
 
@@ -196,6 +243,8 @@ define(['jquery', 'core/log'], function ($, log) {
                     //AND if we didn't just add a suggestion (which will cause a transcript mismatch too) then
                     // it's a missing word (ie in original but not in the corrected text)
                     //we want to get the prior space and highlight it to show its missing
+                    //eg original "one two three four five" corrected to "one two four five"
+                    // we want to highlight the space between "two" and "four" since the t postion has jumped by 2
                     if((match.tposition - prevmatch.tposition)>1) {
                         var missingwordspacenumber = match.pposition - 1;
                         if(missingwordspacenumber>0) {
@@ -222,7 +271,17 @@ define(['jquery', 'core/log'], function ($, log) {
                                 }
                             }
                         }
+                    }else if(match.pposition - prevmatch.pposition > 1) {
+                        //if there is a gap in the pposition, then we have an extra word in the corrected text
+                        //we want to highlight the space where the extra word would have been in the original text
+                        //eg original "one two three four five" corrected to "one two twopointfive three four five"
+                        // we want to highlight the space between "two" and "three" in original since the p position has jumped by more than one
+                        for (var insertedword = prevmatch.pposition + 1; insertedword < match.pposition; insertedword++) {
+                            $('#' + that.cd.wordclass + '_' + insertedword).addClass(that.cd.insertionclass);
+                            $('#' + that.cd.wordclass + '_' + insertedword).attr('data-tpositions', prevmatch.tposition);
+                        }
                     }
+
                     //Always mark up the current words tposition as well
                     $('#' + that.cd.wordclass + '_' + match.pposition).attr('data-tpositions', match.tposition);
                     //store this match as the new prevmatch so on the next loop pass we can compare
