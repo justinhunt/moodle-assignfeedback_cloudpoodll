@@ -1,6 +1,6 @@
 Change List
 =========
-Version 1.0.18 (Build 202402XXXX)
+Version 1.0.18 (Build 2024021500)
 - better support for insertions
 
 Version 1.0.17 (Build 2024021400)

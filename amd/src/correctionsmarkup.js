@@ -163,11 +163,9 @@ define(['jquery', 'core/log'], function ($, log) {
             }else if(correctiontype==='omission') {
                 correctionsclasses.push(that.cd.aiomitted);
             }else if (correctiontype==='suggestion') {
-                correctionsclasses.push(that.cd.aisuggestion);
+                correctionsclasses.push(that.cd.aisuggested);
             }
 
-
-            //$.each(tpositions, function (index, tposition) {
             for (var i = 0; i < tpositions.length; i++) {
                 var tposition = tpositions[i];
                 if(correctiontype==='insertion') {
@@ -181,8 +179,8 @@ define(['jquery', 'core/log'], function ($, log) {
                     }
                 }
             }
-
         },
+
         dehighlightoriginal: function (tpositionstring) {
             var that = this;
             var correctionsclasses = [that.cd.aicorrected, that.cd.aiinserted, that.cd.aiomitted, that.cd.aisuggestion];
