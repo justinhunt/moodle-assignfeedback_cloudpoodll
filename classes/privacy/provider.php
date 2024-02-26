@@ -35,6 +35,7 @@ use \core_privacy\local\request\writer;
 use \core_privacy\local\request\contextlist;
 use \mod_assign\privacy\assign_plugin_request_data;
 use \mod_assign\privacy\useridlist;
+use \assignfeedback_cloudpoodll\constants;
 
 /**
  * Privacy class for requesting user data.
@@ -91,13 +92,43 @@ class provider implements metadataprovider, assignfeedback_provider {
         // Get that comment information and jam it into that exporter.
         $assign = $exportdata->get_assign();
         $plugin = $assign->get_plugin_by_type('assignfeedback', 'cloudpoodll');
-        $cloudpoodll = $plugin->get_feedback_cloudpoodll($exportdata->get_pluginobject()->id);
-        if ($cloudpoodll && !empty($cloudpoodll->commenttext)) {
-            $data = (object) ['commenttext' => format_text($cloudpoodll->commenttext, $cloudpoodll->commentformat,
-                    ['context' => $exportdata->get_context()])];
+        $cloudpoodlls = $plugin->get_allfeedbacks($exportdata->get_pluginobject()->id);
+        $data=[];
+        foreach($cloudpoodlls as $cloudpoodll){
+            switch($cloudpoodll->type){
+                case constants::SUBMISSIONTYPE_AUDIO:
+                    if(empty($cloudpoodll->filename)){break;}
+                    $data['audiofilename'] = $cloudpoodll->filename;
+                    if(!empty($cloudpoodll->transcript)) {
+                        $data['audiotranscript'] = $cloudpoodll->transcript;
+                    }
+                    break;
+                case constants::SUBMISSIONTYPE_VIDEO:
+                    if(empty($cloudpoodll->filename)){break;}
+                    $data['videofilename'] = $cloudpoodll->filename;
+                    if(!empty($cloudpoodll->transcript)) {
+                        $data['videotranscript'] = $cloudpoodll->transcript;
+                    }
+                    break;
+                case constants::SUBMISSIONTYPE_TEXT:
+                    if(empty($cloudpoodll->feedbacktext)){break;}
+                    $data['feedbacktext'] = $cloudpoodll->feedbacktext;
+                    break;
+                case constants::SUBMISSIONTYPE_SCREEN:
+                    if(empty($cloudpoodll->filename)){break;}
+                    $data['screenfilename'] = $cloudpoodll->filename;
+                    break;
+                case constants::SUBMISSIONTYPE_CORRECTIONS:
+                    if(empty($cloudpoodll->correctedtext)){break;}
+                    $data['precorrectedtext'] = $cloudpoodll->submittedtext;
+                    $data['correctedtext'] = $cloudpoodll->correctedtext;
+                    break;
+            }
+        }
+        if(!empty($data)){
             writer::with_context($exportdata->get_context())
                     ->export_data(array_merge($exportdata->get_subcontext(),
-                            [get_string('privacy:commentpath', 'assignfeedback_cloudpoodll')]), $data);
+                            [get_string('privacy:feedbackpath', 'assignfeedback_cloudpoodll')]), (object) $data);
         }
     }
 
