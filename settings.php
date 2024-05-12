@@ -80,7 +80,7 @@ $settings->add(new admin_setting_configtext(constants::M_COMPONENT . '/apisecret
 $regions = utils::get_region_options();
 $settings->add(new admin_setting_configselect(constants::M_COMPONENT . '/awsregion',
         get_string('awsregion', constants::M_COMPONENT),
-        '', constants::REGION_USEAST1, $regions));
+        get_string('loomunavailable', constants::M_COMPONENT), constants::REGION_USEAST1, $regions));
 
 $expiredays = utils::get_expiredays_options();
 $settings->add(new admin_setting_configselect(constants::M_COMPONENT . '/expiredays',

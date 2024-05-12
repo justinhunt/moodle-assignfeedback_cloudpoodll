@@ -253,7 +253,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
             $mform->addElement('static', constants::M_COMPONENT . '_divider', '', $divider);
         }
 
-        $recoptions = utils::fetch_options_recorders();
+        $recoptions = utils::fetch_options_recorders($adminconfig->awsregion);
         $mform->addElement('select', constants::M_COMPONENT . '_recordertype', get_string("recordertype", constants::M_COMPONENT),
                 $recoptions);
         $mform->setDefault(constants::M_COMPONENT . '_recordertype', $recordertype);
@@ -378,11 +378,16 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
     public function get_all_subtypes() {
         $selectedsubtype = $this->get_config('recordertype');
         if ($selectedsubtype == constants::REC_FREE) {
-            $allsubtypes = [constants::SUBMISSIONTYPE_AUDIO,
-                constants::SUBMISSIONTYPE_VIDEO,
-                constants::SUBMISSIONTYPE_SCREEN,
-                constants::SUBMISSIONTYPE_TEXT,
-                constants::SUBMISSIONTYPE_CORRECTIONS];
+            $allsubtypes =[];
+            $allsubtypes[]=constants::SUBMISSIONTYPE_AUDIO;
+            $allsubtypes[]=constants::SUBMISSIONTYPE_VIDEO;
+            $allsubtypes[]=constants::SUBMISSIONTYPE_TEXT;
+            $allsubtypes[]=constants::SUBMISSIONTYPE_CORRECTIONS;
+            $awsregion=get_config(constants::M_COMPONENT, 'awsregion');
+            if(utils::can_use_loom($awsregion)) {
+                $allsubtypes[] = constants::SUBMISSIONTYPE_SCREEN;
+            }
+
         } else if (array_key_exists($selectedsubtype, self::SUBTYPEMAP_ALL)) {
             $allsubtypes = (array) self::SUBTYPEMAP_ALL[$selectedsubtype];
         } else {
@@ -623,15 +628,22 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                    $mform->setType(constants::NAME_UPDATE_CONTROL.'['.$subtypeconst.']', PARAM_TEXT);
 
                     //Loom Launcher
-                    $token = utils::fetch_token($apiuser, $apisecret);
-                    $region =  get_config(constants::M_COMPONENT, 'awsregion');
-                    $loomtoken = utils::fetch_loom_token($token, $region);
-                    $loomappopts = [
-                        "jws" => $loomtoken,
-                        "videourlfield" => $hiddeninputattrs['id']
-                    ];
-                   $loomapp = $renderer->render_from_template(constants::M_COMPONENT . '/loomapp',$loomappopts);
-                   $formelements[] = $mform->createElement('static', 'loomapp', $loomapp);
+                    if(utils::can_use_loom($region)) {
+                        $token = utils::fetch_token($apiuser, $apisecret);
+                        $region = get_config(constants::M_COMPONENT, 'awsregion');
+                        $loomtoken = utils::fetch_loom_token($token, $region);
+                        $loomappopts = [
+                            "jws" => $loomtoken,
+                            "videourlfield" => $hiddeninputattrs['id']
+                        ];
+                        $loomapp = $renderer->render_from_template(constants::M_COMPONENT . '/loomapp', $loomappopts);
+                        $formelements[] = $mform->createElement('static', 'loomapp', $loomapp);
+
+                    }else{
+                        $loomunavailable = $renderer->render_from_template(constants::M_COMPONENT . '/loomunavailable', ['region'=>$region]);
+                        $formelements[] = $mform->createElement('static', 'loomapp', $loomunavailable);
+                    }
+                    //close the toggle panel html div
                     $formelements[] = $mform->createElement('html', html_writer::end_div());
 
                     break;

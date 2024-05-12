@@ -31,11 +31,17 @@ class utils {
     //const CLOUDPOODLL = 'https://vbox.poodll.com/cphost';
     const CLOUDPOODLL = 'https://cloud.poodll.com';
 
-    public static function fetch_options_recorders() {
-        $rec_options[constants::REC_FREE] = get_string("recorderfree", constants::M_COMPONENT);
+    public static function fetch_options_recorders($region=constants::REGION_USEAST1) {
+        $canloom=self::can_use_loom($region);
+        $rec_options[constants::REC_FREE] = $canloom ? get_string("recorderfree", constants::M_COMPONENT) :
+            get_string("recorderfree_noscreen", constants::M_COMPONENT) ;
         $rec_options[constants::REC_AUDIO] = get_string("recorderaudio", constants::M_COMPONENT);
         $rec_options[constants::REC_VIDEO] = get_string("recordervideo", constants::M_COMPONENT);
-        $rec_options[constants::REC_SCREEN] = get_string("recorderscreen", constants::M_COMPONENT);
+        $rec_options[constants::REC_TEXT] = get_string("recorderfeedbacktext", constants::M_COMPONENT);
+        //if loom recording is ok
+        if($canloom) {
+            $rec_options[constants::REC_SCREEN] = get_string("recorderscreen", constants::M_COMPONENT);
+        }
         $rec_options[constants::REC_CORRECTIONS] = get_string("recordercorrections", constants::M_COMPONENT);
         return $rec_options;
     }
@@ -504,7 +510,15 @@ class utils {
         $sessionmatches = json_encode($matches);
 
         return [$sessionerrors,$sessionmatches,$insertioncount];
-
     }
 
+    public static function can_use_loom($region){
+        switch($region) {
+            case constants::REGION_FRANKFURT:
+            case constants::REGION_DUBLIN:
+                return false;
+            default:
+                return true;
+        }
+    }
 }
