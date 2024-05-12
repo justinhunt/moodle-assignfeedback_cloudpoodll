@@ -1,5 +1,8 @@
 Change List
 =========
+Version 1.0.19 (Build 2024051200)
+- Removed ability to use Loom when AWS Region is Frankfurt or Dublin (GDPR concerns)
+
 Version 1.0.18 (Build 2024021500)
 - better support for insertions
 
