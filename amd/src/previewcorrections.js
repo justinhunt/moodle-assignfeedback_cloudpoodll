@@ -6,7 +6,6 @@ define(['jquery', 'core/log','core/str','core/ajax','core/notification','assignf
      */
 
     log.debug('Preview corrections: initialising');
-
     return {
         //controls
         controls: {},
@@ -50,8 +49,6 @@ define(['jquery', 'core/log','core/str','core/ajax','core/notification','assignf
             });
 
         },//end of register events
-
-
 
         render_and_markup: function () {
             var that = this;

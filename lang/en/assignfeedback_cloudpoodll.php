@@ -254,3 +254,5 @@ $string['overwritesuggestions']="Overwrite the existing grammar suggestions?";
 $string['overwritefetchedsubmission']="Overwrite the submission text?";
 $string['correctionstitle'] = 'Corrections';
 $string['loomunavailable'] = 'Poodll screen recording using the Loom service is not available in the Frankfurt or Dublin AWS regions.';
+$string['showcorrections']='Show inline corrections';
+$string['hidecorrections']='Hide inline corrections';

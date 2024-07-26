@@ -17,6 +17,8 @@ define(['jquery', 'core/log'], function ($, log) {
             //previously removed
             wordclass: 'asf_cp_grading_correctionsword',
             spaceclass: 'asf_cp_grading_correctionsspace',
+            originalprewordclass: 'asf_cp_grading_original_preword',
+            originalpostwordclass: 'asf_cp_grading_original_postword',
             suggestionclass: 'asf_cp_corrections_suggestedword',
             insertionclass: 'asf_cp_corrections_insertionword',
             wordomittedclass: 'asf_cp_corrections_omittedword',
@@ -44,6 +46,10 @@ define(['jquery', 'core/log'], function ($, log) {
             //do the markup
             this.markup_suggestedwords();
             this.markup_unmatchedwords();
+            //Original words displauy won't work in preview mode,
+            //because we don't have a marked up passage container on screen to get the original words from
+            //but it will work in the real view summary.
+            this.markup_originalwords();
 
         },
 
@@ -96,6 +102,9 @@ define(['jquery', 'core/log'], function ($, log) {
             //mark up unmatched words
             this.markup_unmatchedwords();
 
+            //fill original words
+            this.markup_originalwords();
+
             //register events
             this.register_events();
 
@@ -110,8 +119,13 @@ define(['jquery', 'core/log'], function ($, log) {
 
         register_events: function () {
             var that = this;
+
+            //classes to apply mouseover/click events to
+            var highlightclasses='.' + this.cd.wordclass + ',.' + this.cd.spaceclass +
+                ',.' + this.cd.originalprewordclass + ',.' + this.cd.originalpostwordclass;
+
             //set up event handlers
-            this.controls.correctionscontainer.on('click','.' + this.cd.wordclass + ',.' + this.cd.spaceclass, function () {
+            this.controls.correctionscontainer.on('click',highlightclasses, function () {
                 var tpositions = $(this).attr('data-tpositions');
                 if (typeof tpositions === 'undefined' || tpositions === '') {
                     return;
@@ -131,7 +145,7 @@ define(['jquery', 'core/log'], function ($, log) {
             });
 
             // Use mouseover event for highlighting
-            this.controls.correctionscontainer.on('mouseover', '.' + this.cd.wordclass + ',.' + this.cd.spaceclass,  function () {
+            this.controls.correctionscontainer.on('mouseover', highlightclasses,  function () {
                 //if there is no transcript positions then we cannot highlight, so just return
                 var tpositions = $(this).attr('data-tpositions');
                 if (typeof tpositions === 'undefined' || tpositions === '') {return;}
@@ -146,7 +160,7 @@ define(['jquery', 'core/log'], function ($, log) {
             });
 
             // Use mouseout event for de-highlighting
-            this.controls.correctionscontainer.on('mouseout','.' + this.cd.wordclass + ',.' + this.cd.spaceclass,  function () {
+            this.controls.correctionscontainer.on('mouseout',highlightclasses,  function () {
                 var tpositions = $(this).attr('data-tpositions');
                 if (typeof tpositions === 'undefined' || tpositions === '') {return;}
                 that.dehighlightoriginal(tpositions);
@@ -156,6 +170,8 @@ define(['jquery', 'core/log'], function ($, log) {
         highlightoriginal: function (tpositionstring,correctiontype) {
             var that = this;
             var tpositions = tpositionstring.split(',');
+
+            //correction classes
             var correctionsclasses = [];
             correctionsclasses.push(that.cd.aicorrected);
             if(correctiontype==='insertion') {
@@ -183,7 +199,7 @@ define(['jquery', 'core/log'], function ($, log) {
 
         dehighlightoriginal: function (tpositionstring) {
             var that = this;
-            var correctionsclasses = [that.cd.aicorrected, that.cd.aiinserted, that.cd.aiomitted, that.cd.aisuggestion];
+            var correctionsclasses = [that.cd.aicorrected, that.cd.aiinserted, that.cd.aiomitted, that.cd.aisuggested];
             var tpositions = tpositionstring.split(',');
             $.each(tpositions, function (index, tposition) {
                 $('#' + that.cd.passagewordclass + '_' + tposition).removeClass(correctionsclasses);
@@ -286,7 +302,61 @@ define(['jquery', 'core/log'], function ($, log) {
                     prevmatch = match;
                 });//end of $ each loop
             }
+        },
 
+        //original CSS classes
+        //The original classes are to show the original passage word before or after the corrections word
+        //because of the layout, "rewritten/added words" [corrections] will show in green, after the original words [red]
+        //but "removed(omitted) words" [corrections] will show as a green space  after the original words [red]
+        // so the span layout for each word in the corrections is:
+        // [original_preword][correctionsword][original_postword][correctionsspace]
+        // suggested word: (original)He eat apples => (corrected)He eats apples =>
+        //    [original_preword: "eat->"][correctionsword: "eats"][original_postword][correctionsspace]
+        // removed(omitted) word: (original)He eat devours the apples=> (corrected) He devours the apples =>
+        //    [original_preword: ][correctionsword: "He"][original_postword: "eat->" ][correctionsspace: " "]
+        markup_originalwords: function () {
+            var that = this;
+            var processed_tpositions=[];
+            var allwordsspaces = $('.' + that.cd.correctionscontainer + ' .' + that.cd.wordclass +', .' + that.cd.correctionscontainer + ' .' + that.cd.spaceclass);
+            allwordsspaces.each(function () {
+                var wordnumber = Number($(this).data('wordnumber'));
+                if($(this).hasClass(that.cd.suggestionclass)||$(this).hasClass(that.cd.wordomittedclass)){
+                    var data_tpositions=$(this).attr('data-tpositions');
+
+                    //if we already added originals, we dont want to do it again,
+                    //eg (original)I the happy man => (corrections)I am a happy man
+                    // we only want to add original "the" on corrections "am" .. and not also on "a"
+                    if(processed_tpositions.includes(data_tpositions)){return;}
+                    processed_tpositions.push(data_tpositions);
+
+                    var tpositions = data_tpositions.split(',');
+                    var originalwords=[];
+                    for (var i = 0; i < tpositions.length; i++) {
+                        var tposition = tpositions[i];
+                        originalwords.push($('#' + that.cd.passagewordclass + '_' + tposition).text());
+                    }
+
+                    if(originalwords.length>0){
+                        var originaltext=originalwords.join(' ') + '->';
+                        if($(this).hasClass(that.cd.suggestionclass) && $(this).hasClass(that.cd.insertionclass)) {
+                            //if it is an inserted word a underscore(since original does not exist) shows before the current word
+                            //a space would be better, but then it would be 2 spaces which html collapses to 1 so it would be invisible
+                            $('#' + that.cd.originalprewordclass + '_' + wordnumber).text('_->');
+                            $('#' + that.cd.originalprewordclass + '_' + (wordnumber)).attr('data-tpositions', '');
+                        }else if($(this).hasClass(that.cd.suggestionclass)){
+                            //if it is a suggested word original word shows before the current word (green highlighted)
+                            $('#' + that.cd.originalprewordclass + '_' + wordnumber).text(originaltext);
+                            $('#' + that.cd.originalprewordclass + '_' + (wordnumber)).attr('data-tpositions',data_tpositions);
+                        }else if($(this).hasClass(that.cd.wordomittedclass)){
+                            //if it is an omitted word, original word shows after the current word (and before the green highlighted space)
+                            //since we are before the space we prepend a space so it doesn't run on after current word
+                            $('#' + that.cd.originalpostwordclass + '_' + (wordnumber)).text(' ' + originaltext);
+                            $('#' + that.cd.originalpostwordclass + '_' + (wordnumber)).attr('data-tpositions',data_tpositions);
+                        }
+                    }
+
+                }
+            });
         },
     };
 });

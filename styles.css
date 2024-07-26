@@ -246,3 +246,12 @@ span.asf_cp_corrections_omittedword {
     margin-bottom: 5px;
     margin-top: 5px;
 }
+
+span.asf_cp_grading_original_preword,span.asf_cp_grading_original_postword {
+    font-weight: 500;
+    background-color: antiquewhite;
+}
+.asf_cp_correctionspreview_cont .asf_cp_grading_original_preword,
+.asf_cp_correctionspreview_cont .asf_cp_grading_original_postword{
+    display: none;
+}
