@@ -140,6 +140,7 @@ class constants {
     const M_LANG_ISIS = 'is-IS';
     const M_LANG_MKMK = 'mk-MK';
     const M_LANG_SRRS = 'sr-RS';
+    const M_LANG_VIVN ='vi-VN';
 
     const SUBMISSIONTYPE_UNCLASSIFIED = 0;
     const SUBMISSIONTYPE_VIDEO = 1;

@@ -153,6 +153,7 @@ class utils {
             constants::M_LANG_TEIN => get_string('te-in', constants::M_COMPONENT),
             constants::M_LANG_TRTR => get_string('tr-tr', constants::M_COMPONENT),
             constants::M_LANG_UKUA => get_string('uk-ua', constants::M_COMPONENT),
+            constants::M_LANG_VIVN => get_string('vi-vn',constants::M_COMPONENT),
 
             constants::M_LANG_BGBG => get_string('bg-bg', constants::M_COMPONENT),
             constants::M_LANG_CSCZ => get_string('cs-cz', constants::M_COMPONENT),
