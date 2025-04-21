@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 class constants {
 
     const M_COMPONENT = 'assignfeedback_cloudpoodll';
-
+    const M_DEFAULT_CLOUDPOODLL = "cloud.poodll.com";
     const M_CLASS='asf_cp';
     const M_TABLE = 'assignfeedback_cloudpoodll';
     const M_FILEAREA = 'feedbacks_cloudpoodll';
@@ -81,6 +81,7 @@ class constants {
     const REGION_MUMBAI = 'mumbai';
     const REGION_CAPETOWN = 'capetown';
     const REGION_BAHRAIN = 'bahrain';
+    const REGION_NINGXIA = 'ningxia';
 
     const TRANSCRIBER_NONE = 0;
     const TRANSCRIBER_AMAZONTRANSCRIBE = 1;

@@ -70,6 +70,7 @@ $string['singapore']='Singapore';
 $string['mumbai']='Mumbai, India';
 $string['capetown'] = 'Capetown, South Africa';
 $string['bahrain'] = 'Bahrain';
+$string['ningxia'] = 'Ningxia, China (req. Poodll China account)';
 $string['forever'] = 'Never expire';
 
 $string['en-us'] = 'English (US)';
@@ -257,3 +258,5 @@ $string['correctionstitle'] = 'Corrections';
 $string['loomunavailable'] = 'Poodll screen recording using the Loom service is not available in the Frankfurt or Dublin AWS regions.';
 $string['showcorrections']='Show inline corrections';
 $string['hidecorrections']='Hide inline corrections';
+$string['cloudpoodllserver'] = 'Cloud Poodll Server';
+$string['cloudpoodllserver_details'] = 'The server to use for Cloud Poodll. Only change this if Poodll has provided a different one.';

@@ -1,5 +1,5 @@
 define(['jquery', 'core/log',
-        'https://cdn.jsdelivr.net/gh/justinhunt/cloudpoodll@latest/amd/build/cloudpoodll.min.js'],
+        'assignfeedback_cloudpoodll/cloudpoodll'],
     function ($, log, CloudPoodll) {
         return {
             init: function (recorderid, thecallback) {
