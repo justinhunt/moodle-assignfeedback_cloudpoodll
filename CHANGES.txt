@@ -1,5 +1,7 @@
 Change List
 =========
+- support for lang server in Ningxia
+
 Version 1.0.24 (Build 2025042100)
 - Support Moodle 5 and PHP 8.4
 - Support for custom Cloud Poodll server
