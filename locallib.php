@@ -221,7 +221,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
 
         $adminconfig = get_config(constants::M_COMPONENT);
         $recordertype = $this->get_config('recordertype') ? $this->get_config('recordertype') : $adminconfig->defaultrecorder;
-        $recorderskin = $this->get_config('recorderskin') ? $this->get_config('recorderskin') : constants::SKIN_BMR;
+        $recorderskin = $this->get_config('recorderskin') ? $this->get_config('recorderskin') : constants::SKIN_123;
         $timelimit = $this->get_config('timelimit') ? $this->get_config('timelimit') : 0;
         $expiredays = $this->get_config('expiredays') ? $this->get_config('expiredays') : $adminconfig->expiredays;
         $language = $this->get_config('language') ? $this->get_config('language') : $adminconfig->language;

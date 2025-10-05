@@ -1,5 +1,7 @@
 Change List
 =========
+1.0.25 (Build 2025100500)
+- better default settings
 - support for lang server in Ningxia
 
 Version 1.0.24 (Build 2025042100)
