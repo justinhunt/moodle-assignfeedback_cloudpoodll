@@ -1,26 +1,17 @@
 Cloud Poodll Feedback for Moodle Assignment
 ========================================
 
-Use Cloud Poodll feedback to respond to  assignment submissions with video and audio recordings.
+Cloud Poodll Assignment Feedback adds audio, video, screencast and AI-corrected text feedback to
+native Moodle Assignment grading. The teacher can record an audio or video response, record a
+screencast walkthrough, or let Cloud Poodll generate AI-powered grammar corrections directly on
+the student's own submission text. Feedback recordings are stored in the Poodll cloud.
 
-If installing by zip file there should be only one folder expanded after you unzip the zip file.
-If it is not called "cloudpoodll" rename it to that.
-Place this folder into your moodle installation under the [site_root]/mod/assign/feedback folder.
+Cloud Poodll requires a Cloud Poodll API username and secret from https://poodll.com
+See here: https://support.poodll.com/support/solutions/articles/19000083076-cloud-poodll-api-secret
 
-Then login to your site as admin and go to your Moodle site's "notifications" page(under site administration). 
-Moodle should then guide you through the installation or upgrade of the PoodLL feedback type for the Moodle assignment.
+See README.md in this folder for the full documentation: features, installation, site settings,
+and the five feedback types.
 
-The default admin settings will be fine in most cases, but you will need to add your Cloud Poodll API user and secret.
-You can get these from Poodll.com.
-
-When you go to create an assignment you should see an option to enable Cloud Poodll feedback in the settings page.
-More instructions can be found here:
-https://poodll.freshdesk.com/solution/articles/19000102304-cloud-poodll-feedback
-
-
-
-Good luck.
 
 Justin Hunt
-The PoodLL Guy
-http://www.poodll.com
+poodllsupport@gmail.com
