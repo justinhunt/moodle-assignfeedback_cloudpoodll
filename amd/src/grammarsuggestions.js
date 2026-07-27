@@ -1,5 +1,5 @@
-define(['jquery', 'core/log','core/str','core/ajax','core/notification','core/modal_factory', 'core/modal_events', 'assignfeedback_cloudpoodll/correctionsmarkup'],
-    function ($, log, str, Ajax, notification, ModalFactory, ModalEvents,correctionsmarkup) {
+define(['jquery', 'core/log','core/str','core/ajax','core/notification','core/modal_save_cancel', 'core/modal_events', 'assignfeedback_cloudpoodll/correctionsmarkup'],
+    function ($, log, str, Ajax, notification, ModalSaveCancel, ModalEvents,correctionsmarkup) {
     "use strict"; // jshint ;_;
     /*
     This file does small report
@@ -51,8 +51,7 @@ define(['jquery', 'core/log','core/str','core/ajax','core/notification','core/mo
 
                 //if we already have grammar suggestions, we need to ask if we should overwrite
                 if(that.get_value($(targetselector)).length>0) {
-                    ModalFactory.create({
-                        type: ModalFactory.types.SAVE_CANCEL,
+                    ModalSaveCancel.create({
                         title: that.overwritewarning,
                         body: that.overwritesuggestions,
                     })
