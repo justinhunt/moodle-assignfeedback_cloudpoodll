@@ -37,6 +37,10 @@ class constants {
     const M_SUBPLUGIN = 'cloudpoodll';
     const M_PLUGINSETTINGS = '/admin/settings.php?section=assignfeedback_cloudpoodll';
 
+    // Chargebee details for the in-app free trial (see fetchcbpage.php).
+    const M_CB_SITE = 'poodllcom';
+    const M_CB_TRIAL_PRICEID = 'Poodll-Free-Trial-USD-Daily';
+
     const APPID = 'assignfeedback_cloudpoodll';
 
     const REC_FREE = 'free';

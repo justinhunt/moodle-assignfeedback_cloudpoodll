@@ -26,6 +26,7 @@ namespace assignfeedback_cloudpoodll\output;
 
 use assignfeedback_cloudpoodll\constants;
 use assignfeedback_cloudpoodll\utils;
+use assignfeedback_cloudpoodll\cbcredentials;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -185,6 +186,57 @@ class renderer extends \plugin_renderer_base {
         $output .= $this->notification($msg, 'warning');
         $output .= $this->output->box_end();
         return $output;
+    }
+
+    /**
+     * Return HTML to let an administrator sort out the Poodll API credentials without leaving the page.
+     *
+     * This contains a form, so it can only be used somewhere that is not already inside one. Inside
+     * the assignment grading form use show_cbcredentials_notice() instead.
+     *
+     * @param \moodle_url|string $returnurl where to send the administrator after saving
+     * @param string $errormessage what is currently wrong with the credentials, if anything
+     * @return string HTML
+     */
+    public function show_cbcredentials_setup($returnurl, $errormessage = '') {
+        if (cbcredentials::can_manage()) {
+            return $this->render_from_template(
+                constants::M_COMPONENT . '/cbcredentialspanel',
+                cbcredentials::export_panel_data($returnurl, $errormessage)
+            );
+        }
+        // Users who cannot fix it get no technical detail, just who to ask.
+        return $this->show_problembox(get_string('cbaskadmin', constants::M_COMPONENT));
+    }
+
+    /**
+     * Return HTML explaining that the Poodll credentials need attention, safe to place inside
+     * another form. Administrators are pointed at the settings page, and at the free trial when
+     * there are no credentials to be found anywhere on this site.
+     *
+     * @param string $errormessage what is currently wrong with the credentials
+     * @return string HTML
+     */
+    public function show_cbcredentials_notice($errormessage) {
+        global $CFG;
+
+        if (!cbcredentials::can_manage()) {
+            // Users who cannot fix it get no technical detail, just who to ask.
+            return $this->show_problembox(get_string('cbaskadmin', constants::M_COMPONENT));
+        }
+
+        $links = \html_writer::link(
+            $CFG->wwwroot . constants::M_PLUGINSETTINGS,
+            get_string('cbgotosettings', constants::M_COMPONENT)
+        );
+        if (!cbcredentials::find_elsewhere()) {
+            $links .= ' | ' . \html_writer::link(
+                $CFG->wwwroot . constants::M_URL . '/fetchcbpage.php',
+                get_string('freetrial', constants::M_COMPONENT),
+                ['target' => '_blank', 'rel' => 'noopener']
+            );
+        }
+        return $this->show_problembox($errormessage . '<br>' . $links);
     }
 
 }

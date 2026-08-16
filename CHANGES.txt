@@ -1,5 +1,9 @@
 Change List
 =========
+Version 1.0.27 (Build 2026081600)
+- Added in-plugin free trial set up
+- Fixed Loom launcher region check, which read the region before fetching it
+
 Version 1.0.26 (Build 2026042000)
 - removed deprecated modal_factory and modal_registry
 

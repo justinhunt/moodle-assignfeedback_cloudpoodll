@@ -466,27 +466,20 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     $roptions->awsregion = get_config(constants::M_COMPONENT, 'awsregion');
                     $roptions->fallback = get_config(constants::M_COMPONENT, 'fallback');
 
-                    // check user has entered cred
-                    if (empty($apiuser) || empty($apisecret)) {
-                        $message = get_string('nocredentials', constants::M_COMPONENT,
-                                $CFG->wwwroot . constants::M_PLUGINSETTINGS);
-                        $recorderbox = $renderer->show_problembox($message);
+                    // Check the credentials are set and that Cloud Poodll accepts them. Administrators
+                    // are pointed at the settings page and the free trial, everybody else is told who
+                    // to ask. The recorder sits inside the grading form, so this must not be a form.
+                    $errormessage = \assignfeedback_cloudpoodll\cbcredentials::credentials_error();
+                    if (!empty($errormessage)) {
+                        $recorderbox = $renderer->show_cbcredentials_notice($errormessage);
                     } else {
                         // fetch token
                         $token = !empty($token) ? $token : utils::fetch_token($apiuser, $apisecret);
 
-                        // check token authenticated and no errors in it
-                        $errormessage = utils::fetch_token_error($token);
-                        if (!empty($errormessage)) {
-                            $recorderbox = $renderer->show_problembox($errormessage);
-
-                        } else {
-                            // All good. So lets fetch recorder html
-                            $recorderbox = $renderer->fetch_recorder($roptions, $token);
-                            $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/feedbackhelper", 'init', [$opts]);
-                            $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/setuprecorder", 'init', [$opts]);
-                        }
-
+                        // All good. So lets fetch recorder html
+                        $recorderbox = $renderer->fetch_recorder($roptions, $token);
+                        $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/feedbackhelper", 'init', [$opts]);
+                        $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/setuprecorder", 'init', [$opts]);
                     }
 
                     $recorderhtml = html_writer::div($recorderbox, '', ['id' => 'recordingtype' . $opts['subtype']]);
@@ -628,9 +621,10 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                    $mform->setType(constants::NAME_UPDATE_CONTROL.'['.$subtypeconst.']', PARAM_TEXT);
 
                     //Loom Launcher
+                    //The region must be fetched before we ask whether Loom can be used in it.
+                    $region = get_config(constants::M_COMPONENT, 'awsregion');
                     if(utils::can_use_loom($region)) {
                         $token = utils::fetch_token($apiuser, $apisecret);
-                        $region = get_config(constants::M_COMPONENT, 'awsregion');
                         $loomtoken = utils::fetch_loom_token($token, $region);
                         $loomappopts = [
                             "jws" => $loomtoken,
