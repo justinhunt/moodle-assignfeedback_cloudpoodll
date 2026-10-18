@@ -1,0 +1,25 @@
+# camp listing manifest — the descriptive content for this plugin's page on
+# camp-registry.org. Edit and commit as normal; camp ingests and hash-pins it
+# at each tagged release. Schema: https://camp-registry.org/schema/listing.schema.json
+name: Cloud Poodll Assignment Feedback
+summary: Audio, video, screencast and AI-corrected text feedback for native Moodle Assignment grading.
+description: |
+  Instead of typing feedback, the teacher can record an audio or video response, record a
+  screencast walkthrough, or let Cloud Poodll suggest AI grammar corrections on the student's
+  submission text. Feedback recordings are stored in the Cloud Poodll cloud, so course backups
+  stay small.
+
+  Works alongside the companion Cloud Poodll Assignment Submission plugin and Moodle's normal
+  assignment grading workflow.
+
+  **Requires a Cloud Poodll account.** Recording, transcription and AI corrections run through the Cloud
+  Poodll service, so the plugin needs an API user and secret from https://poodll.com to function.
+labels:
+  - paid-service
+  - external-account
+  - commercial-support-available
+category: assignment-feedback
+links:
+  docs: https://support.poodll.com
+  issues: https://github.com/justinhunt/moodle-assignfeedback_cloudpoodll/issues
+  changelog: https://github.com/justinhunt/moodle-assignfeedback_cloudpoodll/blob/master/CHANGES.txt
