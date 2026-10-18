@@ -110,7 +110,7 @@ function xmldb_assignfeedback_cloudpoodll_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2022100702, 'assignfeedback', 'cloudpoodll');
     }
 
-    if($oldversion < 2024020701){
+    if ($oldversion < 2024020701) {
         // Define field feedbacktext to be added to assignfeedback_cloudpoodll.
         $table = new xmldb_table('assignfeedback_cloudpoodll');
         $fields=[];
