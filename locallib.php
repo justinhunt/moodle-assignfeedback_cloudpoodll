@@ -103,17 +103,26 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     if (!empty($allfeedbacks[$subtypeconst])) {
                         return true;
                     }
+                } else if (empty($allfeedbacks[$subtypeconst])) {
+                    // Selected, but nothing saved for it yet.
+                    return true;
                 } else if (in_array($subtypeconst, self::SUBTYPEMAP_RECORDERS)) {
                     if ($allfeedbacks[$subtypeconst]->filename != $filename) {
                         return true;
                     }
                 } else if ($subtypeconst == constants::SUBMISSIONTYPE_TEXT) {
-                    if ($allfeedbacks[$subtypeconst]->feedbacktext != $data->feedbacktext) {
+                    // Compare the same values that save() stores.
+                    $feedbacktext = !empty($data->feedbacktext) ? $data->feedbacktext['text'] : '';
+                    if ($allfeedbacks[$subtypeconst]->feedbacktext != $feedbacktext) {
                         return true;
                     }
                 } else if ($subtypeconst == constants::SUBMISSIONTYPE_CORRECTIONS) {
-                    if ($allfeedbacks[$subtypeconst]->correctedtext != $data->correctedtext ||
-                        $allfeedbacks[$subtypeconst]->suggestedtext != $data->suggestedtext) {
+                    $submittedtext = !empty($data->submittedtext) ? $data->submittedtext : '';
+                    $correctedtext = !empty($data->correctedtext) ? $data->correctedtext : '';
+                    if (
+                        $allfeedbacks[$subtypeconst]->submittedtext != $submittedtext ||
+                        $allfeedbacks[$subtypeconst]->correctedtext != $correctedtext
+                    ) {
                         return true;
                     }
                 }
