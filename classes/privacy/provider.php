@@ -56,6 +56,7 @@ class provider implements metadataprovider, assignfeedback_provider {
         $data = [
                 'assignment' => 'privacy:metadata:assignmentid',
                 'grade' => 'privacy:metadata:gradepurpose',
+                'mark' => 'privacy:metadata:markpurpose',
                 'commenttext' => 'privacy:metadata:commentpurpose'
         ];
         $collection->add_database_table('assignfeedback_cloudpoodll', $data, 'privacy:metadata:tablesummary');
@@ -89,10 +90,30 @@ class provider implements metadataprovider, assignfeedback_provider {
      * information to help with exporting.
      */
     public static function export_feedback_user_data(assign_plugin_request_data $exportdata) {
+        global $DB;
+        // The overall feedback (mark 0) and each marker's own feedback are exported separately.
+        $markids = $DB->get_fieldset_select(
+            'assignfeedback_cloudpoodll',
+            'DISTINCT mark',
+            'grade = ?',
+            [$exportdata->get_pluginobject()->id]
+        );
+        foreach ($markids as $markid) {
+            self::export_feedback_set($exportdata, (int) $markid);
+        }
+    }
+
+    /**
+     * Export one set of feedback: the overall feedback or one marker's.
+     *
+     * @param assign_plugin_request_data $exportdata The export request.
+     * @param int $markid The assign_mark id, or 0 for the overall feedback.
+     */
+    protected static function export_feedback_set(assign_plugin_request_data $exportdata, int $markid) {
         // Get that comment information and jam it into that exporter.
         $assign = $exportdata->get_assign();
         $plugin = $assign->get_plugin_by_type('assignfeedback', 'cloudpoodll');
-        $cloudpoodlls = $plugin->get_allfeedbacks($exportdata->get_pluginobject()->id);
+        $cloudpoodlls = $plugin->get_allfeedbacks($exportdata->get_pluginobject()->id, $markid);
         $data=[];
         foreach($cloudpoodlls as $cloudpoodll){
             switch($cloudpoodll->type){
@@ -126,9 +147,12 @@ class provider implements metadataprovider, assignfeedback_provider {
             }
         }
         if(!empty($data)){
+            $path = [get_string('privacy:feedbackpath', 'assignfeedback_cloudpoodll')];
+            if ($markid) {
+                $path[] = get_string('privacy:markerpath', 'assignfeedback_cloudpoodll', $markid);
+            }
             writer::with_context($exportdata->get_context())
-                    ->export_data(array_merge($exportdata->get_subcontext(),
-                            [get_string('privacy:feedbackpath', 'assignfeedback_cloudpoodll')]), (object) $data);
+                    ->export_data(array_merge($exportdata->get_subcontext(), $path), (object) $data);
         }
     }
 

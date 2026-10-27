@@ -45,9 +45,14 @@ class backup_assignfeedback_cloudpoodll_subplugin extends backup_subplugin {
         // Create XML elements.
         $subplugin = $this->get_subplugin_element();
         $subpluginwrapper = new backup_nested_element($this->get_recommended_name());
-        $subpluginelement = new backup_nested_element('feedback_cloudpoodll',
-                null,
-                array('commenttext', 'commentformat', 'grade'));
+        $subpluginelement = new backup_nested_element(
+            'feedback_cloudpoodll',
+            null,
+            [
+                'grade', 'mark', 'type', 'recorder', 'filename', 'transcript', 'fulltranscript', 'vttdata',
+                'fileexpiry', 'feedbacktext', 'submittedtext', 'correctedtext',
+            ]
+        );
 
         // Connect XML elements into the tree.
         $subplugin->add_child($subpluginwrapper);

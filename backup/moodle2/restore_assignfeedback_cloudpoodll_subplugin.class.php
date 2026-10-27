@@ -71,7 +71,39 @@ class restore_assignfeedback_cloudpoodll_subplugin extends restore_subplugin {
         // The mapping is set in the restore for the core assign activity
         // when a grade node is processed.
         $data->grade = $this->get_mappingid('grade', $data->grade);
+        // Marks are restored after grades, so a marker's feedback keeps its old mark id, negated, until
+        // after_execute_grade() maps it. Backups from before version 1.0.30 have no mark.
+        $data->mark = empty($data->mark) ? 0 : -$data->mark;
 
         $DB->insert_record('assignfeedback_cloudpoodll', $data);
+    }
+
+    /**
+     * Link each marker's restored feedback to the restored mark record.
+     */
+    public function after_execute_grade() {
+        global $DB;
+
+        $feedbacks = $DB->get_records_select(
+            'assignfeedback_cloudpoodll',
+            'assignment = ? AND mark < 0',
+            [$this->get_new_parentid('assign')]
+        );
+        foreach ($feedbacks as $feedback) {
+            $newmarkid = $this->get_mappingid('mark', -$feedback->mark);
+            if ($newmarkid) {
+                $DB->set_field('assignfeedback_cloudpoodll', 'mark', $newmarkid, ['id' => $feedback->id]);
+            } else if (
+                !$DB->record_exists(
+                    'assignfeedback_cloudpoodll',
+                    ['grade' => $feedback->grade, 'mark' => 0, 'type' => $feedback->type]
+                )
+            ) {
+                // The site has no mark records (before Moodle 5.2): keep it as the overall feedback.
+                $DB->set_field('assignfeedback_cloudpoodll', 'mark', 0, ['id' => $feedback->id]);
+            } else {
+                $DB->delete_records('assignfeedback_cloudpoodll', ['id' => $feedback->id]);
+            }
+        }
     }
 }

@@ -79,10 +79,86 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         }
     }
 
-    public function get_allfeedbacks($grade) {
+    /**
+     * Get one set of feedback for a grade, keyed by subtype.
+     *
+     * @param int $grade The assign_grades id.
+     * @param int $mark The assign_mark id of a marker's own feedback, or 0 for the overall feedback.
+     * @return array
+     */
+    public function get_allfeedbacks($grade, int $mark = 0) {
         global $DB;
-        return $DB->get_records(constants::M_TABLE, compact('grade'), 'id',
-            'type,id,filename,transcript,fulltranscript,vttdata,feedbacktext,submittedtext,correctedtext');
+        return $DB->get_records(
+            constants::M_TABLE,
+            compact('grade', 'mark'),
+            'id',
+            'type,id,mark,filename,transcript,fulltranscript,vttdata,feedbacktext,submittedtext,correctedtext'
+        );
+    }
+
+    /**
+     * Get every set of feedback for a grade: each allocated marker's own feedback first, then the overall feedback.
+     *
+     * Feedback from a marker who is no longer allocated to the student is left out, as core comments does.
+     *
+     * @param stdClass $grade The grade.
+     * @return array [markid => [subtype => feedback]], markid 0 being the overall feedback.
+     */
+    public function get_feedback_sets(stdClass $grade): array {
+        global $DB;
+        $sets = [];
+        $rows = $DB->get_records(
+            constants::M_TABLE,
+            ['grade' => $grade->id],
+            'mark, id',
+            'id,type,mark,filename,transcript,fulltranscript,vttdata,feedbacktext,submittedtext,correctedtext'
+        );
+        foreach ($rows as $row) {
+            $sets[(int) $row->mark][$row->type] = $row;
+        }
+        $overall = $sets[0] ?? null;
+        unset($sets[0]);
+        if ($sets) {
+            $allocated = [];
+            foreach ($this->assignment->get_marker_allocations($grade->userid, false) as $allocation) {
+                $allocated[$allocation->marker] = true;
+            }
+            $markers = $DB->get_records_list('assign_mark', 'id', array_keys($sets), '', 'id, marker');
+            foreach (array_keys($sets) as $markid) {
+                if (empty($markers[$markid]) || empty($allocated[$markers[$markid]->marker])) {
+                    unset($sets[$markid]);
+                }
+            }
+        }
+        if ($overall) {
+            $sets[0] = $overall;
+        }
+        return $sets;
+    }
+
+    /**
+     * Is a marker giving their own feedback, as one of several markers (Moodle 5.2+)?
+     *
+     * @return bool
+     */
+    protected function is_marking(): bool {
+        return method_exists($this->assignment, 'is_marking') && $this->assignment->is_marking();
+    }
+
+    /**
+     * Which set of feedback a marker reads and writes.
+     *
+     * @param stdClass $grade The grade.
+     * @param int $markerid The marker's user id.
+     * @param bool $create Create the marker's assign_mark record if it does not exist yet.
+     * @return int The assign_mark id, 0 for the overall feedback, or -1 when the marker has no mark record yet.
+     */
+    protected function get_feedback_markid(stdClass $grade, int $markerid, bool $create = false): int {
+        if (!$this->is_marking()) {
+            return 0;
+        }
+        $mark = $this->assignment->get_mark($grade->id, $markerid, $create);
+        return $mark ? (int) $mark->id : -1;
     }
 
     /**
@@ -95,7 +171,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
     public function is_feedback_modified(stdClass $grade, stdClass $data) {
         $allsubtypes = $this->get_all_subtypes();
         if (!empty($grade) && !empty($allsubtypes)) {
-            $allfeedbacks = $this->get_allfeedbacks($grade->id);
+            $allfeedbacks = $this->get_allfeedbacks($grade->id, $this->get_feedback_markid($grade, $grade->grader));
             foreach ($allsubtypes as $subtypeconst) {
                 $subtypeselected = !empty($data->recorders) && !empty($data->recorders[$subtypeconst]);
                 $filename = !empty($data->filename) && !empty($data->filename[$subtypeconst]) ? $data->filename[$subtypeconst] : '';
@@ -371,11 +447,12 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
      * @return bool true if elements were added to the form
      */
     public function get_form_elements_for_user($grade, MoodleQuickForm $mform, stdClass $data, $userid) {
+        global $USER;
 
         $feedbackcloudpoodll = [];
 
         if ($grade) {
-            $feedbackcloudpoodll = $this->get_allfeedbacks($grade->id);
+            $feedbackcloudpoodll = $this->get_allfeedbacks($grade->id, $this->get_feedback_markid($grade, $USER->id));
         }
 
         $this->fetch_cloudpoodll_feedback_form($mform, $feedbackcloudpoodll);
@@ -683,7 +760,8 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
         global $DB;
 
         $allsubtypes = $this->get_all_subtypes();
-        $allfeedbacks = $this->get_allfeedbacks($grade->id);
+        $markid = $this->get_feedback_markid($grade, $grade->grader, true);
+        $allfeedbacks = $this->get_allfeedbacks($grade->id, $markid);
         $allsavedok = true;
 
         // get expiretime of this record.
@@ -717,6 +795,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     $thefeedback->{constants::NAME_UPDATE_CONTROL} = $filename;
                     $thefeedback->fileexpiry = $fileexpiry;
                     $thefeedback->grade = $grade->id;
+                    $thefeedback->mark = $markid;
                     $thefeedback->assignment = $this->assignment->get_instance()->id;
                     $feedbackid = $DB->insert_record(constants::M_TABLE, $thefeedback);
                     if ($feedbackid > 0) {
@@ -739,6 +818,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     $thefeedback = new stdClass();
                     $thefeedback->type = $subtypeconst;
                     $thefeedback->grade = $grade->id;
+                    $thefeedback->mark = $markid;
                     $thefeedback->assignment = $this->assignment->get_instance()->id;
                     $thefeedback->feedbacktext = $feedbacktext;
                     $feedbackid = $DB->insert_record(constants::M_TABLE, $thefeedback);
@@ -764,6 +844,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     $thefeedback = new stdClass();
                     $thefeedback->type = $subtypeconst;
                     $thefeedback->grade = $grade->id;
+                    $thefeedback->mark = $markid;
                     $thefeedback->assignment = $this->assignment->get_instance()->id;
                     $thefeedback->submittedtext = $submittedtext;
                     $thefeedback->correctedtext = $correctedtext;
@@ -815,15 +896,70 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
      * @return string
      */
     public function view_summary(stdClass $grade, & $showviewlink) {
-        global $PAGE;
+        global $DB;
 
         $islist = optional_param('action','',PARAM_TEXT)=='grading';
         $showviewlink = $islist;//is this a list page
 
+        $sets = $this->get_feedback_sets($grade);
+        if (!$sets) {
+            return '';
+        }
+        if (count($sets) == 1 && isset($sets[0])) {
+            // Only the overall feedback: show it as it always was, with no heading.
+            return $this->render_feedback_set($sets[0], $islist, true);
+        }
+
+        // Several markers gave feedback. Label each set, as core comments does.
+        $hidemarkers = $this->assignment->is_hidden_grader()
+            && !has_capability('mod/assign:showhiddengrader', $this->assignment->get_context());
+        $markerpositions = [];
+        foreach ($this->assignment->get_marker_allocations($grade->userid, false) as $position => $allocation) {
+            $markerpositions[$allocation->marker] = $position;
+        }
+        $html = '';
+        $markupcorrections = true;
+        foreach ($sets as $markid => $feedbackset) {
+            $sethtml = $this->render_feedback_set($feedbackset, $islist, $markupcorrections);
+            if ($sethtml === '') {
+                continue;
+            }
+            if ($markid == 0) {
+                $label = get_string('overallfeedback', constants::M_COMPONENT);
+            } else {
+                $markerid = $DB->get_field('assign_mark', 'marker', ['id' => $markid]);
+                if ($hidemarkers) {
+                    $label = get_string('markerfeedbackn', constants::M_COMPONENT, $markerpositions[$markerid]);
+                } else {
+                    $label = get_string(
+                        'markerfeedback',
+                        constants::M_COMPONENT,
+                        fullname($DB->get_record('user', ['id' => $markerid]))
+                    );
+                }
+            }
+            $html .= html_writer::div(html_writer::tag('h4', $label) . $sethtml, constants::M_COMPONENT . '_feedbackset');
+            if (!empty($feedbackset[constants::SUBMISSIONTYPE_CORRECTIONS])) {
+                $markupcorrections = false;
+            }
+        }
+        return $html;
+    }
+
+    /**
+     * Render one set of feedback: the overall feedback or one marker's.
+     *
+     * @param array $feedbackcloudpoodll The feedback, keyed by subtype.
+     * @param bool $islist Is this the grading table?
+     * @param bool $markupcorrections Show corrections with the interactive markup. It works for one set per page only.
+     * @return string
+     */
+    protected function render_feedback_set(array $feedbackcloudpoodll, bool $islist, bool $markupcorrections): string {
+        global $PAGE;
+
         // Get our renderers.
         $renderer = $PAGE->get_renderer(constants::M_COMPONENT);
 
-        $feedbackcloudpoodll = $this->get_allfeedbacks($grade->id);
         if ($feedbackcloudpoodll) {
             $cellhtml = '';
             foreach ($this->get_all_subtypes() as $subtypeconst) {
@@ -869,6 +1005,15 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                             //if its a list, show a truncated version
                             if($islist){
                                 $cellhtml .= shorten_text($subtypefeedback->correctedtext,70);
+                                break;
+                            }
+
+                            if (!$markupcorrections) {
+                                $cellhtml .= html_writer::tag('h5', get_string('correctionstitle', constants::M_COMPONENT));
+                                $cellhtml .= html_writer::div(get_string('submittedtext', constants::M_COMPONENT));
+                                $cellhtml .= format_text($subtypefeedback->submittedtext, FORMAT_PLAIN);
+                                $cellhtml .= html_writer::div(get_string('correctedtext', constants::M_COMPONENT));
+                                $cellhtml .= format_text($subtypefeedback->correctedtext, FORMAT_PLAIN);
                                 break;
                             }
 

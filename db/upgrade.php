@@ -127,5 +127,22 @@ function xmldb_assignfeedback_cloudpoodll_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2024020701, 'assignfeedback', 'cloudpoodll');
     }
 
+    if ($oldversion < 2026102700) {
+        // Multiple markers (Moodle 5.2+) each keep their own feedback, linked to their assign_mark record.
+        $table = new xmldb_table('assignfeedback_cloudpoodll');
+        $field = new xmldb_field('mark', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'grade');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $oldkey = new xmldb_key('uniqgradesubtype', XMLDB_KEY_UNIQUE, ['grade', 'type']);
+        $dbman->drop_key($table, $oldkey);
+        $newkey = new xmldb_key('uniqgrademarksubtype', XMLDB_KEY_UNIQUE, ['grade', 'mark', 'type']);
+        $dbman->add_key($table, $newkey);
+
+        // Cloudpoodll savepoint reached.
+        upgrade_plugin_savepoint(true, 2026102700, 'assignfeedback', 'cloudpoodll');
+    }
+
     return true;
 }

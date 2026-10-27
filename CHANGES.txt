@@ -1,5 +1,11 @@
 Change List
 =========
+Version 1.0.30 (Build 2026102700)
+- Each marker keeps their own feedback when an assignment has several markers (Moodle 5.2+)
+- Fixed backup and restore, which did not include the feedback
+- Fixed PHP warnings when checking if feedback changed
+- Use the core_external classes for the web services
+
 Version 1.0.29 (Build 2026101800)
 - Load recorder scripts from the configured Cloud Poodll server
 

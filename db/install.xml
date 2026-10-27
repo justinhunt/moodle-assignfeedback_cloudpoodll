@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/assign/feedback/cloudpoodll/db" VERSION="20230314" COMMENT="XMLDB file for Moodle mod/assign/feedback/cloudpoodll"
+<XMLDB PATH="mod/assign/feedback/cloudpoodll/db" VERSION="20261027" COMMENT="XMLDB file for Moodle mod/assign/feedback/cloudpoodll"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../../lib/xmldb/xmldb.xsd"
 >
@@ -9,6 +9,7 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="assignment" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="mark" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="ID of the assign_mark record for a marker's own feedback, 0 for the overall feedback"/>
         <FIELD NAME="type" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="recorder" TYPE="char" LENGTH="255" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="filename" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="The filename of the recorded file."/>
@@ -24,7 +25,7 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for this feedback"/>
         <KEY NAME="assignment" TYPE="foreign" FIELDS="assignment" REFTABLE="assign" REFFIELDS="id" COMMENT="The assignment instance this feedback relates to."/>
         <KEY NAME="grade" TYPE="foreign" FIELDS="grade" REFTABLE="assign_grades" REFFIELDS="id" COMMENT="The grade instance this feedback relates to."/>
-        <KEY NAME="uniqgradesubtype" TYPE="unique" FIELDS="grade, type"/>
+        <KEY NAME="uniqgrademarksubtype" TYPE="unique" FIELDS="grade, mark, type"/>
       </KEYS>
     </TABLE>
   </TABLES>
