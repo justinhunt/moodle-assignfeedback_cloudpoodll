@@ -65,7 +65,7 @@ class external extends external_api {
         $siteconfig = get_config(constants::M_COMPONENT);
         // A Moodle AI provider needs no Cloud Poodll token.
         $token = aimanager::uses_moodle_ai() ? '' : utils::fetch_token($siteconfig->apiuser, $siteconfig->apisecret);
-        $textanalyser = new textanalyser($token, $text, $siteconfig->awsregion, $params['language'], false, false, $context->id);
+        $textanalyser = new textanalyser($token, $text, $siteconfig->awsregion, $params['language'], $context->id);
         $suggestions = $textanalyser->fetch_grammar_correction();
         if ($suggestions === false) {
             $reason = $textanalyser->get_error_message();
