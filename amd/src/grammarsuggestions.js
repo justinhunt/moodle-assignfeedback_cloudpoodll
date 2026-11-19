@@ -48,6 +48,7 @@ define(['jquery', 'core/log','core/str','core/ajax','core/notification','core/mo
                 var targetselector  = $(this).data('target');
                 var differenceselector  = $(this).data('difference');
                 var language = $(this).data('language');
+                var cmid = $(this).data('cmid');
 
                 //if we already have grammar suggestions, we need to ask if we should overwrite
                 if(that.get_value($(targetselector)).length>0) {
@@ -60,7 +61,7 @@ define(['jquery', 'core/log','core/str','core/ajax','core/notification','core/mo
                             var root = themodal.getRoot();
                             root.on(ModalEvents.save,
                                 function (e) {
-                                    that.check_grammar(that, srcselector, targetselector, differenceselector, language);
+                                    that.check_grammar(that, srcselector, targetselector, differenceselector, language, cmid);
                                 }
                             );
                             themodal.show();
@@ -68,7 +69,7 @@ define(['jquery', 'core/log','core/str','core/ajax','core/notification','core/mo
                         });
                 }else {
                     //if not we just fetch grammar suggestions
-                    that.check_grammar(that,srcselector ,targetselector,differenceselector ,language);
+                    that.check_grammar(that, srcselector, targetselector, differenceselector, language, cmid);
                 }
                 return false;
             });
@@ -101,7 +102,7 @@ define(['jquery', 'core/log','core/str','core/ajax','core/notification','core/mo
             }
         },
 
-        check_grammar: function (that,srcselector,targetselector,differenceselector, language) {
+        check_grammar: function (that, srcselector, targetselector, differenceselector, language, cmid) {
             var src_element = $(srcselector);
             var target_element = $(targetselector);
             var difference_element = $(differenceselector);
@@ -112,48 +113,45 @@ define(['jquery', 'core/log','core/str','core/ajax','core/notification','core/mo
             if(!text || text==='' || text.trim()===''){
                 return;
             }
+            //keep what was there, to put it back if the check fails
+            var previousvalue = that.get_value(target_element);
             that.set_value(target_element,that.checking, 'text');
             Ajax.call([{
                 methodname: 'assignfeedback_cloudpoodll_check_grammar',
                 args: {
+                    cmid: cmid,
                     text: text,
                     language: language
                 },
                 done: function (ajaxresult) {
-
                     var payloadobject = JSON.parse(ajaxresult);
-                    if (payloadobject) {
-                        if(payloadobject.grammarerrors.length<3){
-                            //hacky but fast way to flag no errors
-                            that.set_value(target_element,that.nosuggestions, 'text');
-                        }else{
-                            that.set_value(target_element,payloadobject.suggestions, 'text');
-                            //use this for html marked up suggestions (word numbers and spaces etc)
-                            that.set_value(difference_element,payloadobject.markedupsuggestions, 'html');
-
-                            var opts = [];
-                            opts['sessionerrors'] = payloadobject.grammarerrors;
-                            opts['sessionmatches'] = payloadobject.grammarmatches;
-                            //markup corrections
-                            correctionsmarkup.justmarkup(differenceselector,
-                                payloadobject.grammarerrors,
-                                payloadobject.grammarmatches,
-                                payloadobject.insertioncount);
-                            //initially the preview container is hidden
-                            //HACK .. to do un-hardcode this
-                            $('.asf_cp_correctionspreview_cont').show();
-
-                        }
-
-                    }else{
-                        //something went wrong, user does not really need to know details
-                        //that.set_value(target_element,that.nosuggestions, 'text');
-                        notification.alert(that.nosuggestions);
-                        log.debug('result not fetched');
+                    if (payloadobject.error) {
+                        that.set_value(target_element, previousvalue, 'text');
+                        notification.alert('', payloadobject.error);
+                        return;
                     }
+                    if(payloadobject.grammarerrors.length<3){
+                        //hacky but fast way to flag no errors
+                        that.set_value(target_element,that.nosuggestions, 'text');
+                    }else{
+                        that.set_value(target_element,payloadobject.suggestions, 'text');
+                        //use this for html marked up suggestions (word numbers and spaces etc)
+                        that.set_value(difference_element,payloadobject.markedupsuggestions, 'html');
 
+                        //markup corrections
+                        correctionsmarkup.justmarkup(differenceselector,
+                            payloadobject.grammarerrors,
+                            payloadobject.grammarmatches,
+                            payloadobject.insertioncount);
+                        //initially the preview container is hidden
+                        //HACK .. to do un-hardcode this
+                        $('.asf_cp_correctionspreview_cont').show();
+                    }
                 },
-                fail: notification.exception
+                fail: function (error) {
+                    that.set_value(target_element, previousvalue, 'text');
+                    notification.exception(error);
+                }
             }]);
         },
 

@@ -650,7 +650,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     if(empty($language)){
                         $language = constants::M_LANG_ENUS;
                     }
-                    $corrbuttonopts = ["language" => $language];
+                    $corrbuttonopts = ["language" => $language, "cmid" => $this->assignment->get_course_module()->id];
                     $corrbutton = $renderer->render_from_template(constants::M_COMPONENT . '/fetchcorrectionsbutton',$corrbuttonopts);
                     $formelements[] = $mform->createElement('static', 'asf_cp_corr_actionbuttons', $corrbutton);
 

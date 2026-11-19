@@ -247,3 +247,23 @@ $settings->add(new admin_setting_configselect(
         '0',
         $size_options
 ));
+
+// AI Manager: which AI provider checks student work. Core AI exists from Moodle 4.5.
+if (class_exists(\core_ai\manager::class)) {
+    $settings->add(new admin_setting_heading(
+        constants::M_COMPONENT . '/aimanager',
+        get_string('aimanager', constants::M_COMPONENT),
+        get_string('aimanager_desc', constants::M_COMPONENT)
+    ));
+    foreach (\assignfeedback_cloudpoodll\aimanager::get_action_options() as $actiontype => $actiondetails) {
+        $settings->add(new admin_setting_configselect(
+            \assignfeedback_cloudpoodll\aimanager::get_action_settingname($actiontype),
+            $actiondetails['name'],
+            $actiondetails['description'],
+            \assignfeedback_cloudpoodll\aimanager::CLOUDPOODLL_OPTION,
+            \assignfeedback_cloudpoodll\aimanager::get_provider_options(
+                \assignfeedback_cloudpoodll\aimanager::AIMANAGER_ACTIONS[$actiontype]
+            )
+        ));
+    }
+}

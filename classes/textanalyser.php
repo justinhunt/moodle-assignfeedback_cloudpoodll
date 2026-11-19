@@ -56,6 +56,12 @@ class textanalyser {
     /** @var string $targetembedding The vector for the 'correct'/model answer. */
     protected $targetembedding;
 
+    /** @var int|null $contextid The context the analysis is done in, for the Moodle AI action register. */
+    protected $contextid;
+
+    /** @var aimanager|null $aimanager The AI manager used for the last Moodle AI request. */
+    protected $aimanager = null;
+
     public static function get_cloud_poodll_server() {
         $conf = get_config(constants::M_COMPONENT);
         if (isset($conf->cloudpoodllserver) && !empty($conf->cloudpoodllserver)) {
@@ -70,8 +76,17 @@ class textanalyser {
          * The class constructor.
          *
          */
-    public function __construct($token,$passage, $region,  $language,$targetembedding=false, $userlanguage=false){
+    public function __construct(
+        $token,
+        $passage,
+        $region,
+        $language,
+        $targetembedding = false,
+        $userlanguage = false,
+        $contextid = null
+    ) {
         $this->token = $token;
+        $this->contextid = $contextid;
         $this->region = $region;
         $this->passage = $passage;
         $this->language = $language;
@@ -645,6 +660,43 @@ class textanalyser {
         return $items;
     }
 
+    /**
+     * The AI manager for a Moodle AI provider, set up for this analysis.
+     *
+     * @return aimanager
+     */
+    protected function get_aimanager(): aimanager {
+        $this->aimanager = new aimanager($this->contextid, $this->language);
+        return $this->aimanager;
+    }
+
+    /**
+     * Why the last Moodle AI request failed, or '' if it did not fail or Cloud Poodll was used.
+     *
+     * @return string
+     */
+    public function get_error_message(): string {
+        return $this->aimanager ? $this->aimanager->get_error_message() : '';
+    }
+
+    /**
+     * Tidy a grammar correction: trim it and drop punctuation left at the start.
+     *
+     * @param string $correction
+     * @return string
+     */
+    public static function tidy_correction($correction) {
+        $correction = (string) $correction;
+        if (\core_text::strlen($correction) > 0) {
+            $correction = trim(\core_text::trim_utf8_bom($correction));
+            $charone = substr($correction, 0, 1);
+            if (preg_match('/^[.,:!?;-]/', $charone)) {
+                $correction = ltrim(substr($correction, 1));
+            }
+        }
+        return $correction;
+    }
+
     //fetch the grammar correction suggestions
     public function fetch_grammar_correction($passage='') {
         global $USER;
@@ -652,6 +704,10 @@ class textanalyser {
         //use local passage if not set
         if(empty($passage)){
             $passage = $this->passage;
+        }
+
+        if (aimanager::uses_moodle_ai()) {
+            return $this->get_aimanager()->grammar_correction($passage);
         }
 
         //The REST API we are calling
@@ -683,17 +739,7 @@ class textanalyser {
             return false;
             //if all good, then lets do the embed
         } else if ($payloadobject->returnCode === 0) {
-            $correction = $payloadobject->returnMessage;
-            //clean up the correction a little
-            if(\core_text::strlen($correction) > 0){
-                $correction = \core_text::trim_utf8_bom($correction);
-                $charone = substr($correction,0,1);
-                if(preg_match('/^[.,:!?;-]/',$charone)){
-                    $correction = substr($correction,1);
-                }
-            }
-
-            return $correction;
+            return self::tidy_correction($payloadobject->returnMessage);
         } else {
             return false;
         }

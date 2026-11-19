@@ -1,5 +1,11 @@
 Change List
 =========
+Version 1.0.31 (Build 2026111900)
+- New AI Manager setting: grammar corrections can be sent to a Moodle AI provider instead of Cloud Poodll (Moodle 4.5+)
+- Only users who can use Cloud Poodll feedback in the assignment can fetch grammar corrections
+- A failed grammar check now shows a message, instead of leaving "checking" in the box
+- Fixed the grammar check getting stuck when the text needed no corrections
+
 Version 1.0.30 (Build 2026102700)
 - Each marker keeps their own feedback when an assignment has several markers (Moodle 5.2+)
 - Fixed backup and restore, which did not include the feedback
