@@ -161,6 +161,14 @@ $settings->add(new admin_setting_configselect(
         $langoptions
 ));
 
+// The local recorders replace the Cloud Poodll iframe recorders. This goes back to the old ones.
+$settings->add(new admin_setting_configcheckbox(
+    constants::M_COMPONENT . '/uselegacyrecorders',
+    get_string('uselegacyrecorders', constants::M_COMPONENT),
+    get_string('uselegacyrecorders_details', constants::M_COMPONENT),
+    0
+));
+
 // Default html5 fallback.
 $fallback_options = utils::fetch_options_fallback();
 $settings->add(new admin_setting_configselect(

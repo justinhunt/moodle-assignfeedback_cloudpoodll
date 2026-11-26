@@ -58,6 +58,9 @@ class constants {
     const SKIN_ONCE = 'once';
     const SKIN_UPLOAD = 'upload';
     const SKIN_SCREEN = 'screen';
+    /** The local recorders, which run in the plugin instead of an iframe from Cloud Poodll. */
+    const SKIN_LOCAL123 = 'local123';
+    const SKIN_LOCALONCE = 'localonce';
 
     const FALLBACK_UPLOAD = 'upload';
     const FALLBACK_IOSUPLOAD = 'iosupload';

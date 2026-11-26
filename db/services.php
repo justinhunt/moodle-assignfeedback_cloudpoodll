@@ -17,6 +17,14 @@ $functions = array(
         'type'        => 'read',
         'ajax'        => true,
     ),
+    'assignfeedback_cloudpoodll_fetch_upload_details' => array(
+        'classname'   => '\assignfeedback_cloudpoodll\external\fetch_upload_details',
+        'methodname'  => 'execute',
+        'description' => 'Gets the upload details for one feedback recording from the new recorders.',
+        'capabilities'=> 'assignfeedback/cloudpoodll:use',
+        'type'        => 'write',
+        'ajax'        => true,
+    ),
     'assignfeedback_cloudpoodll_render_diffs' => array(
         'classname'   => '\assignfeedback_cloudpoodll\external',
         'methodname'  => 'render_diffs',

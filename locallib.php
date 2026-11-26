@@ -306,7 +306,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
 
         $adminconfig = get_config(constants::M_COMPONENT);
         $recordertype = $this->get_config('recordertype') ? $this->get_config('recordertype') : $adminconfig->defaultrecorder;
-        $recorderskin = $this->get_config('recorderskin') ? $this->get_config('recorderskin') : constants::SKIN_123;
+        $recorderskin = utils::effective_skin($this->get_config('recorderskin'));
         $timelimit = $this->get_config('timelimit') ? $this->get_config('timelimit') : 0;
         $expiredays = $this->get_config('expiredays') ? $this->get_config('expiredays') : $adminconfig->expiredays;
         $language = $this->get_config('language') ? $this->get_config('language') : $adminconfig->language;
@@ -543,7 +543,7 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     $roptions = new stdClass();
                     $roptions->recordertype = $subtypename;
                     $roptions->subtype = $opts['subtype'];
-                    $roptions->recorderskin = $this->get_config('recorderskin');
+                    $roptions->recorderskin = utils::effective_skin($this->get_config('recorderskin'));
                     $roptions->timelimit = $this->get_config('timelimit');
                     $roptions->expiredays = $this->get_config('expiredays');
                     $roptions->transcode = 1;// $this->get_config('enabletranscode'); // transcode settings. hardcoded to always transcode
@@ -558,6 +558,12 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
                     $errormessage = \assignfeedback_cloudpoodll\cbcredentials::credentials_error();
                     if (!empty($errormessage)) {
                         $recorderbox = $renderer->show_cbcredentials_notice($errormessage);
+                    } else if (utils::is_local_skin($roptions->recorderskin)) {
+                        // The local recorder gets its upload details through a web service, so it needs no token.
+                        $recorderbox = $renderer->fetch_local_recorder($roptions, $this->assignment->get_course_module()->id);
+                        $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/feedbackhelper", 'init', [$opts]);
+                        $PAGE->requires->js_call_amd(constants::M_COMPONENT . "/setuprecorder", 'initlocal',
+                            [$opts + ['rootid' => $roptions->rootid]]);
                     } else {
                         // fetch token
                         $token = !empty($token) ? $token : utils::fetch_token($apiuser, $apisecret);
@@ -777,6 +783,14 @@ class assign_feedback_cloudpoodll extends assign_feedback_plugin {
             $thefeedback = !empty($allfeedbacks[$subtypeconst]) ? $allfeedbacks[$subtypeconst] : null;
             $subtypeselected = !empty($data->recorders) && !empty($data->recorders[$subtypeconst]);
             $filename = !empty($data->filename) && !empty($data->filename[$subtypeconst]) ? $data->filename[$subtypeconst] : '';
+            // The recorders write the URL into a hidden field, so check it is one they could have made.
+            // Screen feedback is a Loom link, and -1 deletes the feedback.
+            $isrecording = in_array($subtypeconst, [constants::SUBMISSIONTYPE_AUDIO, constants::SUBMISSIONTYPE_VIDEO]);
+            if ($isrecording && $subtypeselected && $filename !== '' && $filename != '-1' &&
+                    !utils::is_cloudpoodll_media_url($filename)) {
+                $this->set_error(get_string('invalidmediaurl', constants::M_COMPONENT));
+                return false;
+            }
             //Recorded feedback - audio / video  / screen
             if (in_array($subtypeconst, self::SUBTYPEMAP_RECORDERS)) {
                 if (!empty($thefeedback)) {

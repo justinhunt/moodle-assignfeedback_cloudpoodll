@@ -26,6 +26,26 @@ export default class setuprecorder {
         return new setuprecorder(opts);
     }
 
+    /**
+     * Listen to a local recorder, which runs in the page instead of an iframe from Cloud Poodll.
+     *
+     * @param {Object} opts component, subtype and the rootid of the recorder
+     */
+    static initlocal(opts) {
+        const root = document.getElementById(opts.rootid);
+        const updatecontrol = document.getElementById(opts.component + opts.subtype + '_updatecontrol');
+        if (!root || !updatecontrol) {
+            return;
+        }
+        root.addEventListener('localrecorder', (e) => {
+            const evt = e.detail || {};
+            if (evt.type === 'awaitingprocessing') {
+                // Unlike the iframe recorders, a second recording replaces the first.
+                updatecontrol.value = evt.mediaurl;
+            }
+        });
+    }
+
     setup_recorder() {
         const recorderid = this.component + this.subtype + '_therecorder';
         instancemap[recorderid] = Object.assign({}, this);

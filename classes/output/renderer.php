@@ -54,6 +54,38 @@ class renderer extends \plugin_renderer_base {
     }
 
     /**
+     * The html of a local recorder, which runs in the plugin instead of a Cloud Poodll iframe.
+     *
+     * No token goes to the page. The recorder asks for its upload URL through the
+     * fetch_upload_details web service when the recording is finished. The id of the recorder is
+     * left in $roptions->rootid for the page's own javascript.
+     *
+     * @param \stdClass $roptions the recorder settings, as made in fetch_cloudpoodll_feedback_form()
+     * @param int $cmid the course module id of the assignment
+     * @return string html
+     */
+    public function fetch_local_recorder($roptions, $cmid) {
+        $rootid = \html_writer::random_id('plr');
+        $roptions->rootid = $rootid;
+        $mediatype = $roptions->recordertype == constants::REC_VIDEO ? 'video' : 'audio';
+        $config = [
+            'rootid' => $rootid,
+            'component' => constants::M_COMPONENT,
+            'wsfunction' => constants::M_COMPONENT . '_fetch_upload_details',
+            'wsargs' => ['cmid' => (int)$cmid, 'mediatype' => $mediatype],
+            'mediatype' => $mediatype,
+            'timelimit' => (int)$roptions->timelimit,
+            // Feedback is for teachers, so they always have pause and "upload a file instead".
+            'allowpause' => true,
+            'allowupload' => true,
+            'asktouse' => $roptions->recorderskin !== constants::SKIN_LOCALONCE,
+            'noaudiofilters' => false,
+        ];
+        $this->page->requires->js_call_amd(constants::M_COMPONENT . '/localrecorder/skin_123', 'init', [$config]);
+        return \html_writer::div('', 'plr-root', ['id' => $rootid]);
+    }
+
+    /**
      * The html part of the recorder
      */
     public function fetch_recorder($roptions, $token) {
