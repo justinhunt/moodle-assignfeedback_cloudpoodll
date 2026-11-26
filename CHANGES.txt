@@ -3,9 +3,6 @@ Change List
 Version 1.0.32 (Build 2026112500)
 - New audio and video recorders that run in Moodle instead of a frame from Cloud Poodll: One Two Three and Once
 - Assignments with the old skins use the new recorders: Once becomes the new Once and the others become the new One Two Three
-- Added a Use the old recorders site setting to go back to the Cloud Poodll recorders
-- The new recorders have Pause and "Upload a file instead". The Upload and Screen Recorder skins still use Cloud Poodll's
-- Feedback recordings are only saved if they are in Cloud Poodll's storage
 
 Version 1.0.31 (Build 2026111900)
 - New AI Manager setting: grammar corrections can be sent to a Moodle AI provider instead of Cloud Poodll (Moodle 4.5+)
